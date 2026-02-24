@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "pydantic-skills",
+  "description": "Official Pydantic plugin marketplace for Claude Code - Logfire instrumentation",
+  "owner": {
+    "name": "Pydantic",
+    "email": "support@pydantic.dev"
+  },
+  "plugins": [
+    {
+      "name": "instrument-with-logfire",
+      "description": "Add Logfire observability to Python applications with auto-instrumentation for FastAPI, httpx, asyncpg, SQLAlchemy, and more",
+      "version": "0.1.0",
+      "author": {
+        "name": "Pydantic",
+        "email": "support@pydantic.dev"
+      },
+      "source": "./plugins/instrument-with-logfire",
+      "category": "monitoring",
+      "homepage": "https://github.com/pydantic/skills/tree/main/plugins/instrument-with-logfire"
+    }
+  ]
+}

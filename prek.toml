@@ -1,0 +1,12 @@
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "check-skill-sync",
+    name = "Check standalone skills are in sync with plugin sources",
+    language = "system",
+    entry = "bash scripts/check-skill-sync.sh",
+    pass_filenames = false,
+    always_run = true,
+  },
+]

@@ -1,0 +1,6 @@
+{
+  "logfire": {
+    "type": "http",
+    "url": "https://logfire-us.pydantic.dev/mcp"
+  }
+}
