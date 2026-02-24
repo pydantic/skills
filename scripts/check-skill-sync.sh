@@ -23,11 +23,27 @@ check_sync() {
 }
 
 check_sync \
-    plugins/instrument-with-logfire/skills/logfire-instrumentation/SKILL.md \
+    plugins/logfire/skills/instrumentation/SKILL.md \
     skills/logfire-instrumentation/SKILL.md
 
 check_sync \
-    plugins/instrument-with-logfire/skills/logfire-instrumentation/references/logging-patterns.md \
-    skills/logfire-instrumentation/references/logging-patterns.md
+    plugins/logfire/skills/instrumentation/references/python/logging-patterns.md \
+    skills/logfire-instrumentation/references/python/logging-patterns.md
+
+check_sync \
+    plugins/logfire/skills/instrumentation/references/python/integrations.md \
+    skills/logfire-instrumentation/references/python/integrations.md
+
+check_sync \
+    plugins/logfire/skills/instrumentation/references/javascript/patterns.md \
+    skills/logfire-instrumentation/references/javascript/patterns.md
+
+check_sync \
+    plugins/logfire/skills/instrumentation/references/javascript/frameworks.md \
+    skills/logfire-instrumentation/references/javascript/frameworks.md
+
+check_sync \
+    plugins/logfire/skills/instrumentation/references/rust/patterns.md \
+    skills/logfire-instrumentation/references/rust/patterns.md
 
 exit $exit_code

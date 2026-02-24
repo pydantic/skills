@@ -1,4 +1,4 @@
-# instrument-with-logfire
+# logfire
 
 Add [Logfire](https://logfire.pydantic.dev/) observability to Python applications.
 
@@ -12,7 +12,7 @@ Add [Logfire](https://logfire.pydantic.dev/) observability to Python application
 ## Install
 
 ```
-claude /install-plugin https://github.com/pydantic/skills --plugin instrument-with-logfire
+claude /install-plugin https://github.com/pydantic/skills --plugin logfire
 ```
 
 ## MCP

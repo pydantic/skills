@@ -1,4 +1,4 @@
-# Logging Patterns
+# Python Logging Patterns
 
 ## Log Levels
 

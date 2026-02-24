@@ -6,7 +6,7 @@ Official [Claude Code](https://claude.com/claude-code) plugin marketplace for th
 
 | Plugin | Description | Commands |
 |--------|-------------|----------|
-| [instrument-with-logfire](plugins/instrument-with-logfire/) | Add Logfire observability to Python apps | `/instrument`, `/debug` |
+| [logfire](plugins/logfire/) | Add Logfire observability to Python apps | `/instrument`, `/debug` |
 
 ## Install
 
@@ -19,7 +19,7 @@ claude /install-plugin https://github.com/pydantic/skills
 Or install a single plugin:
 
 ```
-claude /install-plugin https://github.com/pydantic/skills --plugin instrument-with-logfire
+claude /install-plugin https://github.com/pydantic/skills --plugin logfire
 ```
 
 ## Cross-Agent Skills
