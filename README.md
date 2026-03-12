@@ -10,16 +10,16 @@ Official [Claude Code](https://claude.com/claude-code) plugin marketplace for th
 
 ## Install
 
-Add this marketplace to Claude Code to get all plugins:
+Add this marketplace to Claude Code:
 
 ```
-claude /install-plugin https://github.com/pydantic/skills
+claude plugin marketplace add pydantic/skills
 ```
 
-Or install a single plugin:
+Then install a plugin:
 
 ```
-claude /install-plugin https://github.com/pydantic/skills --plugin logfire
+claude plugin install logfire@pydantic-skills
 ```
 
 ## Cross-Agent Skills
@@ -31,5 +31,5 @@ The `skills/` directory contains standalone SKILL.md files compatible with 30+ a
 Test a plugin locally:
 
 ```bash
-cc --plugin-dir ./plugins/instrument-with-logfire
+claude --plugin-dir ./plugins/logfire
 ```
