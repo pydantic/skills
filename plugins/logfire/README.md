@@ -12,7 +12,8 @@ Add [Logfire](https://logfire.pydantic.dev/) observability to Python application
 ## Install
 
 ```
-claude /install-plugin https://github.com/pydantic/skills --plugin logfire
+claude plugin marketplace add pydantic/skills
+claude plugin install logfire@pydantic-skills
 ```
 
 ## MCP
