@@ -162,7 +162,7 @@ async def main():
 
 **Also use for:** Logging, analytics, debugging, progress bars in UIs.
 
-**Docs:** [Streaming Events and Final Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/agents.md#streaming-events-and-final-output) · [Streaming All Events](https://github.com/pydantic/pydantic-ai/blob/main/docs/agents.md#streaming-all-events)
+**Docs:** [Streaming Events and Final Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#streaming-events-and-final-output) · [Streaming All Events](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#streaming-all-events)
 
 ---
 

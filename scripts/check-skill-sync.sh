@@ -51,7 +51,7 @@ check_sync \
     skills/building-pydantic-ai-agents/SKILL.md
 
 check_sync \
-    plugins/ai/skills/building-pydantic-ai-agents/reference/COMMON-TASKS.md \
-    skills/building-pydantic-ai-agents/reference/COMMON-TASKS.md
+    plugins/ai/skills/building-pydantic-ai-agents/references/COMMON-TASKS.md \
+    skills/building-pydantic-ai-agents/references/COMMON-TASKS.md
 
 exit $exit_code

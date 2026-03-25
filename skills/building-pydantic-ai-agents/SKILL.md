@@ -211,23 +211,23 @@ agent = Agent.from_file('agent.yaml')
 | Search with DuckDuckGo/Tavily/Exa | [Common Tools](https://ai.pydantic.dev/common-tools/) |
 | Ensure my agent returns data in a specific format | [Structured Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/output.md#structured-output) |
 | Pass database connections, API clients, or config to tools | [Dependencies](https://ai.pydantic.dev/dependencies/) |
-| Access usage stats, message history, or retry count in tools | [RunContext](https://ai.pydantic.dev/tools/#runcontext) |
+| Access usage stats, message history, or retry count in tools | [RunContext](https://ai.pydantic.dev/tools/) |
 | Choose or configure models | [Models](https://ai.pydantic.dev/models/) |
 | Automatically switch to backup model when primary fails | [Fallback Model](https://github.com/pydantic/pydantic-ai/blob/main/docs/models/overview.md#fallback-model) |
-| Show real-time progress as my agent works | [Streaming Events and Final Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/agents.md#streaming-events-and-final-output) |
+| Show real-time progress as my agent works | [Streaming Events and Final Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#streaming-events-and-final-output) |
 | Work with messages and multimedia | [Message History](https://ai.pydantic.dev/message-history/) |
 | Reduce token costs by trimming or filtering conversation history | [Processing Message History](https://github.com/pydantic/pydantic-ai/blob/main/docs/message-history.md#processing-message-history) |
 | Keep long conversations manageable without losing context | [Summarize Old Messages](https://github.com/pydantic/pydantic-ai/blob/main/docs/message-history.md#summarize-old-messages) |
 | Use MCP servers | [MCP](https://ai.pydantic.dev/mcp/) |
 | Build multi-step graphs | [Graph](https://ai.pydantic.dev/graph/) |
-| Debug a failed agent run or see what went wrong | [Model Errors](https://github.com/pydantic/pydantic-ai/blob/main/docs/agents.md#model-errors) |
+| Debug a failed agent run or see what went wrong | [Model Errors](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#model-errors) |
 | Make my agent resilient to temporary failures | [Retries](https://ai.pydantic.dev/retries/) |
 | Understand why my agent made specific decisions | [Using Logfire](https://github.com/pydantic/pydantic-ai/blob/main/docs/logfire.md#using-logfire) |
 | Write deterministic tests for my agent | [Unit testing with TestModel](https://github.com/pydantic/pydantic-ai/blob/main/docs/testing.md#unit-testing-with-testmodel) |
 | Enable thinking/reasoning across any provider | [Thinking](https://ai.pydantic.dev/thinking/) · [Thinking Capability](https://ai.pydantic.dev/capabilities/#thinking) |
 | Systematically verify my agent works correctly | [Evals](https://ai.pydantic.dev/evals/) |
 | Use embeddings for RAG | [Embeddings](https://ai.pydantic.dev/embeddings/) |
-| Use durable execution | [Durable Execution](https://ai.pydantic.dev/durable-execution/) |
+| Use durable execution | [Durable Execution](https://ai.pydantic.dev/durable_execution/overview/) |
 | Have one agent delegate tasks to another | [Agent Delegation](https://github.com/pydantic/pydantic-ai/blob/main/docs/multi-agent-applications.md#agent-delegation) |
 | Route requests to different agents based on intent | [Programmatic Agent Hand-off](https://github.com/pydantic/pydantic-ai/blob/main/docs/multi-agent-applications.md#programmatic-agent-hand-off) |
 | Require tool approval (human-in-the-loop) | [Deferred Tools](https://ai.pydantic.dev/deferred-tools/) |
@@ -241,7 +241,7 @@ agent = Agent.from_file('agent.yaml')
 | Publish reusable agent extensions as packages | [Extensibility](https://ai.pydantic.dev/extensibility/) |
 | Build custom toolsets, models, or agents | [Extensibility](https://ai.pydantic.dev/extensibility/) |
 | Debug common issues | [Troubleshooting](https://ai.pydantic.dev/troubleshooting/) |
-| Migrate from deprecated APIs | [Upgrade Guide](https://ai.pydantic.dev/upgrade-guide/) |
+| Migrate from deprecated APIs | [Changelog](https://ai.pydantic.dev/changelog/) |
 | See advanced real-world examples | [Examples](https://ai.pydantic.dev/examples/) |
 | Look up an import path | [API Reference](https://ai.pydantic.dev/api/) |
 
@@ -275,7 +275,7 @@ Need structured data with Pydantic validation?
         └── Yes → Use output_type=str [default]
 
 Dynamic schema at runtime?
-└── Yes → Use StructuredDict(**fields)
+└── Yes → Use StructuredDict(json_schema)
 ```
 
 ### Choosing a Multi-Agent Pattern
@@ -438,7 +438,7 @@ See [Streaming All Events](https://ai.pydantic.dev/agents/#streaming-all-events)
 
 ## Common Tasks
 
-Load [Common Tasks Reference](./reference/COMMON-TASKS.md) for detailed implementation guidance with code examples:
+Load [Common Tasks Reference](./references/COMMON-TASKS.md) for detailed implementation guidance with code examples:
 
 | Task | Section |
 |---|---|
