@@ -54,4 +54,8 @@ check_sync \
     plugins/ai/skills/building-pydantic-ai-agents/references/COMMON-TASKS.md \
     skills/building-pydantic-ai-agents/references/COMMON-TASKS.md
 
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/ARCHITECTURE.md \
+    skills/building-pydantic-ai-agents/references/ARCHITECTURE.md
+
 exit $exit_code

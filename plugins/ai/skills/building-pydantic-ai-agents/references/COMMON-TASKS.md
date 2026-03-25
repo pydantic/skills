@@ -252,7 +252,7 @@ async def research(ctx: RunContext, topic: str) -> str:
 
 ## Debug and Validate Agent Behavior
 
-Instrument with Logfire to see exact model requests, tool calls, and validate LLM outputs.
+Instrument with [Logfire](https://logfire.pydantic.dev/) to see exact model requests, tool calls, and validate LLM outputs. Each agent run becomes a parent trace with child spans for every tool call and LLM request.
 
 ```python
 import logfire
@@ -262,6 +262,14 @@ logfire.instrument_pydantic_ai()
 
 # All agent runs now traced — see tool calls, model requests, and outputs in Logfire dashboard
 ```
+
+For full HTTP-level visibility into what's sent to model providers (invaluable for debugging tool schema errors or unexpected model behavior):
+
+```python
+logfire.instrument_httpx(capture_all=True)
+```
+
+**Tip:** Use `/instrument` to automatically detect your project's frameworks and add Logfire instrumentation. Use `/debug` to query real Logfire traces when investigating errors or unexpected agent behavior.
 
 **Use for:** Debugging unexpected behavior, validating tool schemas, understanding what's sent to providers, production monitoring.
 
