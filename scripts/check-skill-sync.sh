@@ -46,4 +46,12 @@ check_sync \
     plugins/logfire/skills/instrumentation/references/rust/patterns.md \
     skills/logfire-instrumentation/references/rust/patterns.md
 
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/SKILL.md \
+    skills/building-pydantic-ai-agents/SKILL.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/reference/COMMON-TASKS.md \
+    skills/building-pydantic-ai-agents/reference/COMMON-TASKS.md
+
 exit $exit_code
