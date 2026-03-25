@@ -1,13 +1,9 @@
 ---
 name: building-pydantic-ai-agents
-description: |
-  This skill should be used when building AI agents with Pydantic AI — the Python agent framework
-  for LLM-powered applications. Use when the user asks to "build an AI agent", "create an LLM app",
-  "use pydantic ai", "add tools to an agent", "add thinking capability", "add web search capability",
-  "test my agent", "stream agent output", "define agent from YAML", "delegate between agents",
-  when code imports pydantic_ai, or when the user mentions PydanticAI/Pydantic AI in any coding context.
-  Do not use when the user asks about the Pydantic validation library alone (pydantic/BaseModel without
-  agents), other AI frameworks (LangChain, LlamaIndex, CrewAI), or general Python development.
+description: >
+  Build AI agents with Pydantic AI — tools, capabilities, structured output, streaming, testing, and
+  multi-agent patterns. Use when the user mentions Pydantic AI, imports pydantic_ai, or asks to build
+  an AI agent, add tools/capabilities, stream output, define agents from YAML, or test agent behavior.
 license: MIT
 compatibility: Requires Python 3.10+
 metadata:
@@ -15,7 +11,7 @@ metadata:
   author: pydantic
 ---
 
-# Pydantic AI Skill
+# Building AI Agents with Pydantic AI
 
 Pydantic AI is a Python agent framework for building production-grade Generative AI applications.
 This skill provides patterns, architecture guidance, and tested code examples for building applications with Pydantic AI.
@@ -225,8 +221,8 @@ agent = Agent.from_file('agent.yaml')
 | Use template strings in agent instructions | [Template Strings](https://ai.pydantic.dev/agent-spec/#template-strings) |
 | Let my agent call external APIs or functions | [Tools](https://ai.pydantic.dev/tools/) |
 | Organize or restrict which tools an agent can use | [Toolsets](https://ai.pydantic.dev/toolsets/) |
-| Give my agent web search with automatic provider fallback | [WebSearch Capability](https://ai.pydantic.dev/capabilities/#web-search) |
-| Give my agent URL fetching with automatic provider fallback | [WebFetch Capability](https://ai.pydantic.dev/capabilities/#web-fetch) |
+| Give my agent web search with automatic provider fallback | [WebSearch Capability](https://ai.pydantic.dev/capabilities/#provider-adaptive-tools) |
+| Give my agent URL fetching with automatic provider fallback | [WebFetch Capability](https://ai.pydantic.dev/capabilities/#provider-adaptive-tools) |
 | Give my agent web search or code execution (builtin tools) | [Built-in Tools](https://ai.pydantic.dev/builtin-tools/) |
 | Search with DuckDuckGo/Tavily/Exa | [Common Tools](https://ai.pydantic.dev/common-tools/) |
 | Ensure my agent returns data in a specific format | [Structured Output](https://ai.pydantic.dev/output/#structured-output) |
