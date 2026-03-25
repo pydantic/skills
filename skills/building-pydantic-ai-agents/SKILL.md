@@ -282,7 +282,7 @@ Load [Architecture and Decision Guide](./references/ARCHITECTURE.md) for detaile
 ## Key Practices
 
 - **Python 3.10+** compatibility required
-- **Observability**: Pydantic AI has first-class integration with [Logfire](https://logfire.pydantic.dev/) for tracing agent runs, tool calls, and model requests. Add it with `logfire.instrument_pydantic_ai()`, or use `/instrument` to auto-detect and instrument the project. For deeper HTTP-level visibility, `logfire.instrument_httpx(capture_all=True)` captures the exact payloads sent to model providers. When debugging production issues, use `/debug` to query real traces from the Logfire dashboard.
+- **Observability**: Pydantic AI has first-class integration with [Logfire](https://logfire.pydantic.dev/) for tracing agent runs, tool calls, and model requests. Add it with `logfire.instrument_pydantic_ai()`. For deeper HTTP-level visibility, `logfire.instrument_httpx(capture_all=True)` captures the exact payloads sent to model providers.
 - **Testing**: Use `TestModel` for deterministic tests, `FunctionModel` for custom logic
 
 ## Common Gotchas

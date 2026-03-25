@@ -269,8 +269,6 @@ For full HTTP-level visibility into what's sent to model providers (invaluable f
 logfire.instrument_httpx(capture_all=True)
 ```
 
-**Tip:** Use `/instrument` to automatically detect your project's frameworks and add Logfire instrumentation. Use `/debug` to query real Logfire traces when investigating errors or unexpected agent behavior.
-
 **Use for:** Debugging unexpected behavior, validating tool schemas, understanding what's sent to providers, production monitoring.
 
 **Docs:** [Using Logfire](https://ai.pydantic.dev/logfire/#using-logfire) · [Monitoring HTTP Requests](https://ai.pydantic.dev/logfire/#monitoring-http-requests)
