@@ -289,15 +289,12 @@ Load [Architecture and Decision Guide](./references/ARCHITECTURE.md) for detaile
 
 These are mistakes agents commonly make with Pydantic AI. Getting these wrong produces silent failures or confusing errors.
 
-- **Removed parameter names**: Use `output_type` (not `result_type`) and `output_retries` (not `result_retries`) — the old names no longer exist. Use `toolsets` (not `mcp_servers`) — `mcp_servers` still works but is deprecated.
-- **`instructions` vs `system_prompt`**: Both are valid Agent parameters, and both support dynamic functions via their respective decorators (`@agent.instructions`, `@agent.system_prompt`). The key difference is message history behavior: `instructions` are re-injected each run and excluded when explicit `message_history` is provided. `system_prompt` persists in message history and is not re-evaluated unless `@agent.system_prompt(dynamic=True)` is used. Prefer `instructions` for most use cases.
 - **`@agent.tool` requires `RunContext` as first param**; `@agent.tool_plain` must **not** have it. Mixing these up causes runtime errors. Use `tool_plain` when you don't need deps, usage, or messages.
 - **Model strings need the provider prefix**: `'openai:gpt-5.2'` not `'gpt-5.2'`. Without the prefix, Pydantic AI can't resolve the provider.
 - **`TestModel` requires `agent.override()`**: Don't set `agent.model` directly. Always use the context manager: `with agent.override(model=TestModel()):`.
 - **`str` in output_type allows plain text to end the run**: If your union includes `str` (or no `output_type` is set), the model can return plain text instead of structured output. Omit `str` from the union to force tool-based output.
 - **Hook decorator names on `.on` don't repeat `on_`**: Use `hooks.on.run_error` and `hooks.on.model_request_error` — not `hooks.on.on_run_error`.
 - **`history_processors` is plural**: The Agent parameter is `history_processors=[...]`, not `history_processor=`.
-- **Prevent accidental API calls in tests**: Set `from pydantic_ai.models import ALLOW_MODEL_REQUESTS` then `ALLOW_MODEL_REQUESTS = False` globally in test setup to block real model calls outside `override()` blocks.
 
 ## Common Tasks
 
