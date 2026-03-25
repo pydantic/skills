@@ -1,9 +1,13 @@
 ---
 name: building-pydantic-ai-agents
 description: |
-  Python agent framework for building LLM-powered applications. Use for creating
-  agents, adding tools, capabilities (hooks, thinking, web search), structured output,
-  agent specs (YAML/JSON), streaming, testing, and multi-agent systems.
+  Build AI agents with Pydantic AI — the Python agent framework for LLM-powered applications.
+  TRIGGER when: user asks to "build an AI agent", "create an LLM app", "use pydantic ai",
+  "add tools to an agent", "add thinking/web search capability", "test my agent",
+  "stream agent output", "define agent from YAML", "delegate between agents",
+  code imports pydantic_ai, or user mentions PydanticAI/Pydantic AI in any coding context.
+  DO NOT TRIGGER when: user asks about the Pydantic validation library (just `pydantic`/`BaseModel`
+  without agents), other AI frameworks (LangChain, LlamaIndex, CrewAI), or general Python development.
 license: MIT
 metadata:
   version: "1.0.0"
@@ -14,6 +18,21 @@ metadata:
 
 Pydantic AI is a Python agent framework for building production-grade Generative AI applications.
 This skill provides patterns, architecture guidance, and tested code examples for building applications with Pydantic AI.
+
+## When to Use This Skill
+
+Invoke this skill when:
+- User asks to build an AI agent, create an LLM-powered app, or mentions Pydantic AI
+- User wants to add tools, capabilities (thinking, web search), or structured output to an agent
+- User asks to define agents from YAML/JSON specs or use template strings
+- User wants to stream agent events, delegate between agents, or test agent behavior
+- Code imports `pydantic_ai` or references Pydantic AI classes (`Agent`, `RunContext`, `Tool`)
+- User asks about hooks, lifecycle interception, or agent observability with Logfire
+
+Do **not** use this skill for:
+- The Pydantic validation library alone (`pydantic`/`BaseModel` without agents)
+- Other AI frameworks (LangChain, LlamaIndex, CrewAI, AutoGen)
+- General Python development unrelated to AI agents
 
 ## Quick-Start Patterns
 
@@ -435,6 +454,19 @@ See [Streaming All Events](https://ai.pydantic.dev/agents/#streaming-all-events)
 - **Python 3.10+** compatibility required
 - **Observability**: For production systems, enable Logfire with `logfire.instrument_httpx(capture_all=True)` to see exact HTTP requests sent to model providers — invaluable for debugging tool schema errors, unexpected model behavior, and understanding what's actually being sent to the API
 - **Testing**: Use `TestModel` for deterministic tests, `FunctionModel` for custom logic
+
+## Common Gotchas
+
+These are mistakes agents commonly make with Pydantic AI. Getting these wrong produces silent failures or confusing errors.
+
+- **Deprecated parameter names**: Use `instructions` (not `system_prompt`), `output_type` (not `result_type`), `output_retries` (not `result_retries`), `toolsets` (not `mcp_servers`). The old names were removed in v0.6.0.
+- **`@agent.tool` requires `RunContext` as first param**; `@agent.tool_plain` must **not** have it. Mixing these up causes runtime errors. Use `tool_plain` when you don't need deps, usage, or messages.
+- **Model strings need the provider prefix**: `'openai:gpt-5.2'` not `'gpt-5.2'`. Without the prefix, Pydantic AI can't resolve the provider.
+- **`TestModel` requires `agent.override()`**: Don't set `agent.model` directly. Always use the context manager: `with agent.override(model=TestModel()):`.
+- **`str` in output_type allows plain text to end the run**: If your union includes `str` (or no `output_type` is set), the model can return plain text instead of structured output. Omit `str` from the union to force tool-based output.
+- **Hook decorator names on `.on` don't repeat `on_`**: Use `hooks.on.run_error` and `hooks.on.model_request_error` — not `hooks.on.on_run_error`.
+- **`history_processors` is plural**: The Agent parameter is `history_processors=[...]`, not `history_processor=`.
+- **Prevent accidental API calls in tests**: Set `from pydantic_ai.models import ALLOW_MODEL_REQUESTS` then `ALLOW_MODEL_REQUESTS = False` globally in test setup to block real model calls outside `override()` blocks.
 
 ## Common Tasks
 
