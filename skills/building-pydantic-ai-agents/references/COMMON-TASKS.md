@@ -53,7 +53,7 @@ async def audit_tool(ctx, *, call, tool_def, args):
 agent = Agent('openai:gpt-5.2', capabilities=[hooks])
 ```
 
-**Hook types:** `before_run`/`after_run`, `before_model_request`/`after_model_request`, `before_tool_execute`/`after_tool_execute`, `wrap_run`, `wrap_model_request`, `run_error`, `model_request_error`.
+**Hook types:** `before_run`/`after_run`, `run` (wrap), `run_error`, `before_node_run`/`after_node_run`, `node_run` (wrap), `node_run_error`, `before_model_request`/`after_model_request`, `model_request` (wrap), `model_request_error`, `before_tool_validate`/`after_tool_validate`, `tool_validate` (wrap), `tool_validate_error`, `before_tool_execute`/`after_tool_execute`, `tool_execute` (wrap), `tool_execute_error`, `prepare_tools`, `run_event_stream`, `event`.
 
 **Docs:** [Hooks](https://ai.pydantic.dev/hooks/) · [Hooking into the Lifecycle](https://ai.pydantic.dev/capabilities/#hooking-into-the-lifecycle)
 
