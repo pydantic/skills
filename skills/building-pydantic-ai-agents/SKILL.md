@@ -1,14 +1,15 @@
 ---
 name: building-pydantic-ai-agents
 description: |
-  Build AI agents with Pydantic AI — the Python agent framework for LLM-powered applications.
-  TRIGGER when: user asks to "build an AI agent", "create an LLM app", "use pydantic ai",
-  "add tools to an agent", "add thinking/web search capability", "test my agent",
-  "stream agent output", "define agent from YAML", "delegate between agents",
-  code imports pydantic_ai, or user mentions PydanticAI/Pydantic AI in any coding context.
-  DO NOT TRIGGER when: user asks about the Pydantic validation library (just `pydantic`/`BaseModel`
-  without agents), other AI frameworks (LangChain, LlamaIndex, CrewAI), or general Python development.
+  This skill should be used when building AI agents with Pydantic AI — the Python agent framework
+  for LLM-powered applications. Use when the user asks to "build an AI agent", "create an LLM app",
+  "use pydantic ai", "add tools to an agent", "add thinking capability", "add web search capability",
+  "test my agent", "stream agent output", "define agent from YAML", "delegate between agents",
+  when code imports pydantic_ai, or when the user mentions PydanticAI/Pydantic AI in any coding context.
+  Do not use when the user asks about the Pydantic validation library alone (pydantic/BaseModel without
+  agents), other AI frameworks (LangChain, LlamaIndex, CrewAI), or general Python development.
 license: MIT
+compatibility: Requires Python 3.10+
 metadata:
   version: "1.0.0"
   author: pydantic
@@ -228,27 +229,27 @@ agent = Agent.from_file('agent.yaml')
 | Give my agent URL fetching with automatic provider fallback | [WebFetch Capability](https://ai.pydantic.dev/capabilities/#web-fetch) |
 | Give my agent web search or code execution (builtin tools) | [Built-in Tools](https://ai.pydantic.dev/builtin-tools/) |
 | Search with DuckDuckGo/Tavily/Exa | [Common Tools](https://ai.pydantic.dev/common-tools/) |
-| Ensure my agent returns data in a specific format | [Structured Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/output.md#structured-output) |
+| Ensure my agent returns data in a specific format | [Structured Output](https://ai.pydantic.dev/output/#structured-output) |
 | Pass database connections, API clients, or config to tools | [Dependencies](https://ai.pydantic.dev/dependencies/) |
 | Access usage stats, message history, or retry count in tools | [RunContext](https://ai.pydantic.dev/tools/) |
 | Choose or configure models | [Models](https://ai.pydantic.dev/models/) |
-| Automatically switch to backup model when primary fails | [Fallback Model](https://github.com/pydantic/pydantic-ai/blob/main/docs/models/overview.md#fallback-model) |
-| Show real-time progress as my agent works | [Streaming Events and Final Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#streaming-events-and-final-output) |
+| Automatically switch to backup model when primary fails | [Fallback Model](https://ai.pydantic.dev/models/#fallback-model) |
+| Show real-time progress as my agent works | [Streaming Events and Final Output](https://ai.pydantic.dev/agents/#streaming-events-and-final-output) |
 | Work with messages and multimedia | [Message History](https://ai.pydantic.dev/message-history/) |
-| Reduce token costs by trimming or filtering conversation history | [Processing Message History](https://github.com/pydantic/pydantic-ai/blob/main/docs/message-history.md#processing-message-history) |
-| Keep long conversations manageable without losing context | [Summarize Old Messages](https://github.com/pydantic/pydantic-ai/blob/main/docs/message-history.md#summarize-old-messages) |
+| Reduce token costs by trimming or filtering conversation history | [Processing Message History](https://ai.pydantic.dev/message-history/#processing-message-history) |
+| Keep long conversations manageable without losing context | [Summarize Old Messages](https://ai.pydantic.dev/message-history/#summarize-old-messages) |
 | Use MCP servers | [MCP](https://ai.pydantic.dev/mcp/) |
 | Build multi-step graphs | [Graph](https://ai.pydantic.dev/graph/) |
-| Debug a failed agent run or see what went wrong | [Model Errors](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#model-errors) |
+| Debug a failed agent run or see what went wrong | [Model Errors](https://ai.pydantic.dev/agents/#model-errors) |
 | Make my agent resilient to temporary failures | [Retries](https://ai.pydantic.dev/retries/) |
-| Understand why my agent made specific decisions | [Using Logfire](https://github.com/pydantic/pydantic-ai/blob/main/docs/logfire.md#using-logfire) |
-| Write deterministic tests for my agent | [Unit testing with TestModel](https://github.com/pydantic/pydantic-ai/blob/main/docs/testing.md#unit-testing-with-testmodel) |
+| Understand why my agent made specific decisions | [Using Logfire](https://ai.pydantic.dev/logfire/#using-logfire) |
+| Write deterministic tests for my agent | [Unit testing with TestModel](https://ai.pydantic.dev/testing/#unit-testing-with-testmodel) |
 | Enable thinking/reasoning across any provider | [Thinking](https://ai.pydantic.dev/thinking/) · [Thinking Capability](https://ai.pydantic.dev/capabilities/#thinking) |
 | Systematically verify my agent works correctly | [Evals](https://ai.pydantic.dev/evals/) |
 | Use embeddings for RAG | [Embeddings](https://ai.pydantic.dev/embeddings/) |
 | Use durable execution | [Durable Execution](https://ai.pydantic.dev/durable_execution/overview/) |
-| Have one agent delegate tasks to another | [Agent Delegation](https://github.com/pydantic/pydantic-ai/blob/main/docs/multi-agent-applications.md#agent-delegation) |
-| Route requests to different agents based on intent | [Programmatic Agent Hand-off](https://github.com/pydantic/pydantic-ai/blob/main/docs/multi-agent-applications.md#programmatic-agent-hand-off) |
+| Have one agent delegate tasks to another | [Agent Delegation](https://ai.pydantic.dev/multi-agent-applications/#agent-delegation) |
+| Route requests to different agents based on intent | [Programmatic Agent Hand-off](https://ai.pydantic.dev/multi-agent-applications/#programmatic-agent-hand-off) |
 | Require tool approval (human-in-the-loop) | [Deferred Tools](https://ai.pydantic.dev/deferred-tools/) |
 | Use images, audio, video, or documents | [Input](https://ai.pydantic.dev/input/) |
 | Use advanced tool features | [Advanced Tools](https://ai.pydantic.dev/tools-advanced/) |
@@ -416,6 +417,7 @@ Need deterministic, fast tests?
 | Running an autonomous agent, batch job, or background task | `agent.run()` |
 | Writing a CLI tool, script, or Jupyter notebook (no async) | `agent.run_sync()` |
 | Streaming final text word-by-word to a UI | `agent.run_stream()` |
+| Receiving an async iterable of typed events (tool calls, results, final output) | `agent.run_stream_events()` |
 | Inspecting or modifying state between agent steps, human-in-the-loop approval | `agent.iter()` |
 
 See [Streaming All Events](https://ai.pydantic.dev/agents/#streaming-all-events) for `event_stream_handler` details.
@@ -459,7 +461,8 @@ See [Streaming All Events](https://ai.pydantic.dev/agents/#streaming-all-events)
 
 These are mistakes agents commonly make with Pydantic AI. Getting these wrong produces silent failures or confusing errors.
 
-- **Deprecated parameter names**: Use `instructions` (not `system_prompt`), `output_type` (not `result_type`), `output_retries` (not `result_retries`), `toolsets` (not `mcp_servers`). The old names were removed in v0.6.0.
+- **Removed parameter names**: Use `output_type` (not `result_type`) and `output_retries` (not `result_retries`) — the old names no longer exist. Use `toolsets` (not `mcp_servers`) — `mcp_servers` still works but is deprecated.
+- **`instructions` vs `system_prompt`**: Both are valid Agent parameters with different behavior. `instructions` are excluded from message history on subsequent requests; `system_prompt` persists in message history. Prefer `instructions` for most use cases.
 - **`@agent.tool` requires `RunContext` as first param**; `@agent.tool_plain` must **not** have it. Mixing these up causes runtime errors. Use `tool_plain` when you don't need deps, usage, or messages.
 - **Model strings need the provider prefix**: `'openai:gpt-5.2'` not `'gpt-5.2'`. Without the prefix, Pydantic AI can't resolve the provider.
 - **`TestModel` requires `agent.override()`**: Don't set `agent.model` directly. Always use the context manager: `with agent.override(model=TestModel()):`.

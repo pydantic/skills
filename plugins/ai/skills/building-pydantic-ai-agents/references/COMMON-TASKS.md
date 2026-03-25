@@ -134,7 +134,7 @@ agent = Agent('openai:gpt-5.2', history_processors=[keep_recent])
 
 **Also use for:** Privacy filtering (remove PII), summarizing old messages, role-based access.
 
-**Docs:** [Processing Message History](https://github.com/pydantic/pydantic-ai/blob/main/docs/message-history.md#processing-message-history) · [Summarize Old Messages](https://github.com/pydantic/pydantic-ai/blob/main/docs/message-history.md#summarize-old-messages)
+**Docs:** [Processing Message History](https://ai.pydantic.dev/message-history/#processing-message-history) · [Summarize Old Messages](https://ai.pydantic.dev/message-history/#summarize-old-messages)
 
 ---
 
@@ -162,7 +162,7 @@ async def main():
 
 **Also use for:** Logging, analytics, debugging, progress bars in UIs.
 
-**Docs:** [Streaming Events and Final Output](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#streaming-events-and-final-output) · [Streaming All Events](https://github.com/pydantic/pydantic-ai/blob/main/docs/agent.md#streaming-all-events)
+**Docs:** [Streaming Events and Final Output](https://ai.pydantic.dev/agents/#streaming-events-and-final-output) · [Streaming All Events](https://ai.pydantic.dev/agents/#streaming-all-events)
 
 ---
 
@@ -185,7 +185,7 @@ agent = Agent(fallback)
 
 **Also use for:** Cost optimization (expensive → cheap), rate limit handling, regional failover.
 
-**Docs:** [Fallback Model](https://github.com/pydantic/pydantic-ai/blob/main/docs/models/overview.md#fallback-model) · [Per-Model Settings](https://github.com/pydantic/pydantic-ai/blob/main/docs/models/overview.md#per-model-settings)
+**Docs:** [Fallback Model](https://ai.pydantic.dev/models/#fallback-model) · [Per-Model Settings](https://ai.pydantic.dev/models/#per-model-settings)
 
 ---
 
@@ -223,7 +223,7 @@ with agent.override(model=FunctionModel(custom_model)):
 
 **Also use for:** Capturing requests for assertions, simulating errors, testing retries.
 
-**Docs:** [Unit testing with TestModel](https://github.com/pydantic/pydantic-ai/blob/main/docs/testing.md#unit-testing-with-testmodel) · [Unit testing with FunctionModel](https://github.com/pydantic/pydantic-ai/blob/main/docs/testing.md#unit-testing-with-functionmodel)
+**Docs:** [Unit testing with TestModel](https://ai.pydantic.dev/testing/#unit-testing-with-testmodel) · [Unit testing with FunctionModel](https://ai.pydantic.dev/testing/#unit-testing-with-functionmodel)
 
 ---
 
@@ -246,7 +246,7 @@ async def research(ctx: RunContext, topic: str) -> str:
 
 **Also use for:** Triage/routing, specialist hand-off, graph-based workflows.
 
-**Docs:** [Agent Delegation](https://github.com/pydantic/pydantic-ai/blob/main/docs/multi-agent-applications.md#agent-delegation) · [Programmatic Agent Hand-off](https://github.com/pydantic/pydantic-ai/blob/main/docs/multi-agent-applications.md#programmatic-agent-hand-off)
+**Docs:** [Agent Delegation](https://ai.pydantic.dev/multi-agent-applications/#agent-delegation) · [Programmatic Agent Hand-off](https://ai.pydantic.dev/multi-agent-applications/#programmatic-agent-hand-off)
 
 ---
 
@@ -265,4 +265,4 @@ logfire.instrument_pydantic_ai()
 
 **Use for:** Debugging unexpected behavior, validating tool schemas, understanding what's sent to providers, production monitoring.
 
-**Docs:** [Using Logfire](https://github.com/pydantic/pydantic-ai/blob/main/docs/logfire.md#using-logfire) · [Monitoring HTTP Requests](https://github.com/pydantic/pydantic-ai/blob/main/docs/logfire.md#monitoring-http-requests)
+**Docs:** [Using Logfire](https://ai.pydantic.dev/logfire/#using-logfire) · [Monitoring HTTP Requests](https://ai.pydantic.dev/logfire/#monitoring-http-requests)
