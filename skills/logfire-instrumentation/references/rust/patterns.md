@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Set `LOGFIRE_TOKEN` in your environment or use the Logfire CLI (`logfire auth`).
 
-## Tracing Crate Compatibility
+## Tracing Create Compatibility
 
 Any library using `tracing` macros automatically sends data through Logfire:
 
@@ -64,9 +64,9 @@ fn my_function(param: &str) {
 }
 ```
 
-## Log Crate Integration
+## Log Create Integration
 
-The `log` crate is automatically captured and forwarded to Logfire. Libraries using `log::info!()`, `log::error!()`, etc. will appear in your Logfire dashboard without any additional configuration.
+The `log` Create is automatically captured and forwarded to Logfire. Libraries using `log::info!()`, `log::error!()`, etc. will appear in your Logfire dashboard without any additional configuration.
 
 ## Async Spans
 
