@@ -239,6 +239,6 @@ If traces aren't appearing: check that `configure()` is called before `instrumen
 
 Detailed patterns and integration tables, organized by language:
 
-- **Python**: `${CLAUDE_PLUGIN_ROOT}/skills/instrumentation/references/python/logging-patterns.md` (log levels, spans, stdlib integration, metrics, capfire testing) and `${CLAUDE_PLUGIN_ROOT}/skills/instrumentation/references/python/integrations.md` (full instrumentor table with extras)
-- **JavaScript/TypeScript**: `${CLAUDE_PLUGIN_ROOT}/skills/instrumentation/references/javascript/patterns.md` (log levels, spans, error handling, config) and `${CLAUDE_PLUGIN_ROOT}/skills/instrumentation/references/javascript/frameworks.md` (Node.js, Cloudflare Workers, Next.js, Deno setup)
-- **Rust**: `${CLAUDE_PLUGIN_ROOT}/skills/instrumentation/references/rust/patterns.md` (macros, spans, tracing/log crate integration, async, shutdown)
+- **Python**: `./references/python/logging-patterns.md` (log levels, spans, stdlib integration, metrics, capfire testing) and `./references/python/integrations.md` (full instrumentor table with extras)
+- **JavaScript/TypeScript**: `./references/javascript/patterns.md` (log levels, spans, error handling, config) and `./references/javascript/frameworks.md` (Node.js, Cloudflare Workers, Next.js, Deno setup)
+- **Rust**: `./references/rust/patterns.md` (macros, spans, tracing/log crate integration, async, shutdown)

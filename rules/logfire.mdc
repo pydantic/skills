@@ -1,0 +1,18 @@
+---
+description: Apply when instrumenting code with Logfire or querying Logfire data
+globs:
+  - "**/*.py"
+alwaysApply: false
+---
+
+# Logfire Rules
+
+- Call `logfire.configure()` exactly once at application startup, before any `instrument_*()` calls
+- Install `logfire` with extras matching your frameworks: `uv add 'logfire[fastapi,httpx,asyncpg]'`
+- Never commit `.logfire/logfire_credentials.json` — use `LOGFIRE_TOKEN` env var in production
+- Use `logfire.instrument_pydantic_ai()` for all pydantic-ai agents — zero additional code needed
+- Use structured attributes in spans: `logfire.info('Processing {user_id}', user_id=uid)` not f-strings
+- `logfire.instrument_pydantic()` enables validation failure analytics — add it to every service using Pydantic
+- Web framework instrumentors (`instrument_fastapi`, `instrument_django`) need the app instance; HTTP client and database instrumentors are global
+- In Gunicorn deployments, call `logfire.configure()` inside the `post_fork` hook, not at module level
+- Use `logfire.exception()` in except blocks — it automatically captures the traceback

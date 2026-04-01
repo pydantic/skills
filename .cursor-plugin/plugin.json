@@ -1,0 +1,15 @@
+{
+  "name": "pydantic",
+  "version": "0.1.0",
+  "description": "Pydantic validation, AI agents, and Logfire observability for Cursor",
+  "author": {
+    "name": "Pydantic",
+    "email": "support@pydantic.dev"
+  },
+  "skills": "./skills/",
+  "rules": "./rules/",
+  "commands": "./commands/",
+  "mcp": "./plugins/logfire/.mcp.json",
+  "tags": ["python", "pydantic", "validation", "ai", "agents", "observability", "logfire"],
+  "categories": ["Developer Tools"]
+}

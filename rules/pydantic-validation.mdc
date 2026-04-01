@@ -1,0 +1,19 @@
+---
+description: Apply when working with Pydantic models or ValidationErrors
+globs:
+  - "**/*.py"
+alwaysApply: false
+---
+
+# Pydantic v2 Rules
+
+- Always use `@field_validator` (not v1's `@validator`) with explicit `mode=`
+- Never use `assert` in validators — use `raise ValueError(...)` (assert is skipped with -O)
+- Prefer `model_validate_json` over `json.loads` + `model_validate` for performance
+- When a ValidationError occurs, call `.errors()` for structured output before hypothesising
+- Instantiate TypeAdapter at module level, not inside functions
+- Check `from_attributes=True` in model `model_config` when validating ORM objects
+- Use `model_rebuild()` for forward references (not `update_forward_refs`)
+- Use `model_dump()` and `model_dump_json()` (not `.dict()` or `.json()`)
+- Use `ConfigDict(...)` for model config (not inner `class Config:`)
+- Use `Field(pattern=...)` not `Field(regex=...)`

@@ -1,0 +1,19 @@
+---
+description: Apply when working with pydantic-ai agents
+globs:
+  - "**/*.py"
+alwaysApply: false
+---
+
+# Pydantic AI Rules
+
+- Always add `logfire.instrument_pydantic_ai()` before the first agent run in production code
+- Use `output_type=` with a Pydantic model for structured agent output — never parse raw text
+- Put tool descriptions in docstrings — they are passed to the LLM verbatim
+- Use `@agent.tool` (with RunContext) for tools needing deps; `@agent.tool_plain` otherwise
+- Model strings need the provider prefix: `'openai:gpt-5.2'` not `'gpt-5.2'`
+- Set `model_settings` at the agent level for defaults; override at run level for one-off changes
+- Use `agent.override(model=TestModel())` for tests — never set `agent.model` directly
+- Hook decorator names on `.on` don't repeat `on_`: use `hooks.on.run_error` not `hooks.on.on_run_error`
+- `history_processors` is plural — use `history_processors=[...]` not `history_processor=`
+- When `str` is in `output_type`, the model can return plain text instead of structured output — omit `str` to force tool-based output
