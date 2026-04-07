@@ -1,7 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pydantic-skills",
-  "description": "Official Pydantic plugin marketplace for Claude Code - Logfire instrumentation",
   "owner": {
     "name": "Pydantic",
     "email": "support@pydantic.dev"
