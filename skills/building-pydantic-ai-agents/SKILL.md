@@ -7,7 +7,7 @@ description: >
 license: MIT
 compatibility: Requires Python 3.10+
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: pydantic
 ---
 
@@ -212,58 +212,25 @@ agent = Agent.from_file('agent.yaml')
 
 ## Task Routing Table
 
+Load only the most relevant reference first. Read additional references only if the task spans multiple areas.
+
 | I want to... | Reference |
 |---|---|
-| Create or configure agents | [Create a Basic Agent](#create-a-basic-agent) |
-| Bundle reusable behavior (tools, hooks, instructions) | [Add Capabilities to an Agent](./references/COMMON-TASKS.md#add-capabilities-to-an-agent) |
-| Intercept model requests, tool calls, or runs | [Intercept Agent Lifecycle with Hooks](./references/COMMON-TASKS.md#intercept-agent-lifecycle-with-hooks) |
-| Define agents in YAML/JSON without Python code | [Define Agents Declaratively with Specs](./references/COMMON-TASKS.md#define-agents-declaratively-with-specs) |
-| Use template strings in agent instructions | [Define Agents Declaratively with Specs](./references/COMMON-TASKS.md#define-agents-declaratively-with-specs) |
-| Let my agent call external APIs or functions | [Add Tools to an Agent](#add-tools-to-an-agent) |
-| Organize or restrict which tools an agent can use | [Choosing a Tool Registration Method](./references/ARCHITECTURE.md#choosing-a-tool-registration-method) |
-| Give my agent web search with automatic provider fallback | [Add Capabilities to an Agent](./references/COMMON-TASKS.md#add-capabilities-to-an-agent) |
-| Give my agent URL fetching with automatic provider fallback | [Add Capabilities to an Agent](./references/COMMON-TASKS.md#add-capabilities-to-an-agent) |
-| Give my agent web search or code execution (builtin tools) | [Add Capabilities to an Agent](./references/COMMON-TASKS.md#add-capabilities-to-an-agent) |
-| Search with DuckDuckGo/Tavily/Exa | [Search with DuckDuckGo, Tavily, or Exa](./references/COMMON-TASKS.md#search-with-duckduckgo-tavily-or-exa) |
-| Ensure my agent returns data in a specific format | [Structured Output with Pydantic Models](#structured-output-with-pydantic-models) |
-| Pass database connections, API clients, or config to tools | [Dependency Injection](#dependency-injection) |
-| Access usage stats, message history, or retry count in tools | [Add Tools to an Agent](#add-tools-to-an-agent) |
-| Choose or configure models | [Model Provider Prefixes](./references/ARCHITECTURE.md#model-provider-prefixes) |
-| Automatically switch to backup model when primary fails | [Handle Provider Failures](./references/COMMON-TASKS.md#handle-provider-failures) |
-| Show real-time progress as my agent works | [Show Real-Time Progress](./references/COMMON-TASKS.md#show-real-time-progress) |
-| Work with messages and multimedia | [Work with Message History](./references/COMMON-TASKS.md#work-with-message-history) |
-| Reduce token costs by trimming or filtering conversation history | [Manage Context Size](./references/COMMON-TASKS.md#manage-context-size) |
-| Keep long conversations manageable without losing context | [Manage Context Size](./references/COMMON-TASKS.md#manage-context-size) |
-| Use MCP servers | [Use MCP Servers](./references/COMMON-TASKS.md#use-mcp-servers) |
-| Build multi-step graphs | [Build Multi-Step Workflows with Graphs](./references/COMMON-TASKS.md#build-multi-step-workflows-with-graphs) |
-| Debug a failed agent run or see what went wrong | [Debug a Failed Agent Run](./references/COMMON-TASKS.md#debug-a-failed-agent-run) |
-| Make my agent resilient to temporary failures | [Make an Agent Resilient with Retries](./references/COMMON-TASKS.md#make-an-agent-resilient-with-retries) |
-| Understand why my agent made specific decisions | [Debug and Validate Agent Behavior](./references/COMMON-TASKS.md#debug-and-validate-agent-behavior) |
-| Write deterministic tests for my agent | [Test Agent Behavior](./references/COMMON-TASKS.md#test-agent-behavior) |
-| Enable thinking/reasoning across any provider | [Enable Thinking Across Providers](./references/COMMON-TASKS.md#enable-thinking-across-providers) |
-| Systematically verify my agent works correctly | [Evaluations (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Use embeddings for RAG | [Embeddings (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Use durable execution | [Durable Execution (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Have one agent delegate tasks to another | [Coordinate Multiple Agents](./references/COMMON-TASKS.md#coordinate-multiple-agents) |
-| Route requests to different agents based on intent | [Coordinate Multiple Agents](./references/COMMON-TASKS.md#coordinate-multiple-agents) |
-| Require tool approval (human-in-the-loop) | [Require Tool Approval (Human in the Loop)](./references/COMMON-TASKS.md#require-tool-approval-human-in-the-loop) |
-| Use images, audio, video, or documents | [Send Images, Audio, Video, or Documents to the Model](./references/COMMON-TASKS.md#send-images-audio-video-or-documents-to-the-model) |
-| Use advanced tool features | [Require Tool Approval (Human in the Loop)](./references/COMMON-TASKS.md#require-tool-approval-human-in-the-loop) |
-| Validate or require approval before tool execution | [Require Tool Approval (Human in the Loop)](./references/COMMON-TASKS.md#require-tool-approval-human-in-the-loop) |
-| Call the model without using an agent | [Direct API (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Expose agents as HTTP servers (A2A) | [A2A (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Handle network errors and rate limiting automatically | [Make an Agent Resilient with Retries](./references/COMMON-TASKS.md#make-an-agent-resilient-with-retries) |
-| Use LangChain or ACI.dev tools | [Third-Party Tools (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Publish reusable agent extensions as packages | [Custom Toolsets/Models/Capabilities (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Build custom toolsets, models, or agents | [Custom Toolsets/Models/Capabilities (in Advanced Features)](./references/COMMON-TASKS.md#advanced-and-less-common-features) |
-| Debug common issues | [Debug a Failed Agent Run](./references/COMMON-TASKS.md#debug-a-failed-agent-run) |
-| Migrate from deprecated APIs | [Working with the Installed Pydantic AI Package](./references/COMMON-TASKS.md#working-with-the-installed-pydantic-ai-package) |
-| See advanced real-world examples | [Working with the Installed Pydantic AI Package](./references/COMMON-TASKS.md#working-with-the-installed-pydantic-ai-package) |
-| Look up an import path | [Working with the Installed Pydantic AI Package](./references/COMMON-TASKS.md#working-with-the-installed-pydantic-ai-package) |
+| Create/configure agents, choose output types, use deps, define specs, or pick run methods | [Agents Core](./references/AGENTS-CORE.md) |
+| Bundle reusable behavior or intercept lifecycle events | [Capabilities and Hooks](./references/CAPABILITIES-AND-HOOKS.md) |
+| Add function tools, toolsets, MCP servers, or explicit search tools | [Tools Core](./references/TOOLS-CORE.md) |
+| Use provider-native web search, web fetch, or code execution | [Built-in Tools](./references/BUILTIN-TOOLS.md) |
+| Use advanced tool features such as approval, retries, `ToolReturn`, validators, timeouts, or tool search | [Tools Advanced](./references/TOOLS-ADVANCED.md) |
+| Work with multimodal input, message history, or context trimming | [Input and History](./references/INPUT-AND-HISTORY.md) |
+| Test or debug agent behavior | [Testing and Debugging](./references/TESTING-AND-DEBUGGING.md) |
+| Coordinate multiple agents or build graph workflows | [Orchestration and Integrations](./references/ORCHESTRATION-AND-INTEGRATIONS.md#coordinate-multiple-agents) |
+| Call the model directly, expose A2A, use durable execution, embeddings, evals, or third-party integrations | [Orchestration and Integrations](./references/ORCHESTRATION-AND-INTEGRATIONS.md) |
+| Compare abstractions, output modes, decorators, or model-string patterns | [Architecture and Decision Guide](./references/ARCHITECTURE.md) |
+| Follow an older link into `COMMON-TASKS.md` | [Task Reference Map](./references/COMMON-TASKS.md) |
 
 ## Architecture and Decisions
 
-Load [Architecture and Decision Guide](./references/ARCHITECTURE.md) for detailed decision trees, comparison tables, and architecture overview:
+Load [Architecture and Decision Guide](./references/ARCHITECTURE.md) only when the user is choosing between abstractions or wants comparison tables and decision trees:
 
 | Topic | What it covers |
 |---|---|
@@ -292,19 +259,19 @@ These are mistakes agents commonly make with Pydantic AI. Getting these wrong pr
 - **Hook decorator names on `.on` don't repeat `on_`**: Use `hooks.on.run_error` and `hooks.on.model_request_error` — not `hooks.on.on_run_error`.
 - **`history_processors` is plural**: The Agent parameter is `history_processors=[...]`, not `history_processor=`.
 
-## Common Tasks
+## Task-Family References
 
-Load [Common Tasks Reference](./references/COMMON-TASKS.md) for detailed implementation guidance with code examples:
+Load exactly one of these unless the task clearly spans multiple families:
 
-| Task | Section |
+| Task family | Reference |
 |---|---|
-| Add capabilities (Thinking, WebSearch, etc.) | Add Capabilities to an Agent |
-| Intercept model requests and tool calls | Intercept Agent Lifecycle with Hooks |
-| Define agents from YAML/JSON config files | Define Agents Declaratively with Specs |
-| Enable thinking/reasoning across providers | Enable Thinking Across Providers |
-| Trim or filter conversation history | Manage Context Size |
-| Stream events and show real-time progress | Show Real-Time Progress |
-| Auto-switch providers on failure | Handle Provider Failures |
-| Write deterministic tests | Test Agent Behavior |
-| Delegate tasks between agents | Coordinate Multiple Agents |
-| Instrument with Logfire for debugging | Debug and Validate Agent Behavior |
+| Core agent setup, output, deps, specs, models, run methods | [Agents Core](./references/AGENTS-CORE.md) |
+| Capabilities, hooks, and reusable behavior | [Capabilities and Hooks](./references/CAPABILITIES-AND-HOOKS.md) |
+| Function tools, toolsets, MCP, explicit search tools | [Tools Core](./references/TOOLS-CORE.md) |
+| Provider-native builtin tools | [Built-in Tools](./references/BUILTIN-TOOLS.md) |
+| Approval, retries, validators, timeouts, rich tool returns, deferred loading | [Tools Advanced](./references/TOOLS-ADVANCED.md) |
+| Multimodal input, message history, history processors | [Input and History](./references/INPUT-AND-HISTORY.md) |
+| Testing, request inspection, and Logfire debugging | [Testing and Debugging](./references/TESTING-AND-DEBUGGING.md) |
+| Multi-agent patterns, graphs, direct API, A2A, durable execution, embeddings, evals, third-party integrations | [Orchestration and Integrations](./references/ORCHESTRATION-AND-INTEGRATIONS.md) |
+
+Use [Task Reference Map](./references/COMMON-TASKS.md) only for compatibility with older links or when you need a pointer from an old section name to the new file.

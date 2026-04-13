@@ -58,4 +58,36 @@ check_sync \
     plugins/ai/skills/building-pydantic-ai-agents/references/ARCHITECTURE.md \
     skills/building-pydantic-ai-agents/references/ARCHITECTURE.md
 
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/AGENTS-CORE.md \
+    skills/building-pydantic-ai-agents/references/AGENTS-CORE.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/CAPABILITIES-AND-HOOKS.md \
+    skills/building-pydantic-ai-agents/references/CAPABILITIES-AND-HOOKS.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/TOOLS-CORE.md \
+    skills/building-pydantic-ai-agents/references/TOOLS-CORE.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/BUILTIN-TOOLS.md \
+    skills/building-pydantic-ai-agents/references/BUILTIN-TOOLS.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/TOOLS-ADVANCED.md \
+    skills/building-pydantic-ai-agents/references/TOOLS-ADVANCED.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/INPUT-AND-HISTORY.md \
+    skills/building-pydantic-ai-agents/references/INPUT-AND-HISTORY.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/TESTING-AND-DEBUGGING.md \
+    skills/building-pydantic-ai-agents/references/TESTING-AND-DEBUGGING.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/ORCHESTRATION-AND-INTEGRATIONS.md \
+    skills/building-pydantic-ai-agents/references/ORCHESTRATION-AND-INTEGRATIONS.md
+
 exit $exit_code
