@@ -2,6 +2,39 @@
 
 Detailed decision trees, comparison tables, and architecture overview for Pydantic AI.
 
+## Contents
+
+- [Task-Family References](#task-family-references)
+- [Decision Trees](#decision-trees)
+  - [Choosing a Tool Registration Method](#choosing-a-tool-registration-method)
+  - [Choosing an Output Mode](#choosing-an-output-mode)
+  - [Choosing a Multi-Agent Pattern](#choosing-a-multi-agent-pattern)
+  - [Choosing How to Extend Agent Behavior](#choosing-how-to-extend-agent-behavior)
+  - [Choosing a Capability](#choosing-a-capability)
+  - [Choosing a Testing Approach](#choosing-a-testing-approach)
+- [Comparison Tables](#comparison-tables)
+  - [Output Mode Comparison](#output-mode-comparison)
+  - [Model Provider Prefixes](#model-provider-prefixes)
+  - [Tool Decorator Comparison](#tool-decorator-comparison)
+  - [Built-in Capabilities](#built-in-capabilities)
+  - [When to Use Each Agent Method](#when-to-use-each-agent-method)
+- [Architecture Overview](#architecture-overview)
+
+## Task-Family References
+
+Use this file for comparisons and abstraction choices.
+
+If the user already knows what they want to do, load the narrower task guide instead:
+
+- [AGENTS-CORE.md](./AGENTS-CORE.md)
+- [CAPABILITIES-AND-HOOKS.md](./CAPABILITIES-AND-HOOKS.md)
+- [TOOLS-CORE.md](./TOOLS-CORE.md)
+- [BUILTIN-TOOLS.md](./BUILTIN-TOOLS.md)
+- [TOOLS-ADVANCED.md](./TOOLS-ADVANCED.md)
+- [INPUT-AND-HISTORY.md](./INPUT-AND-HISTORY.md)
+- [TESTING-AND-DEBUGGING.md](./TESTING-AND-DEBUGGING.md)
+- [ORCHESTRATION-AND-INTEGRATIONS.md](./ORCHESTRATION-AND-INTEGRATIONS.md)
+
 ## Decision Trees
 
 ### Choosing a Tool Registration Method
@@ -127,7 +160,7 @@ Need deterministic, fast tests?
 | Cerebras | `cerebras:` | `cerebras:llama-4-scout-17b-16e-instruct` |
 | Heroku | `heroku:` | `heroku:claude-sonnet-4-6` |
 
-**Additional prefixes:** `litellm:`, `nebius:`, `ovhcloud:`, `alibaba:`, `sambanova:`, `vercel:`, `outlines:`, `moonshotai:`. For truly custom providers, subclass `Model` or use `OpenAIChatModel` with a custom `base_url`. See [Models](https://ai.pydantic.dev/models/).
+**Additional prefixes:** `litellm:`, `nebius:`, `ovhcloud:`, `alibaba:`, `sambanova:`, `vercel:`, `outlines:`, `moonshotai:`. For truly custom providers, subclass `Model` or use `OpenAIChatModel` with a custom `base_url`.
 
 ### Tool Decorator Comparison
 
@@ -165,7 +198,7 @@ Need deterministic, fast tests?
 | Receiving an async iterable of typed events (tool calls, results, final output) | `agent.run_stream_events()` |
 | Inspecting or modifying state between agent steps, human-in-the-loop approval | `agent.iter()` |
 
-See [Streaming All Events](https://ai.pydantic.dev/agents/#streaming-all-events) for `event_stream_handler` details.
+See [Run Methods and Streaming](./AGENTS-CORE.md#run-methods-and-streaming) for `event_stream_handler` details.
 
 ## Architecture Overview
 

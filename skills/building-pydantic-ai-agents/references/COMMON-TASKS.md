@@ -1,274 +1,108 @@
-# Common Tasks
+# Task Reference Map
 
-Detailed implementation guidance with code examples for common Pydantic AI tasks.
+This file exists as a compatibility index for older links into `COMMON-TASKS.md`.
+
+Prefer the narrower task-family guides below so the agent loads only the material it needs:
+
+- [AGENTS-CORE.md](./AGENTS-CORE.md) — agent creation, output, deps, specs, models, run methods
+- [CAPABILITIES-AND-HOOKS.md](./CAPABILITIES-AND-HOOKS.md) — `Thinking`, `WebSearch`, `Hooks`, custom capabilities
+- [TOOLS-CORE.md](./TOOLS-CORE.md) — `@agent.tool`, `Tool`, toolsets, MCP, common search tools
+- [BUILTIN-TOOLS.md](./BUILTIN-TOOLS.md) — provider-native tools like `WebSearchTool` and `CodeExecutionTool`
+- [TOOLS-ADVANCED.md](./TOOLS-ADVANCED.md) — approval, retries, `ToolReturn`, timeouts, validators, deferred loading
+- [INPUT-AND-HISTORY.md](./INPUT-AND-HISTORY.md) — multimodal input, message history, history processors
+- [TESTING-AND-DEBUGGING.md](./TESTING-AND-DEBUGGING.md) — `TestModel`, `FunctionModel`, `capture_run_messages`, Logfire
+- [ORCHESTRATION-AND-INTEGRATIONS.md](./ORCHESTRATION-AND-INTEGRATIONS.md) — multi-agent patterns, graphs, A2A, direct API, durable execution, embeddings, evals, third-party tools
 
 ## Add Capabilities to an Agent
 
-Use capabilities to bundle reusable behavior. Multiple capabilities compose automatically.
-
-```python
-from pydantic_ai import Agent
-from pydantic_ai.capabilities import Thinking, WebSearch
-
-# Built-in capabilities: just pass instances
-agent = Agent(
-    'anthropic:claude-opus-4-6',
-    capabilities=[
-        Thinking(effort='high'),
-        WebSearch(),
-    ],
-)
-```
-
-**WebSearch** auto-detects whether the model supports builtin web search. If so, it uses the native tool; otherwise, it falls back to a local implementation (e.g., DuckDuckGo). Same pattern applies to `WebFetch`, `ImageGeneration`, and `MCP`.
-
-**Docs:** [Capabilities](https://ai.pydantic.dev/capabilities/) · [Built-in Capabilities](https://ai.pydantic.dev/capabilities/#built-in-capabilities)
-
----
+Read [Add Capabilities](./CAPABILITIES-AND-HOOKS.md#add-capabilities-to-an-agent).
 
 ## Intercept Agent Lifecycle with Hooks
 
-Use `Hooks` for lightweight lifecycle interception via decorators. For reusable behavior that combines hooks with tools/instructions, subclass `AbstractCapability` instead.
-
-```python
-from pydantic_ai import Agent, RunContext
-from pydantic_ai.capabilities.hooks import Hooks
-from pydantic_ai.models import ModelRequestContext
-
-hooks = Hooks()
-
-
-@hooks.on.before_model_request
-async def log_request(ctx: RunContext[None], request_context: ModelRequestContext) -> ModelRequestContext:
-    print(f'Sending {len(request_context.messages)} messages')
-    return request_context
-
-
-@hooks.on.before_tool_execute(tools=['send_email'])
-async def audit_tool(ctx, *, call, tool_def, args):
-    print(f'Executing {call.tool_name}')
-    return args
-
-
-agent = Agent('openai:gpt-5.2', capabilities=[hooks])
-```
-
-**Hook types:** `before_run`/`after_run`, `run` (wrap), `run_error`, `before_node_run`/`after_node_run`, `node_run` (wrap), `node_run_error`, `before_model_request`/`after_model_request`, `model_request` (wrap), `model_request_error`, `before_tool_validate`/`after_tool_validate`, `tool_validate` (wrap), `tool_validate_error`, `before_tool_execute`/`after_tool_execute`, `tool_execute` (wrap), `tool_execute_error`, `prepare_tools`, `run_event_stream`, `event`.
-
-**Docs:** [Hooks](https://ai.pydantic.dev/hooks/) · [Hooking into the Lifecycle](https://ai.pydantic.dev/capabilities/#hooking-into-the-lifecycle)
-
----
+Read [Intercept Agent Lifecycle with Hooks](./CAPABILITIES-AND-HOOKS.md#intercept-agent-lifecycle-with-hooks).
 
 ## Define Agents Declaratively with Specs
 
-Use YAML/JSON specs to separate agent configuration from application code. Specs support template strings rendered from dependencies at runtime.
-
-```yaml
-# agent.yaml
-model: anthropic:claude-opus-4-6
-instructions: "You are helping {{user_name}} with research."
-capabilities:
-  - WebSearch
-  - Thinking:
-      effort: high
-model_settings:
-  max_tokens: 8192
-```
-
-```python
-from dataclasses import dataclass
-
-from pydantic_ai import Agent
-
-
-@dataclass
-class UserContext:
-    user_name: str
-
-
-agent = Agent.from_file('agent.yaml', deps_type=UserContext)
-result = agent.run_sync('Find recent papers on AI safety', deps=UserContext(user_name='Alice'))
-```
-
-**Capability spec syntax:** `'WebSearch'` (no args), `{'Thinking': {'effort': 'high'}}` (kwargs), `{'Thinking': 'high'}` (single arg).
-
-**Docs:** [Agent Specs](https://ai.pydantic.dev/agent-spec/) · [Template Strings](https://ai.pydantic.dev/agent-spec/#template-strings)
-
----
+Read [Define Agents Declaratively with Specs](./AGENTS-CORE.md#define-agents-declaratively-with-specs).
 
 ## Enable Thinking Across Providers
 
-Use the unified `Thinking` capability or `thinking` model setting for cross-provider reasoning support.
+Read [Enable Thinking Across Providers](./CAPABILITIES-AND-HOOKS.md#enable-thinking-across-providers).
 
-```python
-from pydantic_ai import Agent
-from pydantic_ai.capabilities import Thinking
+## Use MCP Servers
 
-# Via capability (recommended for spec compatibility)
-agent = Agent('anthropic:claude-opus-4-6', capabilities=[Thinking(effort='high')])
+Read [Use MCP Servers](./TOOLS-CORE.md#use-mcp-servers).
 
-# Via model_settings (equivalent)
-agent = Agent('anthropic:claude-opus-4-6', model_settings={'thinking': 'high'})
-```
+## Search with DuckDuckGo, Tavily, or Exa
 
-**Effort levels:** `True` (default effort), `False` (disable), `'minimal'`, `'low'`, `'medium'`, `'high'`, `'xhigh'`. Automatically mapped to each provider's native format (Anthropic adaptive thinking, OpenAI reasoning_effort, Google thinking_level, etc.).
+Read [Search with DuckDuckGo, Tavily, or Exa](./TOOLS-CORE.md#search-with-duckduckgo-tavily-or-exa).
 
-**Docs:** [Thinking](https://ai.pydantic.dev/thinking/) · [Unified Thinking Settings](https://ai.pydantic.dev/thinking/#unified-thinking-settings)
+## Require Tool Approval (Human in the Loop)
 
----
+Read [Require Tool Approval](./TOOLS-ADVANCED.md#require-tool-approval-human-in-the-loop).
+
+## Send Images, Audio, Video, or Documents to the Model
+
+Read [Send Images, Audio, Video, or Documents to the Model](./INPUT-AND-HISTORY.md#send-images-audio-video-or-documents-to-the-model).
 
 ## Manage Context Size
 
-Use `history_processors` to trim or filter messages before each model request.
+Read [Manage Context Size](./INPUT-AND-HISTORY.md#manage-context-size).
 
-```python
-from pydantic_ai import Agent, ModelMessage
+## Work with Message History
 
-
-async def keep_recent(messages: list[ModelMessage]) -> list[ModelMessage]:
-    return messages[-10:] if len(messages) > 10 else messages
-
-
-agent = Agent('openai:gpt-5.2', history_processors=[keep_recent])
-```
-
-**Also use for:** Privacy filtering (remove PII), summarizing old messages, role-based access.
-
-**Docs:** [Processing Message History](https://ai.pydantic.dev/message-history/#processing-message-history) · [Summarize Old Messages](https://ai.pydantic.dev/message-history/#summarize-old-messages)
-
----
+Read [Work with Message History](./INPUT-AND-HISTORY.md#work-with-message-history).
 
 ## Show Real-Time Progress
 
-Use `event_stream_handler` with `run()` or `run_stream()` to receive events as they happen.
-
-```python
-from collections.abc import AsyncIterable
-
-from pydantic_ai import Agent, AgentStreamEvent, FunctionToolCallEvent, RunContext
-
-agent = Agent('openai:gpt-5.2')
-
-
-async def stream_handler(ctx: RunContext, events: AsyncIterable[AgentStreamEvent]):
-    async for event in events:
-        if isinstance(event, FunctionToolCallEvent):
-            print(f'Calling {event.part.tool_name}...')
-
-
-async def main():
-    await agent.run('Do the task', event_stream_handler=stream_handler)
-```
-
-**Also use for:** Logging, analytics, debugging, progress bars in UIs.
-
-**Docs:** [Streaming Events and Final Output](https://ai.pydantic.dev/agents/#streaming-events-and-final-output) · [Streaming All Events](https://ai.pydantic.dev/agents/#streaming-all-events)
-
----
+Read [Run Methods and Streaming](./AGENTS-CORE.md#run-methods-and-streaming).
 
 ## Handle Provider Failures
 
-Use `FallbackModel` to automatically switch providers on 4xx/5xx errors.
+Read [Handle Provider Failures](./AGENTS-CORE.md#handle-provider-failures).
 
-```python
-from pydantic_ai import Agent
-from pydantic_ai.models.anthropic import AnthropicModel
-from pydantic_ai.models.fallback import FallbackModel
-from pydantic_ai.models.openai import OpenAIChatModel
+## Make an Agent Resilient with Retries
 
-fallback = FallbackModel(
-    OpenAIChatModel('gpt-5.2'),
-    AnthropicModel('claude-sonnet-4-6'),
-)
-agent = Agent(fallback)
-```
+Read [Make an Agent Resilient with Retries](./TOOLS-ADVANCED.md#make-an-agent-resilient-with-retries).
 
-**Also use for:** Cost optimization (expensive → cheap), rate limit handling, regional failover.
+## Debug a Failed Agent Run
 
-**Docs:** [Fallback Model](https://ai.pydantic.dev/models/#fallback-model) · [Per-Model Settings](https://ai.pydantic.dev/models/#per-model-settings)
-
----
+Read [Debug a Failed Agent Run](./TESTING-AND-DEBUGGING.md#debug-a-failed-agent-run).
 
 ## Test Agent Behavior
 
-Use `TestModel` for fast deterministic tests; `FunctionModel` for custom response logic.
-
-```python
-from pydantic_ai import Agent
-from pydantic_ai.models.test import TestModel
-
-agent = Agent('openai:gpt-5.2')
-
-# TestModel: fast, auto-generates valid responses based on schema
-with agent.override(model=TestModel()):
-    result = agent.run_sync('test prompt')
-    assert result.output == 'success (no tool calls)'
-```
-
-```python
-from pydantic_ai import Agent, ModelResponse, TextPart
-from pydantic_ai.models.function import FunctionModel
-
-agent = Agent('openai:gpt-5.2')
-
-
-# FunctionModel: capture requests, return custom responses
-def custom_model(messages, info):
-    return ModelResponse(parts=[TextPart(content='mocked response')])
-
-
-with agent.override(model=FunctionModel(custom_model)):
-    result = agent.run_sync('test prompt')
-```
-
-**Also use for:** Capturing requests for assertions, simulating errors, testing retries.
-
-**Docs:** [Unit testing with TestModel](https://ai.pydantic.dev/testing/#unit-testing-with-testmodel) · [Unit testing with FunctionModel](https://ai.pydantic.dev/testing/#unit-testing-with-functionmodel)
-
----
+Read [Test Agent Behavior](./TESTING-AND-DEBUGGING.md#test-agent-behavior).
 
 ## Coordinate Multiple Agents
 
-Use **agent delegation** (via tools) when a child returns results to parent; **output functions** for permanent hand-offs.
+Read [Coordinate Multiple Agents](./ORCHESTRATION-AND-INTEGRATIONS.md#coordinate-multiple-agents).
 
-```python
-from pydantic_ai import Agent, RunContext
+## Build Multi-Step Workflows with Graphs
 
-parent = Agent('openai:gpt-5.2')
-researcher = Agent('openai:gpt-5.2', output_type=str)
-
-@parent.tool
-async def research(ctx: RunContext, topic: str) -> str:
-    """Delegate research to specialist."""
-    result = await researcher.run(f'Research: {topic}', usage=ctx.usage)
-    return result.output
-```
-
-**Also use for:** Triage/routing, specialist hand-off, graph-based workflows.
-
-**Docs:** [Agent Delegation](https://ai.pydantic.dev/multi-agent-applications/#agent-delegation) · [Programmatic Agent Hand-off](https://ai.pydantic.dev/multi-agent-applications/#programmatic-agent-hand-off)
-
----
+Read [Build Multi-Step Workflows with Graphs](./ORCHESTRATION-AND-INTEGRATIONS.md#build-multi-step-workflows-with-graphs).
 
 ## Debug and Validate Agent Behavior
 
-Instrument with [Logfire](https://logfire.pydantic.dev/) to see exact model requests, tool calls, and validate LLM outputs. Each agent run becomes a parent trace with child spans for every tool call and LLM request.
+Read [Debug and Validate Agent Behavior](./TESTING-AND-DEBUGGING.md#debug-and-validate-agent-behavior).
 
-```python
-import logfire
+## Advanced and Less Common Features
 
-logfire.configure()
-logfire.instrument_pydantic_ai()
+Read only the relevant section in [ORCHESTRATION-AND-INTEGRATIONS.md](./ORCHESTRATION-AND-INTEGRATIONS.md):
 
-# All agent runs now traced — see tool calls, model requests, and outputs in Logfire dashboard
-```
+- [Direct API](./ORCHESTRATION-AND-INTEGRATIONS.md#call-the-model-without-using-an-agent)
+- [A2A](./ORCHESTRATION-AND-INTEGRATIONS.md#expose-agents-as-http-servers-a2a)
+- [Durable Execution](./ORCHESTRATION-AND-INTEGRATIONS.md#use-durable-execution)
+- [Embeddings](./ORCHESTRATION-AND-INTEGRATIONS.md#use-embeddings-for-rag)
+- [Third-Party Tools](./ORCHESTRATION-AND-INTEGRATIONS.md#use-langchain-or-acidev-tools)
+- [Custom Extensibility](./ORCHESTRATION-AND-INTEGRATIONS.md#build-custom-toolsets-models-or-agents)
+- [Evals](./ORCHESTRATION-AND-INTEGRATIONS.md#systematically-verify-agent-behavior-with-evals)
 
-For full HTTP-level visibility into what's sent to model providers (invaluable for debugging tool schema errors or unexpected model behavior):
+## Working with the Installed Pydantic AI Package
 
-```python
-logfire.instrument_httpx(capture_all=True)
-```
+Prefer the checked-out repository or these bundled references first.
 
-**Use for:** Debugging unexpected behavior, validating tool schemas, understanding what's sent to providers, production monitoring.
+Inspect local package source only as a last resort when:
 
-**Docs:** [Using Logfire](https://ai.pydantic.dev/logfire/#using-logfire) · [Monitoring HTTP Requests](https://ai.pydantic.dev/logfire/#monitoring-http-requests)
+- the user asks about a symbol that is not covered in this skill
+- the local environment already includes `pydantic_ai` and you need exact module layout
+- you have no narrower offline reference available
