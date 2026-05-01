@@ -40,3 +40,11 @@ Test a plugin locally:
 ```bash
 claude --plugin-dir ./plugins/logfire
 ```
+
+Validate Agent Skills metadata and local/plugin sync:
+
+```bash
+uvx --from skills-ref agentskills validate ./skills/building-pydantic-ai-agents
+uvx --from skills-ref agentskills validate ./skills/logfire-instrumentation
+./scripts/check-skill-sync.sh
+```
