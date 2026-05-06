@@ -1,7 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pydantic-skills",
-  "description": "Official Pydantic plugin marketplace for Claude Code - Logfire instrumentation",
   "owner": {
     "name": "Pydantic",
     "email": "support@pydantic.dev"
@@ -18,6 +17,18 @@
       "source": "./plugins/logfire",
       "category": "monitoring",
       "homepage": "https://github.com/pydantic/skills/tree/main/plugins/logfire"
+    },
+    {
+      "name": "ai",
+      "description": "Build production-grade AI agents with Pydantic AI — tools, capabilities, structured output, streaming, and testing patterns",
+      "version": "0.1.0",
+      "author": {
+        "name": "Pydantic",
+        "email": "support@pydantic.dev"
+      },
+      "source": "./plugins/ai",
+      "category": "development",
+      "homepage": "https://github.com/pydantic/skills/tree/main/plugins/ai"
     }
   ]
 }

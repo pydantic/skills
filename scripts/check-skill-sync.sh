@@ -23,27 +23,27 @@ check_sync() {
 }
 
 check_sync \
-    plugins/logfire/skills/instrumentation/SKILL.md \
+    plugins/logfire/skills/logfire-instrumentation/SKILL.md \
     skills/logfire-instrumentation/SKILL.md
 
 check_sync \
-    plugins/logfire/skills/instrumentation/references/python/logging-patterns.md \
+    plugins/logfire/skills/logfire-instrumentation/references/python/logging-patterns.md \
     skills/logfire-instrumentation/references/python/logging-patterns.md
 
 check_sync \
-    plugins/logfire/skills/instrumentation/references/python/integrations.md \
+    plugins/logfire/skills/logfire-instrumentation/references/python/integrations.md \
     skills/logfire-instrumentation/references/python/integrations.md
 
 check_sync \
-    plugins/logfire/skills/instrumentation/references/javascript/patterns.md \
+    plugins/logfire/skills/logfire-instrumentation/references/javascript/patterns.md \
     skills/logfire-instrumentation/references/javascript/patterns.md
 
 check_sync \
-    plugins/logfire/skills/instrumentation/references/javascript/frameworks.md \
+    plugins/logfire/skills/logfire-instrumentation/references/javascript/frameworks.md \
     skills/logfire-instrumentation/references/javascript/frameworks.md
 
 check_sync \
-    plugins/logfire/skills/instrumentation/references/rust/patterns.md \
+    plugins/logfire/skills/logfire-instrumentation/references/rust/patterns.md \
     skills/logfire-instrumentation/references/rust/patterns.md
 
 check_sync \
@@ -57,5 +57,49 @@ check_sync \
 check_sync \
     plugins/logfire/skills/query/references/client-usage.md \
     skills/logfire-query/references/client-usage.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/SKILL.md \
+    skills/building-pydantic-ai-agents/SKILL.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/COMMON-TASKS.md \
+    skills/building-pydantic-ai-agents/references/COMMON-TASKS.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/ARCHITECTURE.md \
+    skills/building-pydantic-ai-agents/references/ARCHITECTURE.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/AGENTS-CORE.md \
+    skills/building-pydantic-ai-agents/references/AGENTS-CORE.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/CAPABILITIES-AND-HOOKS.md \
+    skills/building-pydantic-ai-agents/references/CAPABILITIES-AND-HOOKS.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/TOOLS-CORE.md \
+    skills/building-pydantic-ai-agents/references/TOOLS-CORE.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/BUILTIN-TOOLS.md \
+    skills/building-pydantic-ai-agents/references/BUILTIN-TOOLS.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/TOOLS-ADVANCED.md \
+    skills/building-pydantic-ai-agents/references/TOOLS-ADVANCED.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/INPUT-AND-HISTORY.md \
+    skills/building-pydantic-ai-agents/references/INPUT-AND-HISTORY.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/TESTING-AND-DEBUGGING.md \
+    skills/building-pydantic-ai-agents/references/TESTING-AND-DEBUGGING.md
+
+check_sync \
+    plugins/ai/skills/building-pydantic-ai-agents/references/ORCHESTRATION-AND-INTEGRATIONS.md \
+    skills/building-pydantic-ai-agents/references/ORCHESTRATION-AND-INTEGRATIONS.md
 
 exit $exit_code
