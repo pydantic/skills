@@ -1,9 +1,6 @@
 ---
 name: building-pydantic-ai-agents
-description: >
-  Build AI agents with Pydantic AI — tools, capabilities, structured output, streaming, testing, and
-  multi-agent patterns. Use when the user mentions Pydantic AI, imports pydantic_ai, or asks to build
-  an AI agent, add tools/capabilities, stream output, define agents from YAML, or test agent behavior.
+description: Build AI agents with Pydantic AI — tools, capabilities, structured output, streaming, testing, and multi-agent patterns. Use when the user mentions Pydantic AI, imports pydantic_ai, or asks to build an AI agent, add tools/capabilities, stream output, define agents from YAML, or test agent behavior.
 license: MIT
 compatibility: Requires Python 3.10+
 metadata:
