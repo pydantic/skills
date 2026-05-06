@@ -92,8 +92,8 @@ FROM metrics WHERE metric_name = 'http.server.request.duration' LIMIT 20
    - **Direct REST API** — any language, `GET /v1/query`
 
 3. **Write the code.** Use the reference docs for detailed examples:
-   - Schema: `${CLAUDE_PLUGIN_ROOT}/skills/query/references/schema.md`
-   - Client usage: `${CLAUDE_PLUGIN_ROOT}/skills/query/references/client-usage.md`
+   - Schema: `${CLAUDE_PLUGIN_ROOT}/skills/logfire-query/references/schema.md`
+   - Client usage: `${CLAUDE_PLUGIN_ROOT}/skills/logfire-query/references/client-usage.md`
 
 4. **Store the read token securely.** Use environment variables (`LOGFIRE_READ_TOKEN`), never hardcode tokens. Add to `.env` and ensure `.env` is in `.gitignore`.
 

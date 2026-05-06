@@ -47,15 +47,15 @@ check_sync \
     skills/logfire-instrumentation/references/rust/patterns.md
 
 check_sync \
-    plugins/logfire/skills/query/SKILL.md \
+    plugins/logfire/skills/logfire-query/SKILL.md \
     skills/logfire-query/SKILL.md
 
 check_sync \
-    plugins/logfire/skills/query/references/schema.md \
+    plugins/logfire/skills/logfire-query/references/schema.md \
     skills/logfire-query/references/schema.md
 
 check_sync \
-    plugins/logfire/skills/query/references/client-usage.md \
+    plugins/logfire/skills/logfire-query/references/client-usage.md \
     skills/logfire-query/references/client-usage.md
 
 check_sync \
