@@ -1,0 +1,50 @@
+name: Sync skills from upstream
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout aggregator
+        uses: actions/checkout@v4
+
+      - name: Run sync script
+        run: bash scripts/sync-from-upstream.sh
+
+      - name: Build PR body
+        id: body
+        run: |
+          {
+            echo "Automated sync of skill content from upstream source repositories."
+            echo
+            echo "## Upstream sources"
+            echo
+            cat /tmp/sync-summary.md
+            echo
+            echo "Review the diff against the listed upstream commits before merging."
+          } > /tmp/pr-body.md
+          {
+            echo 'body<<PRBODYEOF'
+            cat /tmp/pr-body.md
+            echo 'PRBODYEOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create or update pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: autosync/upstream-skills
+          base: main
+          title: 'chore: sync skills from upstream'
+          body: ${{ steps.body.outputs.body }}
+          commit-message: 'chore: sync skills from upstream'
+          delete-branch: true
+          labels: autosync
