@@ -1,5 +1,5 @@
 ---
-name: query
+name: logfire-query
 description: Query Logfire telemetry data — traces, logs, spans, and metrics. Use this skill when the user asks to "query logfire", "search traces", "find logs", "query data", "search spans", "look up errors in logfire", "get metrics from logfire", "analyze telemetry", or wants to add Logfire querying capabilities to their code. Also use when the user wants to explore OpenTelemetry data, investigate production issues by querying, or build dashboards/reports from Logfire data.
 ---
 
@@ -69,7 +69,7 @@ Key columns for querying:
 | `service_name` | string | Service identifier |
 | `attributes` | JSON | Metric dimensions |
 
-Full schema: `${CLAUDE_PLUGIN_ROOT}/skills/query/references/schema.md`
+Full schema: [`references/schema.md`](./references/schema.md)
 
 ## SQL Syntax
 
@@ -156,7 +156,7 @@ Region variants:
 
 **Python clients**: `LogfireQueryClient` (sync), `AsyncLogfireQueryClient` (async), `logfire.db_api` (PEP 249 / pandas).
 
-Detailed examples: `${CLAUDE_PLUGIN_ROOT}/skills/query/references/client-usage.md`
+Detailed examples: [`references/client-usage.md`](./references/client-usage.md)
 
 ## Query Best Practices
 
