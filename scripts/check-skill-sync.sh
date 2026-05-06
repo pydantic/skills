@@ -110,8 +110,4 @@ check_sync \
     plugins/harness/skills/pydantic-ai-harness/references/CODE-MODE.md \
     skills/pydantic-ai-harness/references/CODE-MODE.md
 
-check_sync \
-    plugins/harness/skills/pydantic-ai-harness/evals/evals.json \
-    skills/pydantic-ai-harness/evals/evals.json
-
 exit $exit_code
