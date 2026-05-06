@@ -8,6 +8,7 @@ Official [Claude Code](https://claude.com/claude-code) plugin marketplace for th
 |--------|-------------|----------|
 | [logfire](plugins/logfire/) | Add Logfire observability to Python apps | `/instrument`, `/debug`, `/query` |
 | [ai](plugins/ai/) | Build AI agents with Pydantic AI | — |
+| [harness](plugins/harness/) | Add additional capabilities to AI agents such as CodeMode | — |
 
 ## Install
 
@@ -22,6 +23,7 @@ Then install a plugin:
 ```
 claude plugin install logfire@pydantic-skills
 claude plugin install ai@pydantic-skills
+claude plugin install harness@pydantic-skills
 ```
 
 ## Cross-Agent Skills
@@ -32,6 +34,7 @@ The `skills/` directory contains standalone SKILL.md files compatible with 30+ a
 |-------|-------------|
 | [logfire-instrumentation](skills/logfire-instrumentation/) | Add Logfire observability to Python, JS/TS, and Rust apps |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |
+| [pydantic-ai-harness](skills/pydantic-ai-harness/) | Extend Pydantic AI agents with additional capabilities: CodeMode |
 
 ## Development
 

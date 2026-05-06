@@ -1,0 +1,9 @@
+{
+  "name": "harness",
+  "description": "Add Pydantic AI Harness capabilities such as CodeMode for sandboxed tool orchestration in Pydantic AI agents",
+  "version": "0.1.0",
+  "author": {
+    "name": "Pydantic",
+    "email": "support@pydantic.dev"
+  }
+}
