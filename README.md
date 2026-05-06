@@ -6,7 +6,7 @@ Official [Claude Code](https://claude.com/claude-code) plugin marketplace for th
 
 | Plugin | Description | Commands |
 |--------|-------------|----------|
-| [logfire](plugins/logfire/) | Add Logfire observability to Python apps | `/instrument`, `/debug` |
+| [logfire](plugins/logfire/) | Add Logfire observability to Python apps | `/instrument`, `/debug`, `/query` |
 | [ai](plugins/ai/) | Build AI agents with Pydantic AI | — |
 
 ## Install

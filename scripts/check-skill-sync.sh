@@ -47,6 +47,18 @@ check_sync \
     skills/logfire-instrumentation/references/rust/patterns.md
 
 check_sync \
+    plugins/logfire/skills/logfire-query/SKILL.md \
+    skills/logfire-query/SKILL.md
+
+check_sync \
+    plugins/logfire/skills/logfire-query/references/schema.md \
+    skills/logfire-query/references/schema.md
+
+check_sync \
+    plugins/logfire/skills/logfire-query/references/client-usage.md \
+    skills/logfire-query/references/client-usage.md
+
+check_sync \
     plugins/ai/skills/building-pydantic-ai-agents/SKILL.md \
     skills/building-pydantic-ai-agents/SKILL.md
 

@@ -6,6 +6,7 @@ Add [Logfire](https://logfire.pydantic.dev/) observability to Python application
 
 - `/instrument` - detect frameworks and add Logfire instrumentation
 - `/debug` - investigate errors using Logfire traces via MCP
+- `/query` - query traces, logs, and metrics interactively or add query capabilities to code
 - SKILL.md with core Logfire patterns (configure, instrument, structured logging, AI/LLM instrumentation)
 - MCP server for querying Logfire data (`find_exceptions_in_file`, `arbitrary_query`)
 
