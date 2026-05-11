@@ -11,10 +11,11 @@ set -euo pipefail
 # Paths are hardcoded on purpose. If upstream layout changes, this script must
 # be updated explicitly so the change goes through review.
 
-WORKDIR="$(mktemp -d)"
+TMP_BASE="${RUNNER_TEMP:-${TMPDIR:-/tmp}}"
+WORKDIR="$(mktemp -d -p "$TMP_BASE")"
 trap 'rm -rf "$WORKDIR"' EXIT
 
-SUMMARY_FILE="${SUMMARY_FILE:-/tmp/sync-summary.md}"
+SUMMARY_FILE="${SUMMARY_FILE:-$TMP_BASE/sync-summary.md}"
 : > "$SUMMARY_FILE"
 
 sync_skill() {
@@ -40,6 +41,8 @@ sync_skill() {
         exit 1
     fi
 
+    # rsync --delete: plugin_dest and standalone_dest are mirrors of upstream;
+    # any local-only files there will be removed. See CONTRIBUTING.md.
     echo "Syncing $skill_name from $upstream_repo@${upstream_sha:0:7}"
     mkdir -p "$plugin_dest" "$standalone_dest"
     rsync -a --delete "$source_dir/" "$plugin_dest/"
