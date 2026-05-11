@@ -9,9 +9,16 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: sync-from-upstream
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      SUMMARY_FILE: ${{ runner.temp }}/sync-summary.md
+      PR_BODY_FILE: ${{ runner.temp }}/pr-body.md
     steps:
       - name: Checkout aggregator
         uses: actions/checkout@v4
@@ -27,17 +34,18 @@ jobs:
             echo
             echo "## Upstream sources"
             echo
-            cat /tmp/sync-summary.md
+            cat "$SUMMARY_FILE"
             echo
             echo "Review the diff against the listed upstream commits before merging."
-          } > /tmp/pr-body.md
+          } > "$PR_BODY_FILE"
           {
             echo 'body<<PRBODYEOF'
-            cat /tmp/pr-body.md
+            cat "$PR_BODY_FILE"
             echo 'PRBODYEOF'
           } >> "$GITHUB_OUTPUT"
 
       - name: Create or update pull request
+        id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -48,3 +56,13 @@ jobs:
           commit-message: 'chore: sync skills from upstream'
           delete-branch: true
           labels: autosync
+
+      # PRs opened by GITHUB_TOKEN don't trigger pull_request workflows
+      # (GitHub anti-recursion). workflow_dispatch is the documented exception,
+      # so we dispatch CI explicitly against the autosync branch's HEAD SHA;
+      # the resulting check_run attaches to the PR via SHA.
+      - name: Trigger CI on autosync PR
+        if: steps.cpr.outputs.pull-request-operation != 'none'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run ci.yml --ref autosync/upstream-skills --repo "$GITHUB_REPOSITORY"
