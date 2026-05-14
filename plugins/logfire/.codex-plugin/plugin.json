@@ -1,0 +1,44 @@
+{
+  "name": "logfire",
+  "version": "0.1.3",
+  "description": "Add Logfire observability to Python applications with auto-instrumentation for FastAPI, httpx, asyncpg, SQLAlchemy, and more",
+  "author": {
+    "name": "Pydantic",
+    "email": "support@pydantic.dev",
+    "url": "https://pydantic.dev"
+  },
+  "homepage": "https://github.com/pydantic/skills/tree/main/plugins/logfire",
+  "repository": "https://github.com/pydantic/skills",
+  "license": "MIT",
+  "keywords": [
+    "logfire",
+    "observability",
+    "tracing",
+    "monitoring",
+    "pydantic"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Logfire",
+    "shortDescription": "Investigate telemetry and add Logfire instrumentation.",
+    "longDescription": "Use Logfire skills and MCP tools to add instrumentation, query traces and logs, investigate production errors, and connect telemetry back to application code.",
+    "developerName": "Pydantic",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://logfire.pydantic.dev/",
+    "privacyPolicyURL": "https://pydantic.dev/privacy/",
+    "termsOfServiceURL": "https://pydantic.dev/terms/",
+    "defaultPrompt": [
+      "Help me add Logfire instrumentation to this app.",
+      "Investigate recent Logfire errors for this service.",
+      "Find slow endpoints in Logfire and suggest fixes."
+    ],
+    "composerIcon": "./assets/logfire-icon.svg",
+    "logo": "./assets/logfire-icon.svg",
+    "brandColor": "#E520E9"
+  }
+}

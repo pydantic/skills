@@ -1,6 +1,15 @@
 {
-  "logfire": {
-    "type": "http",
-    "url": "https://logfire-us.pydantic.dev/mcp"
+  "mcpServers": {
+    "logfire": {
+      "type": "http",
+      "url": "https://logfire-us.pydantic.dev/mcp"
+    },
+    "logfire-activity-render": {
+      "command": "python3",
+      "args": [
+        "./scripts/logfire_activity_mcp.py"
+      ],
+      "note": "Local render-tool POC for inline Logfire activity cards and sparklines."
+    }
   }
 }
