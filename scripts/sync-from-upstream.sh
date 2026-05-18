@@ -30,7 +30,8 @@ sync_skill() {
 
     if [ ! -d "$clone_dir" ]; then
         echo "Cloning $upstream_repo..."
-        git clone --depth=1 "https://github.com/$upstream_repo.git" "$clone_dir"
+        git -c http.https://github.com/.extraheader= clone --depth=1 \
+            "https://github.com/$upstream_repo.git" "$clone_dir"
     fi
 
     local upstream_sha
