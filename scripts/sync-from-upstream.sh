@@ -25,7 +25,8 @@ sync_skill() {
     local standalone_dest="$4"
     local skill_name="$5"
 
-    local clone_dir="$WORKDIR/$(echo "$upstream_repo" | tr '/' '_')"
+    local clone_dir
+    clone_dir="$WORKDIR/$(echo "$upstream_repo" | tr '/' '_')"
 
     if [ ! -d "$clone_dir" ]; then
         echo "Cloning $upstream_repo..."
@@ -48,7 +49,7 @@ sync_skill() {
     rsync -a --delete "$source_dir/" "$plugin_dest/"
     rsync -a --delete "$source_dir/" "$standalone_dest/"
 
-    printf -- '- **%s**: `%s@%s` (`%s`)\n' \
+    printf -- "- **%s**: \`%s@%s\` (\`%s\`)\n" \
         "$skill_name" "$upstream_repo" "${upstream_sha:0:7}" "$upstream_subpath" \
         >> "$SUMMARY_FILE"
 }
