@@ -57,7 +57,7 @@ Do not infer the project URL from `LOGFIRE_BASE_URL`, `LOGFIRE_URL`, exporter co
 
 If a Logfire project live view is already open in Codex Browser, use the JSON command bridge. This is the only supported in-app interaction model because it updates the view without a full document reload and shows the user that the agent is actively changing the page.
 
-Do not try to call `window.__logfireLiveView.apply(...)` from Codex Browser. Treat that page-window API as an internal implementation detail, not as an agent-accessible control surface.
+Do not try to use page-global JavaScript APIs from Codex Browser. The only supported agent control surface is the JSON command input.
 
 For Codex Browser / `iab`, fill the `Logfire live view agent command` input with a JSON patch such as `{"q":"level='error'","last":"1h","since":null,"until":null}` and press Enter. The hidden submit button is only a form target; do not skip this path just because the button is not visibly clickable.
 
