@@ -57,16 +57,6 @@ jobs:
 
           if [ -z "$(git status --porcelain)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-
-            if [ -n "$existing_pr" ]; then
-              gh pr close "$existing_pr" \
-                --repo "$GITHUB_REPOSITORY" \
-                --comment "Closing because upstream skills are already in sync with main." \
-                --delete-branch
-            elif git ls-remote --exit-code --heads origin "$PR_BRANCH" >/dev/null 2>&1; then
-              git push origin --delete "$PR_BRANCH"
-            fi
-
             exit 0
           fi
 
