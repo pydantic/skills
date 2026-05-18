@@ -25,7 +25,6 @@ jobs:
         run: bash scripts/sync-from-upstream.sh
 
       - name: Build PR body
-        id: body
         run: |
           {
             echo "Automated sync of skill content from upstream source repositories."
@@ -36,31 +35,76 @@ jobs:
             echo
             echo "Review the diff against the listed upstream commits before merging."
           } > "$RUNNER_TEMP/pr-body.md"
-          {
-            echo 'body<<PRBODYEOF'
-            cat "$RUNNER_TEMP/pr-body.md"
-            echo 'PRBODYEOF'
-          } >> "$GITHUB_OUTPUT"
 
       - name: Create or update pull request
-        id: cpr
-        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c  # v6.1.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: autosync/upstream-skills
-          base: main
-          title: 'chore: sync skills from upstream'
-          body: ${{ steps.body.outputs.body }}
-          commit-message: 'chore: sync skills from upstream'
-          delete-branch: true
-          labels: autosync
+        id: sync-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BRANCH: autosync/upstream-skills
+          PR_TITLE: 'chore: sync skills from upstream'
+        run: |
+          set -euo pipefail
+
+          existing_pr="$(
+            gh pr list \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$PR_BRANCH" \
+              --base main \
+              --state open \
+              --json number \
+              --jq '.[0].number // empty'
+          )"
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+
+            if [ -n "$existing_pr" ]; then
+              gh pr close "$existing_pr" \
+                --repo "$GITHUB_REPOSITORY" \
+                --comment "Closing because upstream skills are already in sync with main." \
+                --delete-branch
+            elif git ls-remote --exit-code --heads origin "$PR_BRANCH" >/dev/null 2>&1; then
+              git push origin --delete "$PR_BRANCH"
+            fi
+
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$PR_BRANCH"
+          git add -A
+          git commit -m "chore: sync skills from upstream"
+
+          remote_sha="$(git ls-remote --heads origin "$PR_BRANCH" | awk '{print $1}')"
+          if [ -n "$remote_sha" ]; then
+            git push --force-with-lease="refs/heads/$PR_BRANCH:$remote_sha" origin "HEAD:$PR_BRANCH"
+          else
+            git push origin "HEAD:$PR_BRANCH"
+          fi
+
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$PR_TITLE" \
+              --body-file "$RUNNER_TEMP/pr-body.md"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$PR_BRANCH" \
+              --title "$PR_TITLE" \
+              --body-file "$RUNNER_TEMP/pr-body.md"
+          fi
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
 
       # PRs opened by GITHUB_TOKEN don't trigger pull_request workflows
       # (GitHub anti-recursion). workflow_dispatch is the documented exception,
       # so we dispatch CI explicitly against the autosync branch's HEAD SHA;
       # the resulting check_run attaches to the PR via SHA.
       - name: Trigger CI on autosync PR
-        if: steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated'
+        if: steps.sync-pr.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run ci.yml --ref autosync/upstream-skills --repo "$GITHUB_REPOSITORY"
