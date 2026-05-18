@@ -12,7 +12,7 @@ set -euo pipefail
 # be updated explicitly so the change goes through review.
 
 TMP_BASE="${RUNNER_TEMP:-${TMPDIR:-/tmp}}"
-WORKDIR="$(mktemp -d -p "$TMP_BASE")"
+WORKDIR="$(mktemp -d "${TMP_BASE%/}/skill-sync.XXXXXX")"
 trap 'rm -rf "$WORKDIR"' EXIT
 
 SUMMARY_FILE="${SUMMARY_FILE:-$TMP_BASE/sync-summary.md}"
