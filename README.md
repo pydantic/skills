@@ -1,12 +1,12 @@
 # Pydantic Skills
 
-Official [Claude Code](https://claude.com/claude-code) plugin marketplace for the Pydantic ecosystem, plus a local Codex plugin marketplace for Pydantic tools.
+Official [Claude Code](https://claude.com/claude-code) plugin marketplace for the Pydantic ecosystem, plus local plugin marketplaces for [Codex](https://openai.com/codex) and [Cursor](https://cursor.com).
 
 ## Plugins
 
 | Plugin | Hosts | Description | Capabilities |
 |--------|-------|-------------|--------------|
-| [logfire](plugins/logfire/) | Claude Code, Codex | Add Logfire observability and query/debug telemetry | Claude commands `/instrument`, `/debug`, `/query`; Codex skills and MCP tools |
+| [logfire](plugins/logfire/) | Claude Code, Codex, Cursor | Add Logfire observability and query/debug telemetry | Claude commands `/instrument`, `/debug`, `/query`; Codex/Cursor skills and MCP tools |
 | [codex-logfire-exporter](plugins/codex-logfire-exporter/) | Codex | Export Codex activity traces to Logfire | Codex lifecycle hooks |
 | [ai](plugins/ai/) | Claude Code | Build AI agents with Pydantic AI | Pydantic AI skill docs |
 
@@ -35,7 +35,7 @@ codex plugin marketplace add /absolute/path/to/pydantic/skills
 
 Then open Codex's plugin UI and enable the plugins you want from the **Pydantic** marketplace:
 
-- **Logfire** - installs Logfire skills, the hosted Logfire MCP server, and a local render MCP server for activity widgets.
+- **Logfire** - installs Logfire skills and the hosted Logfire MCP server.
 - **Codex Logfire Exporter** - installs Codex lifecycle hooks that export completed Codex turns and tool calls to Logfire.
 
 After enabling **Codex Logfire Exporter**, restart Codex and run `/hooks` if Codex asks you to review or trust the new hooks.
@@ -48,6 +48,24 @@ For local development after editing a Codex plugin, reload the plugin cache:
 ```
 
 A new Codex conversation may be required for plugin metadata, skills, MCP servers, icons, or hooks to refresh.
+
+## Install In Cursor
+
+For local development, load the plugin from Cursor's local plugin directory:
+
+```bash
+ln -s /absolute/path/to/pydantic/skills/plugins/logfire ~/.cursor/plugins/local/logfire
+```
+
+Then restart Cursor or run **Developer: Reload Window**. The Cursor plugin metadata lives in `.cursor-plugin/plugin.json` and configures:
+
+- display name **Logfire**
+- Logfire skills for instrumentation, querying, and UI-opening workflows
+- hosted Logfire MCP server from `mcp.json`
+
+EU users can point `plugins/logfire/mcp.json` at `https://logfire-eu.pydantic.dev/mcp` instead of the default US endpoint.
+
+The Logfire MCP server requires normal Logfire authentication, such as `logfire auth` or a suitable `LOGFIRE_TOKEN`.
 
 ## Cross-Agent Skills
 
@@ -68,12 +86,16 @@ Test a plugin locally:
 claude --plugin-dir ./plugins/logfire
 ```
 
-The Codex metadata lives alongside the Claude metadata:
+Host-specific metadata lives alongside the shared plugin content:
 
 ```text
+.claude-plugin/marketplace.json
+.cursor-plugin/marketplace.json
 .agents/plugins/marketplace.json
+plugins/logfire/.claude-plugin/plugin.json
+plugins/logfire/.cursor-plugin/plugin.json
 plugins/logfire/.codex-plugin/plugin.json
 plugins/codex-logfire-exporter/.codex-plugin/plugin.json
 ```
 
-The Codex marketplace currently lists `logfire` and `codex-logfire-exporter`; `ai` remains a Claude plugin plus a standalone cross-agent skill.
+The Cursor and Codex marketplaces currently list `logfire`; Codex also lists `codex-logfire-exporter`. The `ai` plugin remains Claude-only plus a standalone cross-agent skill.

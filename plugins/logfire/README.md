@@ -58,6 +58,20 @@ For local development after changing this plugin, refresh the Codex plugin cache
 
 A new Codex conversation may be required for updated skills, MCP servers, icons, or metadata to load.
 
+## Install In Cursor
+
+For local development, load the plugin from Cursor's local plugin directory:
+
+```bash
+ln -s /absolute/path/to/pydantic/skills/plugins/logfire ~/.cursor/plugins/local/logfire
+```
+
+Then restart Cursor or run **Developer: Reload Window**. The Cursor plugin metadata lives in `.cursor-plugin/plugin.json` and configures:
+
+- display name **Logfire**
+- Logfire skills for instrumentation, querying, and UI-opening workflows
+- hosted Logfire MCP server from `mcp.json`
+
 ## MCP
 
 The Logfire MCP server is configured automatically when you install the plugin (US region). EU users can switch by running:
@@ -66,6 +80,6 @@ The Logfire MCP server is configured automatically when you install the plugin (
 claude mcp add logfire --transport http https://logfire-eu.pydantic.dev/mcp
 ```
 
-In Codex, `.mcp.json` configures the `logfire` MCP server.
+In Codex, `.mcp.json` configures the `logfire` MCP server. In Cursor, `mcp.json` configures the same hosted server.
 
 The Logfire MCP server requires normal Logfire authentication, such as `logfire auth` or a suitable `LOGFIRE_TOKEN`.

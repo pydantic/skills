@@ -1,0 +1,18 @@
+{
+  "$schema": "https://cursor.com/schemas/cursor-plugin/marketplace.json",
+  "name": "pydantic-skills",
+  "owner": {
+    "name": "Pydantic",
+    "email": "support@pydantic.dev"
+  },
+  "metadata": {
+    "description": "Pydantic agent skills and plugins for Logfire observability and Pydantic AI development."
+  },
+  "plugins": [
+    {
+      "name": "logfire",
+      "source": "./plugins/logfire",
+      "description": "Add Logfire observability, query traces and logs, and open Logfire UI views from Cursor."
+    }
+  ]
+}

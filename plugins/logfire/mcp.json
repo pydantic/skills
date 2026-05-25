@@ -1,0 +1,10 @@
+{
+  "$schema": "https://cursor.com/schemas/mcp.json",
+  "mcpServers": {
+    "logfire": {
+      "type": "http",
+      "url": "https://logfire-us.pydantic.dev/mcp",
+      "description": "Hosted Logfire MCP server for querying traces, logs, spans, and project links."
+    }
+  }
+}
