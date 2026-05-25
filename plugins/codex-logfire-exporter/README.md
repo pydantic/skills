@@ -121,7 +121,7 @@ which lets Logfire show Codex turns in the generic LLM conversation/details pane
 ## Relationship To The Logfire Plugin
 
 Install `codex-logfire-exporter` when you want telemetry about Codex itself. Install `logfire` when you want Codex to
-help instrument applications, query existing Logfire data, open Logfire UI views, or render local activity reports.
+help instrument applications, query existing Logfire data, or open Logfire UI views.
 The two plugins can be enabled together.
 
 ## Troubleshooting
