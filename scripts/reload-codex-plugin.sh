@@ -64,10 +64,10 @@ echo "Cache:  $target_dir"
 if [ "$plugin" = "logfire" ]; then
     query_marker="$target_dir/skills/logfire-query/SKILL.md"
     ui_marker="$target_dir/skills/logfire-ui/SKILL.md"
-    if rg -q "Logfire UI Live View" "$query_marker" && rg -q "Do not query telemetry first" "$ui_marker"; then
-        echo "Verified: Logfire UI Live View workflow and logfire-ui skill are present."
+    if rg -q "Critical Routing: One Workflow Per Request" "$query_marker" && rg -q "Do not query telemetry first" "$ui_marker"; then
+        echo "Verified: Logfire query/UI routing contract is present."
     else
-        echo "Warning: live-view workflow marker not found in $query_marker or $ui_marker" >&2
+        echo "Warning: Logfire query/UI routing marker not found in $query_marker or $ui_marker" >&2
         exit 1
     fi
 fi

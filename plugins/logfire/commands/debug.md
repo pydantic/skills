@@ -7,6 +7,8 @@ description: Use Logfire traces to investigate errors and debug production issue
 
 Use the Logfire MCP server to investigate errors and debug issues using real trace data.
 
+If the user only asks to open, view in browser, use the live view, open Explore, or get a Logfire link, use `logfire-ui` instead of this query-first debugging workflow. For ambiguous prompts such as "show recent errors", ask whether they want UI or query analysis first.
+
 ## Prerequisites
 
 The Logfire MCP server must be connected (this plugin configures it automatically). The user must have run `logfire auth` or set `LOGFIRE_TOKEN` for their project.
@@ -20,7 +22,7 @@ The Logfire MCP server must be connected (this plugin configures it automaticall
 3. If a specific exception is relevant, use `arbitrary_query` to dig deeper into the surrounding trace context.
 4. Suggest a fix based on the exception details and trace data.
 
-### When the user asks about general issues or wants to explore
+### When the user asks about general issues or wants debugging analysis
 
 1. Call `get_logfire_records_schema` to understand the available columns and tables.
 2. Use `arbitrary_query` to run SQL queries against the OpenTelemetry data. Common queries:
@@ -29,9 +31,9 @@ The Logfire MCP server must be connected (this plugin configures it automaticall
    - Specific endpoint issues: `SELECT * FROM records WHERE attributes->>'http.route' = '/api/users' AND level = 'error' ORDER BY start_timestamp DESC LIMIT 10`
 3. Present findings and suggest fixes.
 
-### When the user wants to share a trace
+### When analysis identifies a trace the user wants to share
 
-1. Use the `logfire_link` MCP tool to generate a shareable URL for a specific trace.
+1. Use the configured Logfire link tool, such as `project_logfire_link(trace_id=trace_id, project=project)`, to generate a shareable URL for that specific trace.
 2. Share the link with the user.
 
 ## Output format
@@ -40,4 +42,4 @@ When presenting debug findings:
 - Lead with the most likely root cause
 - Include relevant trace/span data as evidence
 - Suggest concrete code changes to fix the issue
-- Offer a Logfire UI link if the user wants to explore further
+- Provide a Logfire UI link only when the user asks for one or when linking a specific trace used as evidence
