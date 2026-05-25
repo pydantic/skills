@@ -56,6 +56,8 @@ The `skills/` directory contains standalone SKILL.md files compatible with 30+ a
 | Skill | Description |
 |-------|-------------|
 | [logfire-instrumentation](skills/logfire-instrumentation/) | Add Logfire observability to Python, JS/TS, and Rust apps |
+| [logfire-query](skills/logfire-query/) | Query and analyze Logfire traces, logs, spans, metrics, and activity data |
+| [logfire-ui](skills/logfire-ui/) | Open Logfire project pages, live views, traces, and Explore filters |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |
 
 ## Development
