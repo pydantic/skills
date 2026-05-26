@@ -27,10 +27,10 @@ claude plugin install ai@pydantic-skills
 
 ## Install In Codex
 
-The Codex marketplace metadata is local-only today. From this repository root, add the marketplace with an absolute path:
+Add the published Pydantic marketplace to Codex:
 
 ```bash
-codex plugin marketplace add /absolute/path/to/pydantic/skills
+codex plugin marketplace add pydantic/skills
 ```
 
 Then open Codex's plugin UI and enable the plugins you want from the **Pydantic** marketplace:
@@ -64,10 +64,12 @@ Start a new Codex conversation after switching so the MCP tools reload.
 
 ## Install In Cursor
 
-For local development, load the plugin from Cursor's local plugin directory:
+Install the Logfire plugin from the published [pydantic/skills](https://github.com/pydantic/skills) repository:
 
 ```bash
-ln -s /absolute/path/to/pydantic/skills/plugins/logfire ~/.cursor/plugins/local/logfire
+git clone https://github.com/pydantic/skills.git
+mkdir -p ~/.cursor/plugins/local
+cp -R skills/plugins/logfire ~/.cursor/plugins/local/logfire
 ```
 
 Then restart Cursor or run **Developer: Reload Window**. The Cursor plugin metadata lives in `.cursor-plugin/plugin.json` and configures:
@@ -95,6 +97,12 @@ Test a plugin locally:
 
 ```bash
 claude --plugin-dir ./plugins/logfire
+```
+
+While developing this repository, symlink the Cursor plugin instead of copying it:
+
+```bash
+ln -s /absolute/path/to/pydantic/skills/plugins/logfire ~/.cursor/plugins/local/logfire
 ```
 
 Host-specific metadata lives alongside the shared plugin content:

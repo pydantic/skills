@@ -16,5 +16,5 @@ claude plugin install ai@pydantic-skills
 
 ## Codex
 
-`ai` is not currently listed as a Codex plugin in the local Pydantic marketplace. Codex users can still use the
+`ai` is not currently listed as a Codex plugin in the Pydantic marketplace. Codex users can still use the
 standalone cross-agent skill at `skills/building-pydantic-ai-agents/`.

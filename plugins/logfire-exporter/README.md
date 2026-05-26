@@ -31,12 +31,12 @@ The installed hooks capture Codex lifecycle events:
 | `PostToolUse` | Store tool-call results so they can be exported as child spans |
 | `Stop` | Export the completed turn and its tool spans to Logfire |
 
-## Install Locally
+## Install In Codex
 
-From the repository root:
+Add the published Pydantic marketplace to Codex:
 
 ```bash
-codex plugin marketplace add /absolute/path/to/pydantic/skills
+codex plugin marketplace add pydantic/skills
 ```
 
 Then enable **Logfire Exporter** from the **Pydantic** marketplace in the Codex plugin UI.

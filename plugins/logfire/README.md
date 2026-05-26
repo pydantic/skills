@@ -35,10 +35,10 @@ The Claude plugin provides `/instrument`, `/debug`, `/query`, and the Logfire MC
 
 ## Install In Codex
 
-From the repository root, add the local Pydantic marketplace:
+Add the published Pydantic marketplace to Codex:
 
 ```bash
-codex plugin marketplace add /absolute/path/to/pydantic/skills
+codex plugin marketplace add pydantic/skills
 ```
 
 Then enable **Logfire** from the Codex plugin UI. The Codex plugin metadata lives in `.codex-plugin/plugin.json` and configures:
@@ -60,10 +60,12 @@ A new Codex conversation may be required for updated skills, MCP servers, icons,
 
 ## Install In Cursor
 
-For local development, load the plugin from Cursor's local plugin directory:
+Install the Logfire plugin from the published [pydantic/skills](https://github.com/pydantic/skills) repository:
 
 ```bash
-ln -s /absolute/path/to/pydantic/skills/plugins/logfire ~/.cursor/plugins/local/logfire
+git clone https://github.com/pydantic/skills.git
+mkdir -p ~/.cursor/plugins/local
+cp -R skills/plugins/logfire ~/.cursor/plugins/local/logfire
 ```
 
 Then restart Cursor or run **Developer: Reload Window**. The Cursor plugin metadata lives in `.cursor-plugin/plugin.json` and configures:
