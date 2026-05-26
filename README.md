@@ -42,15 +42,6 @@ Configure **Logfire Exporter** with a Logfire write token in your environment or
 `${XDG_CONFIG_HOME:-~/.config}/logfire-exporter/config.env`. Restart Codex after configuration, and run `/hooks` if
 Codex asks you to review or trust the new hooks.
 
-For local development after editing a Codex plugin, reload the plugin cache:
-
-```bash
-./scripts/reload-codex-plugin.sh logfire
-./scripts/reload-codex-plugin.sh logfire-exporter
-```
-
-A new Codex conversation may be required for plugin metadata, skills, MCP servers, icons, or hooks to refresh.
-
 To use the EU Logfire MCP endpoint in Codex without editing plugin files, replace the MCP entry and re-authenticate:
 
 ```bash
@@ -72,7 +63,7 @@ mkdir -p ~/.cursor/plugins/local
 cp -R skills/plugins/logfire ~/.cursor/plugins/local/logfire
 ```
 
-Then restart Cursor or run **Developer: Reload Window**. The Cursor plugin metadata lives in `.cursor-plugin/plugin.json` and configures:
+Then restart Cursor or run **Developer: Reload Window**. The plugin configures:
 
 - display name **Logfire**
 - Logfire skills for instrumentation, querying, and UI-opening workflows
@@ -90,31 +81,3 @@ The `skills/` directory contains standalone SKILL.md files compatible with 30+ a
 | [logfire-query](skills/logfire-query/)                             | Query and analyze Logfire traces, logs, spans, metrics, and activity data           |
 | [logfire-ui](skills/logfire-ui/)                                   | Open Logfire project pages, live views, traces, and Explore filters                 |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |
-
-## Development
-
-Test a plugin locally:
-
-```bash
-claude --plugin-dir ./plugins/logfire
-```
-
-While developing this repository, symlink the Cursor plugin instead of copying it:
-
-```bash
-ln -s /absolute/path/to/pydantic/skills/plugins/logfire ~/.cursor/plugins/local/logfire
-```
-
-Host-specific metadata lives alongside the shared plugin content:
-
-```text
-.claude-plugin/marketplace.json
-.cursor-plugin/marketplace.json
-.agents/plugins/marketplace.json
-plugins/logfire/.claude-plugin/plugin.json
-plugins/logfire/.cursor-plugin/plugin.json
-plugins/logfire/.codex-plugin/plugin.json
-plugins/logfire-exporter/.codex-plugin/plugin.json
-```
-
-The Cursor and Codex marketplaces currently list `logfire`; Codex also lists `logfire-exporter`. The `ai` plugin remains Claude-only plus a standalone cross-agent skill.

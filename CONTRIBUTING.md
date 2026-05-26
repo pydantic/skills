@@ -24,3 +24,40 @@ A daily workflow (`.github/workflows/sync-from-upstream.yml`) clones each upstre
 ## Manually triggering a sync
 
 Actions → **Sync skills from upstream** → Run workflow.
+
+## Plugin development
+
+Test a Claude Code plugin locally:
+
+```bash
+claude --plugin-dir ./plugins/logfire
+```
+
+After editing a Codex plugin, reload the plugin cache:
+
+```bash
+./scripts/reload-codex-plugin.sh logfire
+./scripts/reload-codex-plugin.sh logfire-exporter
+```
+
+A new Codex conversation may be required for plugin metadata, skills, MCP servers, icons, or hooks to refresh.
+
+While developing the Cursor plugin, symlink the checkout instead of copying it:
+
+```bash
+ln -s /absolute/path/to/pydantic/skills/plugins/logfire ~/.cursor/plugins/local/logfire
+```
+
+Host-specific metadata lives alongside the shared plugin content:
+
+```text
+.claude-plugin/marketplace.json
+.cursor-plugin/marketplace.json
+.agents/plugins/marketplace.json
+plugins/logfire/.claude-plugin/plugin.json
+plugins/logfire/.cursor-plugin/plugin.json
+plugins/logfire/.codex-plugin/plugin.json
+plugins/logfire-exporter/.codex-plugin/plugin.json
+```
+
+The Cursor and Codex marketplaces currently list `logfire`; Codex also lists `logfire-exporter`. The `ai` plugin remains Claude-only plus a standalone cross-agent skill.
