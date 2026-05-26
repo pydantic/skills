@@ -74,7 +74,20 @@ Then restart Cursor or run **Developer: Reload Window**. The Cursor plugin metad
 
 ## MCP
 
-The Logfire MCP server is configured automatically when you install the plugin (US region). EU users can switch by running:
+The Logfire MCP server is configured automatically when you install the plugin (US region).
+
+Codex users can switch to the EU endpoint without editing plugin files by replacing the MCP entry and re-authenticating:
+
+```bash
+codex mcp remove logfire
+codex mcp add logfire --url https://logfire-eu.pydantic.dev/mcp
+codex mcp login logfire
+codex mcp get logfire
+```
+
+Start a new Codex conversation after switching so the MCP tools reload.
+
+Claude Code users can switch by running:
 
 ```
 claude mcp add logfire --transport http https://logfire-eu.pydantic.dev/mcp

@@ -1,11 +1,11 @@
-# Codex Logfire Exporter
+# Logfire Exporter
 
 Codex hook plugin that exports completed Codex turns and tool calls to Logfire using direct OTLP HTTP/JSON.
 
 This plugin is separate from the main Logfire plugin:
 
 - `logfire` lets Codex query Logfire data and help instrument applications.
-- `codex-logfire-exporter` sends Codex's own activity telemetry to Logfire.
+- `logfire-exporter` sends Codex's own activity telemetry to Logfire.
 
 The exporter deliberately does not emit a long-lived session root span. Each completed `Stop` hook exports one
 root-level turn span in a deterministic trace derived from the Codex conversation/thread identity; tool spans are
@@ -15,7 +15,7 @@ children of that turn span.
 
 The Codex plugin metadata lives in `.codex-plugin/plugin.json` and configures:
 
-- display name **Codex Logfire Exporter**
+- display name **Logfire Exporter**
 - category **Coding**
 - capabilities **Read** and **Write**
 - transparent SVG icon and Logfire pink brand color
@@ -39,18 +39,19 @@ From the repository root:
 codex plugin marketplace add /absolute/path/to/pydantic/skills
 ```
 
-Then enable **Codex Logfire Exporter** from the **Pydantic** marketplace in the Codex plugin UI.
+Then enable **Logfire Exporter** from the **Pydantic** marketplace in the Codex plugin UI.
 
 After enabling the plugin:
 
-1. Restart Codex so hook configuration is loaded.
-2. Run `/hooks` if Codex asks you to review or trust the plugin hooks.
-3. Complete a new Codex turn; the exporter sends telemetry on the `Stop` hook.
+1. Configure `LOGFIRE_TOKEN` in your shell environment or in `${XDG_CONFIG_HOME:-~/.config}/logfire-exporter/config.env`.
+2. Restart Codex so hook configuration is loaded.
+3. Run `/hooks` if Codex asks you to review or trust the plugin hooks.
+4. Complete a new Codex turn; the exporter sends telemetry on the `Stop` hook.
 
 For local development after changing the plugin:
 
 ```bash
-./scripts/reload-codex-plugin.sh codex-logfire-exporter
+./scripts/reload-codex-plugin.sh logfire-exporter
 ```
 
 A new Codex conversation may be required for updated hooks, icons, or metadata to load.
@@ -60,26 +61,28 @@ A new Codex conversation may be required for updated hooks, icons, or metadata t
 Configure credentials in:
 
 ```text
-${XDG_CONFIG_HOME:-~/.config}/codex-logfire-exporter/config.env
+${XDG_CONFIG_HOME:-~/.config}/logfire-exporter/config.env
 ```
 
-Example:
+The minimal config is:
 
 ```dotenv
 LOGFIRE_TOKEN=<your Logfire write token>
-LOGFIRE_URL=https://logfire-api.pydantic.dev
 ```
+
+`LOGFIRE_BASE_URL` defaults to `https://logfire-api.pydantic.dev`. Set it only for another Logfire region or a local
+Logfire instance. `LOGFIRE_URL` is still accepted as a compatibility alias, but `LOGFIRE_BASE_URL` takes precedence.
 
 For a local Logfire instance:
 
 ```dotenv
-LOGFIRE_TOKEN=test-e2e-write-token
-LOGFIRE_URL=http://localhost:3000
+LOGFIRE_BASE_URL=http://localhost:3000/
+LOGFIRE_TOKEN=pylf_v1_local_zHhcVLNlKY921fl9jkN7vZ6P4gkL9w7h8HVG609xK5ym
 CODEX_LOGFIRE_DEBUG=true
 ```
 
-For compatibility with the original local proof of concept, the exporter will also read
-`${XDG_CONFIG_HOME:-~/.config}/codex-logfire-plugin/config.env` when the new config file does not exist.
+For compatibility with local pre-release testing, the exporter will also read old config paths when the new config
+file does not exist.
 
 The plugin sends `Authorization: <LOGFIRE_TOKEN>`, matching Logfire's direct OTLP client configuration. If you need a
 scheme-prefixed header, set `CODEX_LOGFIRE_AUTH_SCHEME=Bearer`.
@@ -120,7 +123,7 @@ which lets Logfire show Codex turns in the generic LLM conversation/details pane
 
 ## Relationship To The Logfire Plugin
 
-Install `codex-logfire-exporter` when you want telemetry about Codex itself. Install `logfire` when you want Codex to
+Install `logfire-exporter` when you want telemetry about Codex itself. Install `logfire` when you want Codex to
 help instrument applications, query existing Logfire data, or open Logfire UI views.
 The two plugins can be enabled together.
 
@@ -129,13 +132,13 @@ The two plugins can be enabled together.
 Debug logs are written under:
 
 ```text
-${XDG_STATE_HOME:-~/.local/state}/codex-logfire-exporter/logs/
+${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/logs/
 ```
 
 If no spans or plugin logs appear after a completed Codex turn, check the Codex TUI log:
 
 ```bash
-rg -n "codex-logfire|failed to load plugin" ~/.codex/log/codex-tui.log
+rg -n "logfire-exporter|failed to load plugin" ~/.codex/log/codex-tui.log
 ```
 
 ## Test
@@ -143,5 +146,5 @@ rg -n "codex-logfire|failed to load plugin" ~/.codex/log/codex-tui.log
 From the repository root:
 
 ```bash
-python3 -m unittest discover -s plugins/codex-logfire-exporter/tests
+python3 -m unittest discover -s plugins/logfire-exporter/tests
 ```

@@ -1,5 +1,5 @@
 {
-  "name": "codex-logfire-exporter",
+  "name": "logfire-exporter",
   "version": "0.1.0",
   "description": "Export Codex activity traces to Logfire via direct OTLP spans.",
   "author": {
@@ -7,7 +7,7 @@
     "email": "support@pydantic.dev",
     "url": "https://pydantic.dev"
   },
-  "homepage": "https://github.com/pydantic/skills/tree/main/plugins/codex-logfire-exporter",
+  "homepage": "https://github.com/pydantic/skills/tree/main/plugins/logfire-exporter",
   "repository": "https://github.com/pydantic/skills",
   "license": "MIT",
   "keywords": [
@@ -20,14 +20,14 @@
     "hooks",
     "tracing"
   ],
-  "hooks": "./hooks/hooks.json",
   "interface": {
-    "displayName": "Codex Logfire Exporter",
+    "displayName": "Logfire Exporter",
     "shortDescription": "Export Codex activity traces to Logfire.",
     "longDescription": "Captures Codex lifecycle hook events, stores lightweight turn fragments locally, and exports completed turns and tool calls to Logfire as direct OTLP spans.",
     "developerName": "Pydantic",
     "category": "Coding",
     "capabilities": [
+      "Interactive",
       "Read",
       "Write"
     ],
@@ -35,12 +35,12 @@
     "privacyPolicyURL": "https://pydantic.dev/privacy/",
     "termsOfServiceURL": "https://pydantic.dev/terms/",
     "defaultPrompt": [
-      "Check whether Codex Logfire Exporter hooks are installed.",
-      "Explain the Codex Logfire Exporter trace design.",
-      "Help me inspect Codex hook telemetry."
+      "Check whether Logfire Exporter hooks are installed.",
+      "Explain the Logfire Exporter trace design.",
+      "Help me inspect Codex hook telemetry in Logfire."
     ],
-    "composerIcon": "./assets/codex-logfire-exporter-icon.svg",
-    "logo": "./assets/codex-logfire-exporter-icon.svg",
+    "composerIcon": "./assets/logfire-exporter-icon.svg",
+    "logo": "./assets/logfire-exporter-icon.svg",
     "brandColor": "#E520E9"
   }
 }

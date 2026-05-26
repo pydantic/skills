@@ -1,4 +1,4 @@
-# Codex Logfire Exporter Plan
+# Logfire Exporter Plan
 
 ## Goal
 
@@ -32,7 +32,7 @@ it is not always the right identity for the whole visible conversation.
 Use a Codex conversation identity to derive a stable OpenTelemetry trace ID:
 
 ```text
-trace_id = sha256("codex-logfire-exporter:trace:v1\0" + conversation_id)[:16]
+trace_id = sha256("logfire-exporter:trace:v1\0" + conversation_id)[:16]
 ```
 
 The resulting 16 bytes are encoded as 32 lowercase hex characters. If the result is all zeroes, replace it with a fixed non-zero fallback derived from the same input plus `":nonzero"`.
@@ -71,13 +71,13 @@ Configuration:
 
 ```text
 LOGFIRE_TOKEN=<write token>
-LOGFIRE_URL=https://logfire-api.pydantic.dev
+LOGFIRE_BASE_URL=https://logfire-api.pydantic.dev
 ```
 
 The trace export endpoint is:
 
 ```text
-{LOGFIRE_URL}/v1/traces
+{LOGFIRE_BASE_URL}/v1/traces
 ```
 
 Use `Authorization: <LOGFIRE_TOKEN>` by default, matching Logfire's direct OTLP client configuration. Allow `CODEX_LOGFIRE_AUTH_SCHEME=Bearer` for collector-style setups that need a scheme-prefixed header.
@@ -159,7 +159,7 @@ Each completed Codex turn exports one root-level span in the session trace.
 
 ```text
 trace_id: deterministic from selected conversation_id
-span_id: sha256("codex-logfire-exporter:turn-span:v1\0" + session_id + "\0" + turn_id)[:8]
+span_id: sha256("logfire-exporter:turn-span:v1\0" + session_id + "\0" + turn_id)[:8]
 parent_span_id: omitted
 name: "codex turn"
 start_time_unix_nano: first timestamp for the turn
@@ -197,8 +197,8 @@ codex.response.length = <assistant character count, when known>
 Important resource attributes:
 
 ```text
-service.name = "codex-logfire-exporter"
-telemetry.sdk.name = "codex-logfire-exporter"
+service.name = "logfire-exporter"
+telemetry.sdk.name = "logfire-exporter"
 telemetry.sdk.language = "python"
 ```
 
@@ -223,7 +223,7 @@ Each captured tool call exports a child span under the turn span.
 
 ```text
 trace_id: same deterministic conversation trace ID
-span_id: sha256("codex-logfire-exporter:tool-span:v1\0" + session_id + "\0" + turn_id + "\0" + tool_key)[:8]
+span_id: sha256("logfire-exporter:tool-span:v1\0" + session_id + "\0" + turn_id + "\0" + tool_key)[:8]
 parent_span_id: turn span ID
 name: "codex tool <tool_name>"
 start_time_unix_nano: completed_at - duration, when duration is available; otherwise completed_at
@@ -254,7 +254,7 @@ error.type = <tool error type, when known>
 Store hook state under:
 
 ```text
-${XDG_STATE_HOME:-~/.local/state}/codex-logfire-exporter
+${XDG_STATE_HOME:-~/.local/state}/logfire-exporter
 ```
 
 Use separate directories for:

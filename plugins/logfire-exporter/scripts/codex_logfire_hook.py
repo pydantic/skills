@@ -22,9 +22,9 @@ from typing import Any
 
 
 PLUGIN_VERSION = "0.1.0"
-SERVICE_NAME = "codex-logfire-exporter"
-STATE_DIR_NAME = "codex-logfire-exporter"
-LEGACY_STATE_DIR_NAME = "codex-logfire-plugin"
+SERVICE_NAME = "logfire-exporter"
+STATE_DIR_NAME = "logfire-exporter"
+LEGACY_STATE_DIR_NAMES = ("codex-logfire-exporter", "codex-logfire-plugin")
 DEFAULT_LOGFIRE_URL = "https://logfire-api.pydantic.dev"
 MAX_TRANSCRIPT_BYTES = 20 * 1024 * 1024
 STALE_AFTER_SECONDS = 24 * 60 * 60
@@ -334,6 +334,7 @@ def build_turn_span(
         "codex.source": turn.get("source"),
         "codex.model": turn.get("model"),
         "codex.transcript_path": turn.get("transcript_path"),
+        "codex.logfire_project": os.getenv("CODEX_LOGFIRE_PROJECT"),
         "codex.stop_hook_active": bool(turn.get("stop_hook_active")),
         "codex.prompt.length": turn.get("prompt_length"),
         "codex.response.length": turn.get("last_assistant_message_length"),
@@ -558,6 +559,7 @@ def otlp_traces_endpoint() -> str:
     raw = (
         os.getenv("CODEX_LOGFIRE_TRACES_ENDPOINT")
         or os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT")
+        or os.getenv("LOGFIRE_BASE_URL")
         or os.getenv("LOGFIRE_URL")
         or os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
         or DEFAULT_LOGFIRE_URL
@@ -976,8 +978,13 @@ def config_env_path() -> Path:
     else:
         config_home = Path.home() / ".config"
     path = config_home / STATE_DIR_NAME / "config.env"
-    legacy_path = config_home / LEGACY_STATE_DIR_NAME / "config.env"
-    return legacy_path if legacy_path.is_file() and not path.is_file() else path
+    if path.is_file():
+        return path
+    for legacy_state_dir_name in LEGACY_STATE_DIR_NAMES:
+        legacy_path = config_home / legacy_state_dir_name / "config.env"
+        if legacy_path.is_file():
+            return legacy_path
+    return path
 
 
 def unquote_env_value(value: str) -> str:
@@ -996,7 +1003,7 @@ def debug(message: str) -> None:
     try:
         log_dir = state_root() / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
-        with (log_dir / "codex-logfire-exporter.log").open("a", encoding="utf-8") as f:
+        with (log_dir / "logfire-exporter.log").open("a", encoding="utf-8") as f:
             timestamp = dt.datetime.now(dt.timezone.utc).isoformat()
             f.write(f"{timestamp} {message}\n")
     except OSError:

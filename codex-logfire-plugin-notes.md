@@ -3,7 +3,7 @@
 Date: 2026-05-12
 
 Update: 2026-05-14 - this repository now includes a local Codex marketplace at `.agents/plugins/marketplace.json`
-with `logfire` and `codex-logfire-exporter` entries.
+with `logfire` and `logfire-exporter` entries.
 
 ## Context
 
@@ -91,8 +91,8 @@ It also includes local Codex marketplace metadata:
 ```text
 .agents/plugins/marketplace.json
 plugins/logfire/.codex-plugin/plugin.json
-plugins/codex-logfire-exporter/.codex-plugin/plugin.json
-plugins/codex-logfire-exporter/hooks/hooks.json
+plugins/logfire-exporter/.codex-plugin/plugin.json
+plugins/logfire-exporter/hooks/hooks.json
 ```
 
 The Logfire plugin content is shared across hosts:
@@ -111,9 +111,9 @@ Codex local installation uses:
 codex plugin marketplace add /absolute/path/to/pydantic/skills
 ```
 
-Then enable `logfire` or `codex-logfire-exporter` from the Codex plugin UI. After changing local plugin files, refresh
+Then enable `logfire` or `logfire-exporter` from the Codex plugin UI. After changing local plugin files, refresh
 the cache with `./scripts/reload-codex-plugin.sh logfire` or
-`./scripts/reload-codex-plugin.sh codex-logfire-exporter`.
+`./scripts/reload-codex-plugin.sh logfire-exporter`.
 
 The separate `pydantic/claude-code-logfire-plugin` repo is more Claude-specific. It uses `.claude-plugin/plugin.json`, Claude hook events, and Claude environment assumptions such as `CLAUDE_PROJECT_DIR`. It may be a useful reference for session capture, but it is not directly portable to Codex.
 

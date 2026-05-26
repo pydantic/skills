@@ -17,10 +17,10 @@
       "category": "Coding"
     },
     {
-      "name": "codex-logfire-exporter",
+      "name": "logfire-exporter",
       "source": {
         "source": "local",
-        "path": "./plugins/codex-logfire-exporter"
+        "path": "./plugins/logfire-exporter"
       },
       "policy": {
         "installation": "AVAILABLE",

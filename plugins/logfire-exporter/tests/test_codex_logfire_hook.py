@@ -77,17 +77,32 @@ class HookTests(unittest.TestCase):
         os.environ["CODEX_LOGFIRE_CONTENT_CAPTURE_MODE"] = "invalid"
         self.assertEqual(hook.content_capture_mode(), "full")
 
-    def test_config_env_path_falls_back_to_legacy_poc_path(self) -> None:
+    def test_logfire_base_url_is_accepted_for_endpoint(self) -> None:
+        os.environ["LOGFIRE_BASE_URL"] = "https://logfire-eu.pydantic.dev/"
+        self.assertEqual(hook.otlp_traces_endpoint(), "https://logfire-eu.pydantic.dev/v1/traces")
+
+    def test_logfire_base_url_takes_precedence_over_legacy_url(self) -> None:
+        os.environ["LOGFIRE_BASE_URL"] = "https://logfire-eu.pydantic.dev/"
+        os.environ["LOGFIRE_URL"] = "https://logfire-us.pydantic.dev/"
+        self.assertEqual(hook.otlp_traces_endpoint(), "https://logfire-eu.pydantic.dev/v1/traces")
+
+    def test_config_env_path_falls_back_to_legacy_paths(self) -> None:
         os.environ.pop("CODEX_LOGFIRE_CONFIG_FILE", None)
         config_home = Path(self.tmp.name) / "config"
         os.environ["XDG_CONFIG_HOME"] = str(config_home)
-        legacy_path = config_home / "codex-logfire-plugin" / "config.env"
+        legacy_path = config_home / "codex-logfire-exporter" / "config.env"
         legacy_path.parent.mkdir(parents=True)
         legacy_path.write_text("LOGFIRE_TOKEN=legacy-token\n", encoding="utf-8")
 
         self.assertEqual(hook.config_env_path(), legacy_path)
 
-        new_path = config_home / "codex-logfire-exporter" / "config.env"
+        poc_path = config_home / "codex-logfire-plugin" / "config.env"
+        poc_path.parent.mkdir(parents=True)
+        poc_path.write_text("LOGFIRE_TOKEN=poc-token\n", encoding="utf-8")
+        legacy_path.unlink()
+        self.assertEqual(hook.config_env_path(), poc_path)
+
+        new_path = config_home / "logfire-exporter" / "config.env"
         new_path.parent.mkdir(parents=True)
         new_path.write_text("LOGFIRE_TOKEN=new-token\n", encoding="utf-8")
         self.assertEqual(hook.config_env_path(), new_path)
@@ -100,6 +115,7 @@ class HookTests(unittest.TestCase):
         self.addCleanup(server.server_close)
         os.environ["LOGFIRE_TOKEN"] = "test-token"
         os.environ["LOGFIRE_URL"] = f"http://127.0.0.1:{server.server_port}"
+        os.environ["CODEX_LOGFIRE_PROJECT"] = "acme/codex"
         os.environ["CODEX_LOGFIRE_CONTENT_CAPTURE_MODE"] = "no_tool_content"
 
         transcript = Path(self.tmp.name) / "rollout.jsonl"
@@ -218,6 +234,7 @@ class HookTests(unittest.TestCase):
         self.assertEqual(attrs["codex.conversation_id"], "sess-1")
         self.assertEqual(attrs["codex.trace_source"], "payload.session_id")
         self.assertEqual(attrs["codex.session_id"], "sess-1")
+        self.assertEqual(attrs["codex.logfire_project"], "acme/codex")
         self.assertEqual(attrs["codex.prompt.length"], "5")
         self.assertEqual(attrs["codex.response.length"], "4")
         self.assertEqual(attrs["gen_ai.operation.name"], "chat")
