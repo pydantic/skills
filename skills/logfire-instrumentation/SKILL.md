@@ -15,6 +15,10 @@ Invoke this skill when:
 - User wants to monitor AI/LLM calls (PydanticAI, OpenAI, Anthropic)
 - User asks to add observability to an AI agent or LLM pipeline
 
+## User-Facing Progress
+
+Keep progress updates concise and operational. Do not narrate skill selection, local instructions, or routine detection steps. If an update is needed, use one short sentence focused on the current action, such as "Checking the app framework before adding Logfire."
+
 ## How Logfire Works
 
 Logfire is an observability platform built on OpenTelemetry. It captures traces, logs, and metrics from applications. Logfire has native SDKs for Python, JavaScript/TypeScript, and Rust, plus support for any language via OpenTelemetry.

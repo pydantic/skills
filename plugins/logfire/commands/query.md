@@ -15,6 +15,14 @@ One of the following:
 
 ## Workflow
 
+### Route the request first
+
+Use `/query` only when the user wants data fetched and analyzed, a SQL query, a computed answer, or programmatic query code.
+
+Do not use `/query` for direct UI/browser/link requests such as "open in Logfire", "show in Codex", "open Explore", "live view", or "give me a link". Route those to `logfire-ui`.
+
+For ambiguous prompts such as "show recent errors", "view logs", or "show spans", ask whether the user wants a Logfire UI view or query analysis in chat. Do not do both unless the user explicitly asks for both.
+
 ### Determine the approach
 
 Ask the user what they need:

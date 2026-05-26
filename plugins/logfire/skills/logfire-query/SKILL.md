@@ -1,6 +1,6 @@
 ---
 name: logfire-query
-description: Query Logfire telemetry data — traces, logs, spans, and metrics. Use this skill when the user asks to "query logfire", "search traces", "find logs", "query data", "search spans", "look up errors in logfire", "get metrics from logfire", "analyze telemetry", or wants to add Logfire querying capabilities to their code. Also use when the user wants to explore OpenTelemetry data, investigate production issues by querying, or build dashboards/reports from Logfire data.
+description: Query and analyze Logfire telemetry data — traces, logs, spans, metrics, summaries, and SQL results. Use this skill when the user asks to "query logfire", "search traces", "find logs", "query data", "search spans", "look up errors in logfire", "get metrics from logfire", "analyze telemetry", "summarize errors", "find root cause", or add Logfire querying capabilities to code. Do not use this skill for direct Logfire UI, browser, live-view, Explore-page, or link-opening requests; use logfire-ui instead. If "show" or "view" wording is ambiguous, ask whether the user wants a UI view or query analysis.
 ---
 
 # Query Logfire Data
@@ -12,14 +12,28 @@ Invoke this skill when:
 - User wants to search for specific events, errors, or patterns in telemetry data
 - User wants to analyze OpenTelemetry data stored in Logfire
 - User wants to add programmatic query capabilities to their code
-- User asks to "query logfire", "search traces", "find logs", "get metrics"
-- User wants to build reports or dashboards from Logfire data
+- User asks to "query logfire", "search traces", "find logs", "get metrics", "count", "summarize", "compare", or "find root cause"
+
+## User-Facing Progress
+
+Keep progress updates terse. Do not narrate route classification, local skill instructions, schema selection, or routine query setup. If an update is needed, use one short sentence focused on the action, such as "Querying recent Logfire errors."
+
+## Critical Routing: One Workflow Per Request
+
+Before using any query tool, classify the request.
+
+- Query route: "analyze", "query", "count", "summarize", "compare", "find root cause", "find slowest", "look up errors", "get metrics", or "add query capabilities".
+- UI route: "open", "show in browser", "show in Codex", "show in Logfire", "live view", "open Explore", "open the UI", "give me a link", or GUI/browser presentation. Use `logfire-ui`; do not call `query_run` just to make a URL.
+- Ambiguous route: prompts like "show recent errors", "view logs", or "show spans" do not specify whether the user wants chat analysis or the Logfire UI. Ask the user to choose query analysis or UI view.
+- Combined route: if the user explicitly asks for both analysis and a link, query only for the requested analysis or to identify the requested item, then provide the relevant Logfire link. Do not add UI/browser work unless the user asked for it.
+
+Only query before opening Logfire UI when the user asks to open a specific unknown item that must be found first, such as "find the slowest trace and open it" or "open the latest error trace".
 
 ## Two Approaches
 
 | Aspect | MCP `query_run` | REST API `/v1/query` |
 |--------|-----------------|----------------------|
-| **Best for** | Interactive exploration in Claude | Adding query code to a project |
+| **Best for** | Interactive analysis in Codex | Adding query code to a project |
 | **Auth** | OAuth via MCP session | Bearer read token |
 | **Setup** | Already configured via plugin | Need a read token |
 | **Formats** | JSON rows | JSON, CSV, Apache Arrow |
@@ -131,6 +145,27 @@ FROM records WHERE trace_id = '<id>' ORDER BY start_timestamp
 -- Error breakdown by service
 SELECT service_name, count(*) as errors
 FROM records WHERE is_exception GROUP BY service_name ORDER BY errors DESC
+```
+
+## UI Links After Querying
+
+If the user explicitly asks for both analysis and a Logfire link, finish the query analysis first, then use a Logfire link only for the known result:
+
+- For a known `trace_id`, use `project_logfire_link(trace_id=trace_id, project=project, handoff=True)` only when the user asked to open it immediately in the browser. Use `project_logfire_link(trace_id=trace_id, project=project)` for a durable or shareable URL.
+- For a project/filter view, use the `logfire-ui` routing rules.
+- Do not open the browser unless the user asked to open the link.
+
+For a span-count prompt, provide SQL like this when the user wants an aggregate query or analysis:
+
+```sql
+SELECT
+  time_bucket(interval '5 minutes', start_timestamp) AS bucket,
+  count(*) AS span_count
+FROM records
+WHERE kind = 'span'
+GROUP BY bucket
+ORDER BY bucket
+LIMIT 200
 ```
 
 ## REST API Approach (Programmatic)
