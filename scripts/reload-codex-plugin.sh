@@ -31,16 +31,20 @@ PY
 target_dir="$cache_root/$version"
 
 mkdir -p "$target_dir"
-python3 - "$source_dir" "$target_dir" <<'PY'
+python3 - "$source_dir" "$target_dir" "$cache_root" <<'PY'
 import shutil
 import sys
 from pathlib import Path
 
 source = Path(sys.argv[1])
 target = Path(sys.argv[2])
+cache_root = Path(sys.argv[3])
 target_resolved = target.resolve()
+cache_root_resolved = cache_root.resolve()
 
-if ".codex/plugins/cache" not in target_resolved.as_posix():
+try:
+    target_resolved.relative_to(cache_root_resolved)
+except ValueError:
     raise SystemExit(f"Refusing to replace unexpected target: {target_resolved}")
 
 if target.exists():

@@ -21,7 +21,26 @@ from pathlib import Path
 from typing import Any
 
 
-PLUGIN_VERSION = "0.1.0"
+FALLBACK_PLUGIN_VERSION = "unknown"
+
+
+def plugin_version() -> str:
+    manifest_path = Path(__file__).resolve().parents[1] / ".codex-plugin" / "plugin.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return FALLBACK_PLUGIN_VERSION
+
+    if not isinstance(manifest, dict):
+        return FALLBACK_PLUGIN_VERSION
+
+    version = manifest.get("version")
+    if isinstance(version, str) and version:
+        return version
+    return FALLBACK_PLUGIN_VERSION
+
+
+PLUGIN_VERSION = plugin_version()
 SERVICE_NAME = "logfire-exporter"
 STATE_DIR_NAME = "logfire-exporter"
 LEGACY_STATE_DIR_NAMES = ("codex-logfire-exporter", "codex-logfire-plugin")
@@ -582,6 +601,9 @@ def authorization_header(token: str) -> str:
     scheme = os.getenv("CODEX_LOGFIRE_AUTH_SCHEME", "").strip()
     if scheme:
         if scheme.lower() in {"none", "raw"}:
+            return token
+        scheme_prefix = f"{scheme} "
+        if token.lower().startswith(scheme_prefix.lower()):
             return token
         return f"{scheme} {token}"
     if re.match(r"^[A-Za-z]+\s+\S+", token):

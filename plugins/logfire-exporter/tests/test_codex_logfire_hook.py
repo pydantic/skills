@@ -54,6 +54,10 @@ class HookTests(unittest.TestCase):
         os.environ.clear()
         os.environ.update(self.old_env)
 
+    def test_plugin_version_matches_manifest(self) -> None:
+        manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual(hook.PLUGIN_VERSION, manifest["version"])
+
     def test_deterministic_ids_are_stable_and_sized(self) -> None:
         trace_id = hook.deterministic_hex_id("trace:v1", 16, "sess")
         self.assertEqual(trace_id, hook.deterministic_hex_id("trace:v1", 16, "sess"))
@@ -69,6 +73,9 @@ class HookTests(unittest.TestCase):
         self.assertEqual(hook.authorization_header("Bearer write-token"), "Bearer write-token")
         os.environ["CODEX_LOGFIRE_AUTH_SCHEME"] = "Bearer"
         self.assertEqual(hook.authorization_header("write-token"), "Bearer write-token")
+        self.assertEqual(hook.authorization_header("Bearer write-token"), "Bearer write-token")
+        os.environ["CODEX_LOGFIRE_AUTH_SCHEME"] = "bearer"
+        self.assertEqual(hook.authorization_header("Bearer write-token"), "Bearer write-token")
 
     def test_content_capture_defaults_to_full(self) -> None:
         self.assertEqual(hook.content_capture_mode(), "full")
@@ -199,7 +206,7 @@ class HookTests(unittest.TestCase):
                 "tool_name": "Bash",
                 "tool_use_id": "tool-1",
                 "tool_response": {"exit_code": 0},
-                "duration_ms": 250,
+                "duration_ms": 250.5,
                 "timestamp": "2026-05-14T10:00:03Z",
             }
         )
@@ -255,6 +262,7 @@ class HookTests(unittest.TestCase):
         self.assertEqual(tool_attrs["logfire.msg"], "Codex tool Bash completed")
         self.assertEqual(tool_attrs["logfire.tags"], ["Codex"])
         self.assertEqual(tool_attrs["codex.tool.success"], True)
+        self.assertEqual(tool_attrs["codex.tool.duration_ms"], 250.5)
 
     def test_thread_id_env_groups_multiple_hook_sessions_in_one_trace(self) -> None:
         server = HTTPServer(("127.0.0.1", 0), CaptureHandler)
@@ -388,6 +396,8 @@ def flatten_attrs(attrs: list[dict[str, object]]) -> dict[str, object]:
             out[str(attr["key"])] = value["stringValue"]
         elif "intValue" in value:
             out[str(attr["key"])] = value["intValue"]
+        elif "doubleValue" in value:
+            out[str(attr["key"])] = value["doubleValue"]
         elif "boolValue" in value:
             out[str(attr["key"])] = value["boolValue"]
         elif "arrayValue" in value:
