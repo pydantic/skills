@@ -1,14 +1,14 @@
 # Pydantic Skills
 
-Official [Claude Code](https://claude.com/claude-code) plugin marketplace for the Pydantic ecosystem, plus local plugin marketplaces for [Codex](https://openai.com/codex) and [Cursor](https://cursor.com).
+Logfire and Pydantic AI plugins for [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex), and [Cursor](https://cursor.com). Instrument your code with Logfire, query and export the resulting telemetry, and build LLM agents with Pydantic AI.
 
 ## Plugins
 
-| Plugin | Hosts | Description | Capabilities |
-|--------|-------|-------------|--------------|
-| [logfire](plugins/logfire/) | Claude Code, Codex, Cursor | Add Logfire observability and query/debug telemetry | Claude commands `/instrument`, `/debug`, `/query`; Codex/Cursor skills and MCP tools |
-| [logfire-exporter](plugins/logfire-exporter/) | Codex | Export Codex activity traces to Logfire | Codex lifecycle hooks |
-| [ai](plugins/ai/) | Claude Code | Build AI agents with Pydantic AI | Pydantic AI skill docs |
+| Plugin                                        | Hosts                      | Description                                         | Capabilities                                                                         |
+| --------------------------------------------- | -------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [logfire](plugins/logfire/)                   | Claude Code, Codex, Cursor | Add Logfire observability and query/debug telemetry | Claude commands `/instrument`, `/debug`, `/query`; Codex/Cursor skills and MCP tools |
+| [logfire-exporter](plugins/logfire-exporter/) | Codex                      | Export Codex activity traces to Logfire             | Codex lifecycle hooks                                                                |
+| [ai](plugins/ai/)                             | Claude Code                | Build AI agents with Pydantic AI                    | Pydantic AI skill docs                                                               |
 
 ## Install In Claude Code
 
@@ -82,11 +82,11 @@ The Logfire MCP server requires normal Logfire authentication, such as `logfire 
 
 The `skills/` directory contains standalone SKILL.md files compatible with 30+ agents via the [agentskills.io](https://agentskills.io) standard - including Codex, Cursor, Gemini CLI, and Claude Code.
 
-| Skill | Description |
-|-------|-------------|
-| [logfire-instrumentation](skills/logfire-instrumentation/) | Add Logfire observability to Python, JS/TS, and Rust apps |
-| [logfire-query](skills/logfire-query/) | Query and analyze Logfire traces, logs, spans, metrics, and activity data |
-| [logfire-ui](skills/logfire-ui/) | Open Logfire project pages, live views, traces, and Explore filters |
+| Skill                                                              | Description                                                                         |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [logfire-instrumentation](skills/logfire-instrumentation/)         | Add Logfire observability to Python, JS/TS, and Rust apps                           |
+| [logfire-query](skills/logfire-query/)                             | Query and analyze Logfire traces, logs, spans, metrics, and activity data           |
+| [logfire-ui](skills/logfire-ui/)                                   | Open Logfire project pages, live views, traces, and Explore filters                 |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |
 
 ## Development
