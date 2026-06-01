@@ -9,6 +9,7 @@ Logfire and Pydantic AI plugins for [Claude Code](https://claude.com/claude-code
 | [logfire](plugins/logfire/)                   | Claude Code, Codex, Cursor | Add Logfire observability and query/debug telemetry | Claude commands `/instrument`, `/debug`, `/query`; Codex/Cursor skills and MCP tools |
 | [logfire-exporter](plugins/logfire-exporter/) | Codex                      | Export Codex activity traces to Logfire             | Codex lifecycle hooks                                                                |
 | [ai](plugins/ai/)                             | Claude Code                | Build AI agents with Pydantic AI                    | Pydantic AI skill docs                                                               |
+| [pydantic-ai-harness](plugins/pydantic-ai-harness/) | Claude Code          | Extend Pydantic AI agents with harness capabilities (Code Mode) | Pydantic AI Harness skill docs                                           |
 
 ## Install In Claude Code
 
@@ -23,6 +24,7 @@ Then install a plugin:
 ```
 claude plugin install logfire@pydantic-skills
 claude plugin install ai@pydantic-skills
+claude plugin install pydantic-ai-harness@pydantic-skills
 ```
 
 ## Install In Codex
@@ -81,3 +83,4 @@ The `skills/` directory contains standalone SKILL.md files compatible with 30+ a
 | [logfire-query](skills/logfire-query/)                             | Query and analyze Logfire traces, logs, spans, metrics, and activity data           |
 | [logfire-ui](skills/logfire-ui/)                                   | Open Logfire project pages, live views, traces, and Explore filters                 |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |
+| [pydantic-ai-harness](skills/pydantic-ai-harness/)                 | Extend Pydantic AI agents with harness capabilities like Code Mode (sandboxed `run_code`) |

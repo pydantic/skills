@@ -44,4 +44,8 @@ check_dir_sync \
     plugins/ai/skills/building-pydantic-ai-agents \
     skills/building-pydantic-ai-agents
 
+check_dir_sync \
+    plugins/pydantic-ai-harness/skills/pydantic-ai-harness \
+    skills/pydantic-ai-harness
+
 exit $exit_code

@@ -1,0 +1,9 @@
+{
+  "name": "pydantic-ai-harness",
+  "description": "Extend Pydantic AI agents with batteries-included capabilities from pydantic-ai-harness, currently Code Mode for collapsing many tool calls into one sandboxed Python execution",
+  "version": "0.1.0",
+  "author": {
+    "name": "Pydantic",
+    "email": "support@pydantic.dev"
+  }
+}
