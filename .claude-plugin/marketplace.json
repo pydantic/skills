@@ -41,6 +41,18 @@
       "source": "./plugins/pydantic-ai-harness",
       "category": "development",
       "homepage": "https://github.com/pydantic/skills/tree/main/plugins/pydantic-ai-harness"
+    },
+    {
+      "name": "migrate-deep-agents-to-pydantic-ai",
+      "description": "Migrate LangChain Deep Agents projects using idiomatic, behavior-validated Pydantic AI patterns",
+      "version": "0.1.0",
+      "author": {
+        "name": "Pydantic",
+        "email": "support@pydantic.dev"
+      },
+      "source": "./plugins/migrate-deep-agents-to-pydantic-ai",
+      "category": "development",
+      "homepage": "https://github.com/pydantic/skills/tree/main/plugins/migrate-deep-agents-to-pydantic-ai"
     }
   ]
 }

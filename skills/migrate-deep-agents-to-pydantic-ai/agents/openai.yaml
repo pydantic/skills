@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deep Agents to Pydantic AI"
+  short_description: "Migrate Deep Agents to idiomatic Pydantic AI"
+  default_prompt: "Use $migrate-deep-agents-to-pydantic-ai to migrate this Deep Agents project to idiomatic Pydantic AI while preserving and validating its required behavior."

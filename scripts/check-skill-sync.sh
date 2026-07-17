@@ -48,4 +48,8 @@ check_dir_sync \
     plugins/pydantic-ai-harness/skills/pydantic-ai-harness \
     skills/pydantic-ai-harness
 
+check_dir_sync \
+    plugins/migrate-deep-agents-to-pydantic-ai/skills/migrate-deep-agents-to-pydantic-ai \
+    skills/migrate-deep-agents-to-pydantic-ai
+
 exit $exit_code
