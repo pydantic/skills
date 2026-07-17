@@ -10,12 +10,7 @@ Translate observable behavior and operational guarantees, not constructor argume
 ## Workflow
 
 1. **Freeze the source contract.** Record the effective prompt, model/profile routing, tools, output, state, files, subagent topology, approvals, streaming, budgets, persistence, deployment boundaries, and representative traces.
-2. **Inventory the project.** Run the bundled scanner, verify its findings manually, and read [the migration map](references/migration-map.md) for every detected surface.
-
-   ```bash
-   SKILL_DIR="<absolute path to this skill>"
-   python3 "$SKILL_DIR/scripts/inventory_deepagents.py" <project-root>
-   ```
+2. **Inventory the project.** Read manifests and lockfiles, then search the full repository for Deep Agents/LangGraph imports, `create_deep_agent` factories and call sites, middleware/profile construction, tools, backends, state schemas, checkpointers, subagent definitions, instructions/skills, streaming consumers, deployment entry points, and external services. Follow indirection instead of relying on a fixed token list; record unreadable or uninspected paths and read [the migration map](references/migration-map.md) for every detected surface.
 3. **Choose the owner.** Read [the Pydantic AI architecture guide](references/pydantic-ai-architecture.md). Place each concern in the smallest correct primitive: agent configuration, typed deps, output type, tool/toolset, capability, hook, `ProcessHistory`, graph, Harness capability, or application service.
 4. **Record semantic differences.** Follow [the semantic-differences guide](references/semantic-differences.md). Treat a similarly named API as a candidate until its prompt, state, result, failure, event, side-effect, and recovery behavior are verified.
 5. **Build one vertical slice.** Port typed deps, one tool family, the output contract, and one representative request. Keep temporary LangChain adapters only at explicit seams.
