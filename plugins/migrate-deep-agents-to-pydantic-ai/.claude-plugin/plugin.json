@@ -1,6 +1,6 @@
 {
   "name": "migrate-deep-agents-to-pydantic-ai",
-  "description": "Migrate LangChain Deep Agents projects using idiomatic, behavior-validated Pydantic AI patterns",
+  "description": "Migrate LangChain Deep Agents projects using composable Pydantic AI primitives and behavior validation",
   "version": "0.1.0",
   "author": {
     "name": "Pydantic",

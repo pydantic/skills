@@ -35,8 +35,8 @@ Keep the application shell. Replace only the Deep Agent runtime initially:
 
 1. Build a Pydantic AI `Agent` factory from authenticated typed deps.
 2. Wrap the existing sandbox provider as a focused filesystem/command capability. Do not replace remote isolation with local Harness `Shell`.
-3. Map repository context to `RepoContext` only when it can see the sandbox filesystem and repository instruction files are trusted at system priority; otherwise expose them as lower-trust context or inject only host-approved instructions.
-4. Map a text-only explicit child to `SubAgents`; preserve its model, tool boundary, budgets, and retry policy. If it reads or mutates shared graph state, add a deps-backed store or a typed handoff/merge adapter.
+3. Use static/dynamic instructions or a repository-context capability only when it can see the sandbox filesystem and repository instruction files are trusted at system priority; otherwise expose them as lower-trust context or inject only host-approved instructions.
+4. Map an explicit child to a typed child `Agent`; an installed Harness experimental delegation capability is optional when its contract fits. Preserve model, tool boundary, budgets, and retry policy. If the child reads or mutates shared graph state, add a deps-backed store and a typed handoff/merge contract.
 5. Convert middleware in order:
    - preparation and identity → deps plus dynamic instructions;
    - message queue → host-driven `AgentRun.enqueue` or a narrow request hook;
@@ -46,7 +46,7 @@ Keep the application shell. Replace only the Deep Agent runtime initially:
    - push/release guards → deferred approval plus server-side authorization;
    - status/notifications → event handler and after-run hook;
    - provider sanitation/fallback → provider model configuration and `FallbackModel`.
-6. Add `StepPersistence` for event/snapshot lineage if useful, but retain thread metadata, sandbox lease, task queue, and side-effect ledger in the application.
+6. Add an installed step/event persistence capability for lineage if useful, but retain thread metadata, sandbox lease, task queue, and side-effect ledger in the application.
 7. Re-run end-to-end tests for sandbox recreation, duplicate trigger delivery, mid-run messages, permissions, draft PR creation, and review follow-ups.
 
 ### Do not flatten
@@ -66,14 +66,14 @@ The orchestrator writes a plan and report files, delegates focused research to i
 
 ### Migration shape
 
-- `write_todos` → `Planning`.
-- `task` → `SubAgents` for adaptive rounds, or `DynamicWorkflow` for known independent facets and comparisons.
+- `write_todos` → a typed plan repository and tools; optionally installed Harness experimental `Planning` after verifying its contract.
+- `task` → typed child agents for adaptive rounds, or bounded application fan-out for known independent facets and comparisons.
 - Tavily/search/fetch → native tools or provider-adaptive `WebSearch`/`WebFetch`; keep full-content fetch bounded.
 - `think_tool` → `Thinking` plus explicit stop criteria; do not preserve a no-op tool unless its trace event is an actual product requirement.
 - Deep Agents `StateBackend` report files → typed intermediate outputs or a custom per-run virtual artifact adapter. Use `FileSystem` only when real, isolated workspace artifacts are part of the target contract; never silently turn ephemeral state files into shared host files.
 - child return → a Pydantic model containing claims, source URLs, and confidence. Let the parent deduplicate and format citations.
-- large page returns → `OverflowingToolOutput(Spill(...))`; long runs → `TieredCompaction`.
-- prompt-only concurrency/iteration limits → `max_agent_calls`, `UsageLimits`, child timeouts, and an application deadline.
+- large page returns → bounded results/artifact offload, optionally the installed experimental overflow capability; long runs → a `ProcessHistory` composition, optionally an installed experimental compaction capability.
+- prompt-only concurrency/iteration limits → an application semaphore/call counter, `UsageLimits`, child timeouts, and an application deadline.
 
 Test simple fact lookup, multi-entity comparison, conflicting sources, empty search, duplicate URLs, citation renumbering, and budget exhaustion.
 
@@ -89,9 +89,9 @@ Source: [Deep Agents content-builder-agent example](https://github.com/langchain
 
 ### Migration shape
 
-- brand `AGENTS.md` → trusted static instructions or `RepoContext`, not writable `Memory` by default;
+- brand `AGENTS.md` → trusted static/dynamic instructions or a repository-context capability, not writable model memory by default;
 - each writing skill → a deferred custom capability with its own description and instructions, or a bounded skill catalog;
-- researcher YAML → explicit `Agent` + `SubAgent`, or Harness disk subagent definitions after checking format and tool resolution;
+- researcher YAML → an explicit typed child `Agent`, or installed Harness experimental subagent definitions after checking format and tool resolution;
 - generated content/artifacts → `FileSystem` plus image-generation tools that return typed path/metadata;
 - CLI event mapping → `event_stream_handler` over Pydantic AI event types rather than string matching arbitrary messages;
 - quality checklist → output model or deterministic artifact validation, not prompt text alone.
@@ -111,7 +111,7 @@ The project combines `SQLDatabaseToolkit`, always-loaded database instructions, 
 1. Keep `SQLDatabaseToolkit` behind `LangChainToolset` for the first vertical slice, or replace it with a small native read-only toolset.
 2. Enforce read-only behavior in the database connection/tool implementation. Parse or prepare SQL and reject multiple statements and mutating operations. Prompt instructions are secondary.
 3. Map `AGENTS.md` to static instructions and the two skills to deferred capabilities.
-4. Add `Planning` only for genuinely multi-table analytical work; simple count/lookups do not need a plan.
+4. Add typed plan tools—or an installed experimental planning capability—only for genuinely multi-table analytical work; simple count/lookups do not need a plan.
 5. Use a typed output such as `QueryAnswer(sql, columns, rows, explanation, limitations)`.
 6. Use Code Mode only around explicitly read-only schema/query tools when batching and local aggregation reduce model turns.
 7. Remove the implicit general-purpose child unless a tested query class benefits from delegation.
@@ -128,11 +128,11 @@ The deployed agent follows Plan → Implement → Review → Deliver inside a La
 
 ### Migration shape
 
-- planning → `Planning`;
+- planning → typed plan state and tools, optionally the installed experimental planning capability;
 - file access and commands → a real sandbox adapter, or `FileSystem` + `Shell` only inside an already isolated host;
 - code-review workflow → deferred capability with its helper scripts mounted into the sandbox;
-- coding preferences → tenant-scoped Harness `Memory`, preferably on-demand when trust requires it;
-- subagents → explicit `SubAgents` with narrow tools;
+- coding preferences → a tenant-scoped application store with bounded tools, preferably on-demand when trust requires it;
+- subagents → explicit typed child agents with narrow tools;
 - test/lint loop → keep prompt guidance, then add deterministic post-edit verification in the host when completion must guarantee it;
 - commit/push → separate tools and require approval for external writes according to product policy.
 
@@ -148,8 +148,8 @@ The supervisor performs synchronous market research before strategy work and des
 
 ### Migration shape
 
-- blocking market research → `SubAgents` with deliberately serialized JSON text or a custom typed delegation adapter for `MarketReport`; built-in delegation stringifies Pydantic outputs rather than returning schema-valid JSON;
-- independent batch research → `DynamicWorkflow` only if all work should finish inside one parent tool call;
+- blocking market research → a typed child agent returning `MarketReport`; if an installed Harness delegation capability is selected, test its exact parent-visible serialization;
+- independent batch research → bounded application fan-out when all work should finish in the request, or an explicit graph when transitions are domain state;
 - background content writing → an external worker and a custom background-task capability with start/list/check/update/cancel tools;
 - shared report path → artifact store or FileSystem, not automatically model memory;
 - skills → deferred capabilities;
