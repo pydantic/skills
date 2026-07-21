@@ -12,6 +12,7 @@ Synced skills are owned by the library they document. Libraries host those skill
 | `logfire-instrumentation` | [`pydantic/logfire`](https://github.com/pydantic/logfire) — `logfire/.agents/skills/logfire-instrumentation/` |
 | `building-pydantic-ai-agents` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/building-pydantic-ai-agents/` |
 | `pydantic-ai-harness` | [`pydantic/pydantic-ai-harness`](https://github.com/pydantic/pydantic-ai-harness) — `pydantic_ai_harness/.agents/skills/pydantic-ai-harness/` |
+| `pydantic` | [`pydantic/pydantic`](https://github.com/pydantic/pydantic) — `.agents/skills/pydantic/` |
 
 A daily workflow (`.github/workflows/sync-from-upstream.yml`) clones each upstream listed above, runs `rsync -a --delete` into both destinations, and opens a PR. CI (`scripts/check-skill-sync.sh`) enforces that plugin and standalone skill copies stay byte-identical.
 
@@ -61,4 +62,4 @@ plugins/logfire/.codex-plugin/plugin.json
 plugins/logfire-exporter/.codex-plugin/plugin.json
 ```
 
-The Cursor and Codex marketplaces currently list `logfire`; Codex also lists `logfire-exporter`. The `ai` plugin remains Claude-only plus a standalone cross-agent skill.
+The Cursor and Codex marketplaces currently list `logfire`; Codex also lists `logfire-exporter`. The `ai` and `pydantic` plugins remain Claude-only plus a standalone cross-agent skill each.

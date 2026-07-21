@@ -1,6 +1,6 @@
 # Pydantic Skills
 
-Logfire and Pydantic AI plugins for [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex), and [Cursor](https://cursor.com). Instrument your code with Logfire, query and export the resulting telemetry, and build LLM agents with Pydantic AI.
+Logfire, Pydantic AI, and Pydantic plugins for [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex), and [Cursor](https://cursor.com). Instrument your code with Logfire, query and export the resulting telemetry, build LLM agents with Pydantic AI, and validate data with Pydantic.
 
 ## Plugins
 
@@ -10,6 +10,7 @@ Logfire and Pydantic AI plugins for [Claude Code](https://claude.com/claude-code
 | [logfire-exporter](plugins/logfire-exporter/) | Codex                      | Export Codex activity traces to Logfire             | Codex lifecycle hooks                                                                |
 | [ai](plugins/ai/)                             | Claude Code                | Build AI agents with Pydantic AI                    | Pydantic AI skill docs                                                               |
 | [pydantic-ai-harness](plugins/pydantic-ai-harness/) | Claude Code          | Extend Pydantic AI agents with harness capabilities (Code Mode) | Pydantic AI Harness skill docs                                           |
+| [pydantic](plugins/pydantic/)                 | Claude Code                | Validate and serialize data with Pydantic           | Pydantic skill docs                                                                  |
 
 ## Install In Claude Code
 
@@ -25,6 +26,7 @@ Then install a plugin:
 claude plugin install logfire@pydantic-skills
 claude plugin install ai@pydantic-skills
 claude plugin install pydantic-ai-harness@pydantic-skills
+claude plugin install pydantic@pydantic-skills
 ```
 
 ## Install In Codex
@@ -84,3 +86,4 @@ The `skills/` directory contains standalone SKILL.md files compatible with 30+ a
 | [logfire-ui](skills/logfire-ui/)                                   | Open Logfire project pages, live views, traces, and Explore filters                 |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |
 | [pydantic-ai-harness](skills/pydantic-ai-harness/)                 | Extend Pydantic AI agents with harness capabilities like Code Mode (sandboxed `run_code`) |
+| [pydantic](skills/pydantic/)                                       | Validate and serialize data with Pydantic models, constraints, and custom validators |

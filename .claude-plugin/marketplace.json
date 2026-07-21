@@ -41,6 +41,18 @@
       "source": "./plugins/pydantic-ai-harness",
       "category": "development",
       "homepage": "https://github.com/pydantic/skills/tree/main/plugins/pydantic-ai-harness"
+    },
+    {
+      "name": "pydantic",
+      "description": "Validate and serialize data with Pydantic — modeling patterns, constraints, custom validators, coercion, and discriminated unions",
+      "version": "0.1.0",
+      "author": {
+        "name": "Pydantic",
+        "email": "support@pydantic.dev"
+      },
+      "source": "./plugins/pydantic",
+      "category": "development",
+      "homepage": "https://github.com/pydantic/skills/tree/main/plugins/pydantic"
     }
   ]
 }
