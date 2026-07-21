@@ -15,12 +15,22 @@ Synced skills are owned by the library they document. Libraries host those skill
 
 A daily workflow (`.github/workflows/sync-from-upstream.yml`) clones each upstream listed above, runs `rsync -a --delete` into both destinations, and opens a PR. CI (`scripts/check-skill-sync.sh`) enforces that plugin and standalone skill copies stay byte-identical.
 
-**Anything you add directly inside a synced skill directory will be wiped on the next sync.** To change synced skill content, send a PR upstream. Everything else in this repo (plugin metadata, repo-root files, `.github/`, `scripts/`) is fine to edit here.
+**Anything you add directly inside an upstream-synced skill directory will be wiped on the next sync.** To change synced skill content, send a PR upstream. Everything else in this repo (plugin metadata, repo-root files, `.github/`, `scripts/`) is fine to edit here.
 
-## Adding a new skill
+## Repository-owned skills
+
+The Deep Agents migration skill is repository-owned because it spans Deep Agents, Pydantic AI core, and optional Harness capabilities. It has its own marketplace plugin; `scripts/check-skill-sync.sh` keeps that plugin's skill and the standalone copy byte-identical.
+
+| Skill | Canonical source |
+|-------|------------------|
+| `migrate-deep-agents-to-pydantic-ai` | `plugins/migrate-deep-agents-to-pydantic-ai/skills/migrate-deep-agents-to-pydantic-ai/` |
+
+## Adding a new synced skill
 
 1. Ensure the skill exists in the library at `<package-dir>/.agents/skills/<skill-name>/`.
 2. Add a `sync_skill` entry to `scripts/sync-from-upstream.sh`.
+
+For a repository-owned cross-project skill, add the canonical plugin copy, mirror it under `skills/`, and add the pair to `scripts/check-skill-sync.sh`.
 
 ## Manually triggering a sync
 

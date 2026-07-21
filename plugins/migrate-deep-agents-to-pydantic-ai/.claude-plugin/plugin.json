@@ -1,0 +1,9 @@
+{
+  "name": "migrate-deep-agents-to-pydantic-ai",
+  "description": "Migrate LangChain Deep Agents projects using composable Pydantic AI primitives and behavior validation",
+  "version": "0.1.0",
+  "author": {
+    "name": "Pydantic",
+    "email": "support@pydantic.dev"
+  }
+}
