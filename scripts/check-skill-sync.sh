@@ -48,4 +48,8 @@ check_dir_sync \
     plugins/pydantic-ai-harness/skills/pydantic-ai-harness \
     skills/pydantic-ai-harness
 
+check_dir_sync \
+    plugins/pydantic/skills/pydantic \
+    skills/pydantic
+
 exit $exit_code

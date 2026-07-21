@@ -76,6 +76,13 @@ sync_skill \
     "skills/pydantic-ai-harness" \
     "pydantic-ai-harness"
 
+sync_skill \
+    "pydantic/pydantic" \
+    ".agents/skills/pydantic" \
+    "plugins/pydantic/skills/pydantic" \
+    "skills/pydantic" \
+    "pydantic"
+
 echo
 echo "Sync complete. Summary:"
 cat "$SUMMARY_FILE"
