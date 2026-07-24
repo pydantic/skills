@@ -20,8 +20,8 @@
     },
     {
       "name": "ai",
-      "description": "Build production-grade AI agents with Pydantic AI — tools, capabilities, structured output, streaming, and testing patterns",
-      "version": "0.1.0",
+      "description": "Build production-grade Pydantic AI agents and migrate LangChain or LangGraph systems",
+      "version": "0.2.0",
       "author": {
         "name": "Pydantic",
         "email": "support@pydantic.dev"
