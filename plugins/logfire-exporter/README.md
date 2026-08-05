@@ -127,6 +127,25 @@ Install `logfire-exporter` when you want telemetry about Codex itself. Install `
 help instrument applications, query existing Logfire data, or open Logfire UI views.
 The two plugins can be enabled together.
 
+## Python Interpreter Selection
+
+The hooks run `scripts/run_codex_logfire_hook.sh`, which picks a working Python 3 interpreter rather
+than trusting a bare `python3`: version-manager shims (notably pyenv's) can hang instead of failing
+when their backing installation is broken, which previously made every hook run to its timeout and
+stalled the conversation. The wrapper probes candidates (`python3` on `PATH`, then common system
+locations) with a 2-second watchdog, caches the first one that answers under
+`${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/python_interpreter`, and skips exporting
+entirely when none works.
+
+To pin a specific interpreter, set `CODEX_LOGFIRE_PYTHON` (in the hook environment or in the
+`config.env` file):
+
+```dotenv
+CODEX_LOGFIRE_PYTHON=/opt/homebrew/bin/python3.13
+```
+
+A pinned interpreter is used as-is, with no probe.
+
 ## Troubleshooting
 
 Debug logs are written under:
@@ -140,6 +159,13 @@ If no spans or plugin logs appear after a completed Codex turn, check the Codex 
 ```bash
 rg -n "logfire-exporter|failed to load plugin" ~/.codex/log/codex-tui.log
 ```
+
+If hooks report timeouts (a "Hooks summary" with `hook timed out` errors) or chats feel slow after
+enabling the plugin, your `python3` is probably a broken version-manager shim. Fix the shim (for
+pyenv: `pyenv rehash`, or reinstall the selected version) or pin a known-good interpreter with
+`CODEX_LOGFIRE_PYTHON` as described above. Set `CODEX_LOGFIRE_DEBUG=1` in the hook environment to
+see the interpreter selection on stderr, and delete the cached choice at
+`${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/python_interpreter` to force a rescan.
 
 ## Test
 

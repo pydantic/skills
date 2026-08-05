@@ -1,0 +1,155 @@
+from __future__ import annotations
+
+import os
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+WRAPPER_PATH = ROOT / "scripts" / "run_codex_logfire_hook.sh"
+
+# The wrapper itself needs coreutils (dirname, grep, cat, sleep, ...), so the
+# sandboxed PATHs used below always keep the system directories; fake
+# interpreters shadow real ones by coming first.
+SYSTEM_PATH = os.defpath.lstrip(os.pathsep)
+
+
+@unittest.skipIf(sys.platform == "win32", "the hook wrapper targets POSIX shells")
+class WrapperTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.tmp_path = Path(self.tmp.name)
+        self.state_dir = self.tmp_path / "state"
+        self.bin_dir = self.tmp_path / "bin"
+        self.bin_dir.mkdir()
+
+    def base_env(self) -> dict[str, str]:
+        # State and config overrides keep the wrapper (and the hook it may
+        # launch) away from the developer's real files.
+        return {
+            "HOME": str(self.tmp_path),
+            "PATH": os.pathsep.join([str(self.bin_dir), SYSTEM_PATH]),
+            "CODEX_LOGFIRE_STATE_DIR": str(self.state_dir),
+            "CODEX_LOGFIRE_CONFIG_FILE": str(self.tmp_path / "config.env"),
+        }
+
+    def write_executable(self, path: Path, body: str) -> Path:
+        path.write_text(body, encoding="utf-8")
+        path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        return path
+
+    def write_fake_interpreter(self, name: str, marker: Path) -> Path:
+        # Answers any invocation (including the probe) and records its argv,
+        # standing in for a working python3 without exec-ing the real hook.
+        return self.write_executable(
+            self.bin_dir / name,
+            f'#!/bin/sh\nprintf \'%s\\n\' "$@" > "{marker}"\nexit 0\n',
+        )
+
+    def write_hanging_shim(self, name: str) -> Path:
+        return self.write_executable(self.bin_dir / name, "#!/bin/sh\nsleep 60\nexit 0\n")
+
+    def run_wrapper(self, env: dict[str, str], stdin: str = "") -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["sh", str(WRAPPER_PATH)],
+            input=stdin,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30.0,
+        )
+
+    def cached_interpreter(self) -> str | None:
+        cache = self.state_dir / "python_interpreter"
+        if not cache.is_file():
+            return None
+        return cache.read_text(encoding="utf-8").strip()
+
+    def test_healthy_interpreter_runs_hook_and_caches_choice(self) -> None:
+        marker = self.tmp_path / "ran"
+        self.write_fake_interpreter("python3", marker)
+        result = self.run_wrapper(self.base_env())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
+        self.assertEqual(self.cached_interpreter(), str(self.bin_dir / "python3"))
+
+    def test_real_interpreter_end_to_end(self) -> None:
+        # With the real Python first on PATH the wrapper must run the real
+        # hook, which exits 0 immediately on empty stdin.
+        env = self.base_env()
+        env["PATH"] = os.pathsep.join([str(Path(sys.executable).parent), SYSTEM_PATH])
+        result = self.run_wrapper(env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        cached = self.cached_interpreter()
+        if cached is None:
+            self.fail("no interpreter was cached")
+        self.assertTrue(Path(cached).exists())
+
+    def test_hanging_shim_never_stalls_the_hook(self) -> None:
+        # A pyenv-style shim that hangs shadows python3. The wrapper must kill
+        # the probe after ~2s and move on (to a system interpreter when one
+        # exists, else fail open); it must never wait on the shim.
+        shim = self.write_hanging_shim("python3")
+        started = time.monotonic()
+        result = self.run_wrapper(self.base_env())
+        elapsed = time.monotonic() - started
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertLess(elapsed, 8.0)
+        cached = self.cached_interpreter()
+        if cached is not None:
+            self.assertNotEqual(cached, str(shim))
+
+    def test_env_override_is_trusted_without_probe(self) -> None:
+        marker = self.tmp_path / "ran"
+        pinned = self.write_fake_interpreter("pinned-python", marker)
+        env = self.base_env()
+        env["CODEX_LOGFIRE_PYTHON"] = str(pinned)
+        result = self.run_wrapper(env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
+
+    def test_config_file_override_is_used(self) -> None:
+        marker = self.tmp_path / "ran"
+        pinned = self.write_fake_interpreter("pinned-python", marker)
+        (self.tmp_path / "config.env").write_text(
+            f'CODEX_LOGFIRE_PYTHON="{pinned}"\n', encoding="utf-8"
+        )
+        result = self.run_wrapper(self.base_env())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
+
+    def test_stale_cache_rescans_instead_of_hanging(self) -> None:
+        hanging = self.write_hanging_shim("stale-python")
+        self.state_dir.mkdir(parents=True)
+        (self.state_dir / "python_interpreter").write_text(f"{hanging}\n", encoding="utf-8")
+        marker = self.tmp_path / "ran"
+        self.write_fake_interpreter("python3", marker)
+        started = time.monotonic()
+        result = self.run_wrapper(self.base_env())
+        elapsed = time.monotonic() - started
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(marker.exists(), "rescan did not reach the healthy interpreter")
+        self.assertLess(elapsed, 8.0)
+        self.assertEqual(self.cached_interpreter(), str(self.bin_dir / "python3"))
+
+    def test_stdin_reaches_the_hook(self) -> None:
+        # The probes must not consume the hook payload: the fake interpreter
+        # answers probes (-c) directly and otherwise records stdin.
+        capture = self.tmp_path / "stdin"
+        self.write_executable(
+            self.bin_dir / "python3",
+            f'#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\ncat > "{capture}"\nexit 0\n',
+        )
+        result = self.run_wrapper(self.base_env(), stdin='{"hook_event_name": "Stop"}')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(capture.read_text(encoding="utf-8"), '{"hook_event_name": "Stop"}')
+
+
+if __name__ == "__main__":
+    unittest.main()
