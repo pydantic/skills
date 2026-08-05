@@ -245,6 +245,8 @@ class HookTests(unittest.TestCase):
         self.assertEqual(attrs["codex.prompt.length"], "5")
         self.assertEqual(attrs["codex.response.length"], "4")
         self.assertEqual(attrs["gen_ai.operation.name"], "chat")
+        # The provider, not "codex", so cost calculators can price the turn.
+        self.assertEqual(attrs["gen_ai.system"], "openai")
         self.assertEqual(attrs["gen_ai.response.model"], "gpt-5.5")
         self.assertEqual(attrs["gen_ai.usage.input_tokens"], "20")
         self.assertEqual(attrs["gen_ai.usage.output_tokens"], "5")
