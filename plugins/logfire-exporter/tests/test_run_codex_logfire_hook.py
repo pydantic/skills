@@ -74,6 +74,16 @@ class WrapperTests(unittest.TestCase):
             return None
         return cache.read_text(encoding="utf-8").strip()
 
+    def assert_process_exited(self, pid: int) -> None:
+        deadline = time.monotonic() + 2.0
+        while time.monotonic() < deadline:
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                return
+            time.sleep(0.05)
+        self.fail(f"process {pid} is still present")
+
     def test_healthy_interpreter_runs_hook_and_caches_choice(self) -> None:
         marker = self.tmp_path / "ran"
         self.write_fake_interpreter("python3", marker)
@@ -138,19 +148,23 @@ exit 0
             self.assertEqual(logical_cwd, expected_cwd)
             self.assertEqual(physical_cwd, expected_cwd)
 
-    def test_watchdog_kills_probe_children(self) -> None:
-        # A hanging shim usually blocks on a child it spawned; the watchdog
-        # must sweep that child too, not orphan it to run to completion.
-        pidfile = self.tmp_path / "child.pid"
+    def test_watchdog_kills_complete_probe_process_tree(self) -> None:
+        child_pidfile = self.tmp_path / "child.pid"
+        grandchild_pidfile = self.tmp_path / "grandchild.pid"
         self.write_executable(
             self.bin_dir / "python3",
-            f'#!/bin/sh\nsleep 60 &\necho $! > "{pidfile}"\nwait\n',
+            f'''#!/bin/sh
+/bin/sh -c 'sleep 60 & echo $! > "{grandchild_pidfile}"; wait' &
+echo $! > "{child_pidfile}"
+wait
+''',
         )
         result = self.run_wrapper(self.base_env())
         self.assertEqual(result.returncode, 0, result.stderr)
-        child_pid = int(pidfile.read_text(encoding="utf-8").strip())
-        with self.assertRaises(ProcessLookupError):
-            os.kill(child_pid, 0)
+        child_pid = int(child_pidfile.read_text(encoding="utf-8").strip())
+        grandchild_pid = int(grandchild_pidfile.read_text(encoding="utf-8").strip())
+        self.assert_process_exited(child_pid)
+        self.assert_process_exited(grandchild_pid)
 
     def test_env_override_is_trusted_without_probe(self) -> None:
         marker = self.tmp_path / "ran"

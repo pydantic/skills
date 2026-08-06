@@ -58,6 +58,15 @@ load_python_from_config() {
     return 0
 }
 
+# Print every descendant of a process, deepest first. macOS has pgrep but no
+# setsid, so the watchdog snapshots the tree explicitly before killing it.
+collect_descendants() {
+    for child_pid in $(pgrep -P "$1" 2>/dev/null); do
+        collect_descendants "$child_pid"
+        printf '%s\n' "$child_pid"
+    done
+}
+
 # probe <interpreter>: true when the interpreter starts, is Python 3, and
 # exits within the watchdog window. Stdin is redirected away so a probe can
 # never consume the hook payload.
@@ -74,18 +83,17 @@ probe() {
             sleep 0.1 2>/dev/null || { sleep 1; ticks=$((ticks + 9)); }
             ticks=$((ticks + 1))
         done
-        # A hanging shim usually blocks on a child it spawned; sweep that
-        # child too so it is not orphaned to run to completion (one leaked
-        # process per hook run). Snapshot the children BEFORE killing the
-        # parent: killing them first can let the parent finish cleanly and
-        # the probe would then count as a success, selecting the hung shim.
+        # A hanging shim can block on a chain of child processes. Snapshot the
+        # complete descendant tree BEFORE killing the parent so none are
+        # orphaned to keep running. Killing descendants first can let the
+        # parent finish cleanly and make the probe select the hung shim.
         # (setsid + a process-group kill would be more thorough, but setsid
         # does not exist on macOS, where this failure mode is most common.)
-        probe_children=$(pgrep -P "$probe_pid" 2>/dev/null)
+        probe_descendants=$(collect_descendants "$probe_pid")
         kill -9 "$probe_pid" 2>/dev/null
-        if [ -n "$probe_children" ]; then
+        if [ -n "$probe_descendants" ]; then
             # shellcheck disable=SC2086 # word-splitting the PID list is intended
-            kill -9 $probe_children 2>/dev/null
+            kill -9 $probe_descendants 2>/dev/null
         fi
     ) &
     watchdog_pid=$!
