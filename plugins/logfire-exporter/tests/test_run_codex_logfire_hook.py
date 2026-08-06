@@ -124,6 +124,18 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
 
+    def test_config_file_override_tolerates_whitespace(self) -> None:
+        # The hook's own config parser allows whitespace around '=' and the
+        # value; the wrapper's one-key parser must accept the same shapes.
+        marker = self.tmp_path / "ran"
+        pinned = self.write_fake_interpreter("pinned-python", marker)
+        (self.tmp_path / "config.env").write_text(
+            f"  CODEX_LOGFIRE_PYTHON = '{pinned}'  \n", encoding="utf-8"
+        )
+        result = self.run_wrapper(self.base_env())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
+
     def test_stale_cache_rescans_instead_of_hanging(self) -> None:
         hanging = self.write_hanging_shim("stale-python")
         self.state_dir.mkdir(parents=True)

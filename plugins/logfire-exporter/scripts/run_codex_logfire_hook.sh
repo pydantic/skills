@@ -38,9 +38,11 @@ debug() {
 load_python_from_config() {
     config_file="${CODEX_LOGFIRE_CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/logfire-exporter/config.env}"
     [ -f "$config_file" ] || return 1
-    line=$(grep '^CODEX_LOGFIRE_PYTHON=' "$config_file" 2>/dev/null | tail -n 1) || return 1
+    # Accept the same shapes the hook's own config parser does: optional
+    # whitespace around the key and '=', and whitespace-padded values.
+    line=$(grep -E '^[[:space:]]*CODEX_LOGFIRE_PYTHON[[:space:]]*=' "$config_file" 2>/dev/null | tail -n 1) || return 1
     [ -n "$line" ] || return 1
-    value=${line#CODEX_LOGFIRE_PYTHON=}
+    value=$(printf '%s' "${line#*=}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
     # Strip one layer of surrounding quotes, matching the hook's env parsing.
     case $value in
         \"*\") value=${value#\"}; value=${value%\"} ;;
@@ -62,8 +64,9 @@ probe() {
         while [ "$ticks" -lt "$PROBE_TIMEOUT_TICKS" ]; do
             kill -0 "$probe_pid" 2>/dev/null || exit 0
             # Fractional sleep is not POSIX; degrade to whole seconds where
-            # unsupported (the hook-level timeout still bounds the worst case).
-            sleep 0.1 2>/dev/null || sleep 1
+            # unsupported, consuming ten ticks per second so the total
+            # watchdog window stays ~2s either way.
+            sleep 0.1 2>/dev/null || { sleep 1; ticks=$((ticks + 9)); }
             ticks=$((ticks + 1))
         done
         kill -9 "$probe_pid" 2>/dev/null
