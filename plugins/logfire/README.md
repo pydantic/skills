@@ -89,8 +89,13 @@ the shell where you launch Claude Code:
 export LOGFIRE_MCP_URL=https://logfire-eu.pydantic.dev/mcp
 ```
 
-(On plugin versions before 0.1.4, the URL is hardcoded; add the endpoint manually instead with
-`claude mcp add --transport http logfire https://logfire-eu.pydantic.dev/mcp`.)
+This needs plugin version 0.1.4 or later (`claude plugin list` shows the installed version); on
+earlier versions the URL is hardcoded. Update an older install and restart Claude Code:
+
+```bash
+claude plugin marketplace update claude-plugins-official
+claude plugin update logfire@claude-plugins-official
+```
 
 **Codex** users can switch by replacing the MCP entry and re-authenticating:
 
