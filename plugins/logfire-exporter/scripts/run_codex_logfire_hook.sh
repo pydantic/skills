@@ -30,6 +30,12 @@ HOOK_SCRIPT="$SCRIPT_DIR/codex_logfire_hook.py"
 # not process state.
 CDPATH='' cd -- "$SCRIPT_DIR" || exit 0
 
+if [ -z "${CODEX_LOGFIRE_STATE_DIR:-}" ] &&
+    [ -z "${XDG_STATE_HOME:-}" ] &&
+    [ -z "${HOME:-}" ]; then
+    exit 0
+fi
+
 STATE_DIR="${CODEX_LOGFIRE_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/logfire-exporter}"
 CACHE_FILE="$STATE_DIR/python_interpreter"
 PROBE_TIMEOUT_TICKS=20 # x 0.1s = 2 seconds

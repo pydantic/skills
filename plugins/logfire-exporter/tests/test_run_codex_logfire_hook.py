@@ -118,6 +118,18 @@ class WrapperTests(unittest.TestCase):
         if cached is not None:
             self.assertNotEqual(cached, str(shim))
 
+    def test_missing_home_and_state_directory_fails_open(self) -> None:
+        marker = self.tmp_path / "ran"
+        self.write_fake_interpreter("python3", marker)
+        env = self.base_env()
+        env.pop("HOME")
+        env.pop("CODEX_LOGFIRE_STATE_DIR")
+
+        result = self.run_wrapper(env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(marker.exists())
+
     def test_normalizes_working_directory_before_running_python(self) -> None:
         marker = self.tmp_path / "working-directories"
         self.write_executable(
