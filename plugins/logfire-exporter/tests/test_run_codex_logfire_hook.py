@@ -105,6 +105,20 @@ class WrapperTests(unittest.TestCase):
         if cached is not None:
             self.assertNotEqual(cached, str(shim))
 
+    def test_watchdog_kills_probe_children(self) -> None:
+        # A hanging shim usually blocks on a child it spawned; the watchdog
+        # must sweep that child too, not orphan it to run to completion.
+        pidfile = self.tmp_path / "child.pid"
+        self.write_executable(
+            self.bin_dir / "python3",
+            f'#!/bin/sh\nsleep 60 &\necho $! > "{pidfile}"\nwait\n',
+        )
+        result = self.run_wrapper(self.base_env())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        child_pid = int(pidfile.read_text(encoding="utf-8").strip())
+        with self.assertRaises(ProcessLookupError):
+            os.kill(child_pid, 0)
+
     def test_env_override_is_trusted_without_probe(self) -> None:
         marker = self.tmp_path / "ran"
         pinned = self.write_fake_interpreter("pinned-python", marker)

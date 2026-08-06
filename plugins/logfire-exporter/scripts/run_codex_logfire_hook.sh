@@ -69,7 +69,19 @@ probe() {
             sleep 0.1 2>/dev/null || { sleep 1; ticks=$((ticks + 9)); }
             ticks=$((ticks + 1))
         done
+        # A hanging shim usually blocks on a child it spawned; sweep that
+        # child too so it is not orphaned to run to completion (one leaked
+        # process per hook run). Snapshot the children BEFORE killing the
+        # parent: killing them first can let the parent finish cleanly and
+        # the probe would then count as a success, selecting the hung shim.
+        # (setsid + a process-group kill would be more thorough, but setsid
+        # does not exist on macOS, where this failure mode is most common.)
+        probe_children=$(pgrep -P "$probe_pid" 2>/dev/null)
         kill -9 "$probe_pid" 2>/dev/null
+        if [ -n "$probe_children" ]; then
+            # shellcheck disable=SC2086 # word-splitting the PID list is intended
+            kill -9 $probe_children 2>/dev/null
+        fi
     ) &
     watchdog_pid=$!
     wait "$probe_pid" 2>/dev/null
