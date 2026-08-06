@@ -1,0 +1,208 @@
+#!/bin/sh
+# Runs codex_logfire_hook.py with a Python interpreter that is known to work.
+#
+# Invoking a bare `python3` is not reliable: version-manager shims can hang
+# because their backing installation is broken, while pyenv can also loop
+# forever when PWD is relative (https://github.com/pyenv/pyenv/issues/3513).
+# Codex then blocks on every hook until its timeout, grinding the chat to a
+# crawl. This wrapper normalizes the working directory, probes interpreter
+# candidates with a short watchdog, caches the first one that answers, and
+# fails open (exit 0) when none does. A broken Python setup therefore degrades
+# to "no telemetry" rather than "stalled chats".
+#
+# Configuration:
+#   CODEX_LOGFIRE_PYTHON     absolute path to the interpreter to use; trusted
+#                            as-is (no probe). May also be set in the exporter
+#                            config.env file.
+#   CODEX_LOGFIRE_STATE_DIR  overrides where the interpreter choice is cached
+#                            (same variable the hook itself uses for state).
+#   CODEX_LOGFIRE_DEBUG      when non-empty, selection details are written to
+#                            stderr.
+
+set -u
+
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
+HOOK_SCRIPT="$SCRIPT_DIR/codex_logfire_hook.py"
+
+# Codex can launch hooks with a relative PWD (for example, PWD=.), triggering
+# pyenv #3513. Move to a known absolute, accessible directory before invoking
+# any interpreter shim. The project cwd is carried in the hook's stdin payload,
+# not process state.
+CDPATH='' cd -- "$SCRIPT_DIR" || exit 0
+
+if [ -z "${CODEX_LOGFIRE_STATE_DIR:-}" ] &&
+    [ -z "${XDG_STATE_HOME:-}" ] &&
+    [ -z "${HOME:-}" ]; then
+    exit 0
+fi
+
+STATE_DIR="${CODEX_LOGFIRE_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/logfire-exporter}"
+CACHE_FILE="$STATE_DIR/python_interpreter"
+PROBE_TIMEOUT_TICKS=20 # x 0.1s = 2 seconds
+MAX_PROBES=3           # keep total automatic selection below 10s hook timeouts
+probe_count=0
+seen_candidates=''
+
+debug() {
+    if [ -n "${CODEX_LOGFIRE_DEBUG:-}" ]; then
+        printf 'run_codex_logfire_hook: %s\n' "$1" >&2
+    fi
+}
+
+# The hook script itself loads config.env, but the interpreter choice is
+# needed before any Python runs, so read this one key here too.
+load_python_from_config() {
+    if [ -n "${CODEX_LOGFIRE_CONFIG_FILE:-}" ]; then
+        config_file=$CODEX_LOGFIRE_CONFIG_FILE
+    else
+        if [ -n "${XDG_CONFIG_HOME:-}" ]; then
+            config_home=$XDG_CONFIG_HOME
+        elif [ -n "${HOME:-}" ]; then
+            config_home="$HOME/.config"
+        else
+            return 1
+        fi
+        config_file="$config_home/logfire-exporter/config.env"
+        if [ ! -f "$config_file" ]; then
+            for legacy_dir in codex-logfire-exporter codex-logfire-plugin; do
+                legacy_file="$config_home/$legacy_dir/config.env"
+                if [ -f "$legacy_file" ]; then
+                    config_file=$legacy_file
+                    break
+                fi
+            done
+        fi
+    fi
+    [ -f "$config_file" ] || return 1
+    # Accept the same shapes the hook's own config parser does: optional
+    # whitespace around the key and '=', and whitespace-padded values.
+    line=$(grep -E '^[[:space:]]*CODEX_LOGFIRE_PYTHON[[:space:]]*=' "$config_file" 2>/dev/null | tail -n 1) || return 1
+    [ -n "$line" ] || return 1
+    value=$(printf '%s' "${line#*=}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+    # Strip one layer of surrounding quotes, matching the hook's env parsing.
+    case $value in
+        \"*\") value=${value#\"}; value=${value%\"} ;;
+        \'*\') value=${value#\'}; value=${value%\'} ;;
+    esac
+    [ -n "$value" ] || return 1
+    CODEX_LOGFIRE_PYTHON=$value
+    return 0
+}
+
+# Print every descendant of a process, deepest first. macOS has pgrep but no
+# setsid, so the watchdog snapshots the tree explicitly before killing it.
+collect_descendants() {
+    for child_pid in $(pgrep -P "$1" 2>/dev/null); do
+        collect_descendants "$child_pid"
+        printf '%s\n' "$child_pid"
+    done
+}
+
+# probe <interpreter>: true when the interpreter starts, is Python 3, and
+# exits within the watchdog window. Stdin is redirected away so a probe can
+# never consume the hook payload.
+probe() {
+    "$1" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 9) else 1)' </dev/null >/dev/null 2>&1 &
+    probe_pid=$!
+    (
+        ticks=0
+        while [ "$ticks" -lt "$PROBE_TIMEOUT_TICKS" ]; do
+            kill -0 "$probe_pid" 2>/dev/null || exit 0
+            # Fractional sleep is not POSIX; degrade to whole seconds where
+            # unsupported, consuming ten ticks per second so the total
+            # watchdog window stays ~2s either way.
+            sleep 0.1 2>/dev/null || { sleep 1; ticks=$((ticks + 9)); }
+            ticks=$((ticks + 1))
+        done
+        # A hanging shim can block on a chain of child processes. Snapshot the
+        # complete descendant tree BEFORE killing the parent so none are
+        # orphaned to keep running. Killing descendants first can let the
+        # parent finish cleanly and make the probe select the hung shim.
+        # (setsid + a process-group kill would be more thorough, but setsid
+        # does not exist on macOS, where this failure mode is most common.)
+        probe_descendants=$(collect_descendants "$probe_pid")
+        kill -9 "$probe_pid" 2>/dev/null
+        if [ -n "$probe_descendants" ]; then
+            # shellcheck disable=SC2086 # word-splitting the PID list is intended
+            kill -9 $probe_descendants 2>/dev/null
+        fi
+    ) &
+    watchdog_pid=$!
+    wait "$probe_pid" 2>/dev/null
+    probe_status=$?
+    kill "$watchdog_pid" 2>/dev/null
+    wait "$watchdog_pid" 2>/dev/null
+    [ "$probe_status" -eq 0 ]
+}
+
+probe_within_budget() {
+    [ "$probe_count" -lt "$MAX_PROBES" ] || return 1
+    probe_count=$((probe_count + 1))
+    probe "$1"
+}
+
+candidate_seen() {
+    [ -n "$seen_candidates" ] &&
+        printf '%s\n' "$seen_candidates" | grep -F -x -- "$1" >/dev/null 2>&1
+}
+
+remember_candidate() {
+    if [ -n "$seen_candidates" ]; then
+        seen_candidates="$seen_candidates
+$1"
+    else
+        seen_candidates=$1
+    fi
+}
+
+run_with() {
+    exec "$1" "$HOOK_SCRIPT"
+}
+
+if [ -z "${CODEX_LOGFIRE_PYTHON:-}" ]; then
+    load_python_from_config || true
+fi
+
+if [ -n "${CODEX_LOGFIRE_PYTHON:-}" ]; then
+    debug "using CODEX_LOGFIRE_PYTHON=$CODEX_LOGFIRE_PYTHON"
+    run_with "$CODEX_LOGFIRE_PYTHON"
+fi
+
+# A previously cached interpreter is still probed (cheap when healthy) so a
+# cache pointing at a since-broken shim falls through to a fresh scan instead
+# of hanging.
+if [ -f "$CACHE_FILE" ]; then
+    cached=$(cat "$CACHE_FILE" 2>/dev/null || printf '')
+    if [ -n "$cached" ] && [ -x "$cached" ]; then
+        remember_candidate "$cached"
+        if probe_within_budget "$cached"; then
+            debug "using cached interpreter $cached"
+            run_with "$cached"
+        fi
+    fi
+    debug "cached interpreter unusable, rescanning"
+fi
+
+for candidate in python3 /usr/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3 python; do
+    resolved=$(command -v "$candidate" 2>/dev/null) || continue
+    if candidate_seen "$resolved"; then
+        debug "skipping duplicate candidate $resolved"
+        continue
+    fi
+    if [ "$probe_count" -ge "$MAX_PROBES" ]; then
+        debug "probe budget exhausted; skipping remaining candidates"
+        break
+    fi
+    remember_candidate "$resolved"
+    if probe_within_budget "$resolved"; then
+        debug "selected $resolved"
+        mkdir -p "$STATE_DIR" 2>/dev/null || true
+        printf '%s\n' "$resolved" > "$CACHE_FILE" 2>/dev/null || true
+        run_with "$resolved"
+    fi
+    debug "candidate $resolved failed probe"
+done
+
+# Fail open: exporting telemetry is never worth breaking the conversation.
+debug "no working Python 3 interpreter found; skipping export"
+exit 0
