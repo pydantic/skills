@@ -357,7 +357,11 @@ def build_turn_span(
         "codex.stop_hook_active": bool(turn.get("stop_hook_active")),
         "codex.prompt.length": turn.get("prompt_length"),
         "codex.response.length": turn.get("last_assistant_message_length"),
-        "gen_ai.system": "codex",
+        # "openai" (the underlying provider) rather than "codex": cost
+        # calculators resolve prices from (gen_ai.system, model), and "codex"
+        # matches no pricing provider. Codex identity stays on the codex.*
+        # attributes, agent_name, and the "Codex" tag.
+        "gen_ai.system": "openai",
         "gen_ai.operation.name": "chat",
         "gen_ai.request.model": turn.get("model"),
         "gen_ai.response.model": turn.get("model"),
