@@ -197,6 +197,29 @@ wait
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
 
+    def test_config_file_falls_back_to_legacy_paths(self) -> None:
+        legacy_directories = ("codex-logfire-exporter", "codex-logfire-plugin")
+        for index, legacy_directory in enumerate(legacy_directories):
+            with self.subTest(legacy_directory=legacy_directory):
+                marker = self.tmp_path / f"legacy-ran-{index}"
+                pinned = self.write_fake_interpreter(f"legacy-python-{index}", marker)
+                config_home = self.tmp_path / f"config-{index}"
+                legacy_config = config_home / legacy_directory / "config.env"
+                legacy_config.parent.mkdir(parents=True)
+                legacy_config.write_text(
+                    f"CODEX_LOGFIRE_PYTHON={pinned}\n", encoding="utf-8"
+                )
+                env = self.base_env()
+                env.pop("CODEX_LOGFIRE_CONFIG_FILE")
+                env["XDG_CONFIG_HOME"] = str(config_home)
+
+                result = self.run_wrapper(env)
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn(
+                    "codex_logfire_hook.py", marker.read_text(encoding="utf-8")
+                )
+
     def test_stale_cache_rescans_instead_of_hanging(self) -> None:
         hanging = self.write_hanging_shim("stale-python")
         self.state_dir.mkdir(parents=True)

@@ -43,7 +43,21 @@ debug() {
 # The hook script itself loads config.env, but the interpreter choice is
 # needed before any Python runs, so read this one key here too.
 load_python_from_config() {
-    config_file="${CODEX_LOGFIRE_CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/logfire-exporter/config.env}"
+    if [ -n "${CODEX_LOGFIRE_CONFIG_FILE:-}" ]; then
+        config_file=$CODEX_LOGFIRE_CONFIG_FILE
+    else
+        config_home=${XDG_CONFIG_HOME:-$HOME/.config}
+        config_file="$config_home/logfire-exporter/config.env"
+        if [ ! -f "$config_file" ]; then
+            for legacy_dir in codex-logfire-exporter codex-logfire-plugin; do
+                legacy_file="$config_home/$legacy_dir/config.env"
+                if [ -f "$legacy_file" ]; then
+                    config_file=$legacy_file
+                    break
+                fi
+            done
+        fi
+    fi
     [ -f "$config_file" ] || return 1
     # Accept the same shapes the hook's own config parser does: optional
     # whitespace around the key and '=', and whitespace-padded values.
