@@ -1,0 +1,21 @@
+plugins/logfire-exporter/scripts/run_codex_logfire_hook.cmd
+  s_76126d19203d6b::t_7b4167be28afda 14,20
+plugins/logfire-exporter/tests/test_hooks_config.py
+  s_76126d19203d6b::t_7b4167be28afda 49-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "07d42967e65f418a024f630c7e71333068aa7c3c",
+  "prompts": {},
+  "sessions": {
+    "s_76126d19203d6b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd256-c472-78a3-932d-6b9397c99012",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Alex Hall <alex.mojaki@gmail.com>"
+    }
+  }
+}
