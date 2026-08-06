@@ -1,6 +1,6 @@
 {
   "name": "logfire",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Add Logfire observability to Python applications with auto-instrumentation for FastAPI, httpx, asyncpg, SQLAlchemy, and more",
   "author": {
     "name": "Pydantic",
@@ -18,7 +18,7 @@
     "pydantic"
   ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
+  "mcpServers": "./.codex-plugin/mcp.json",
   "interface": {
     "displayName": "Logfire",
     "shortDescription": "Investigate telemetry and add Logfire instrumentation.",

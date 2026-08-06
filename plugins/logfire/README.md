@@ -48,7 +48,7 @@ Then enable **Logfire** from the Codex plugin UI. The Codex plugin metadata live
 - capabilities **Interactive** and **Write**
 - Logfire icon and pink brand color
 - Logfire skills for instrumentation, querying, and UI-opening workflows
-- MCP server from `.mcp.json`
+- MCP server from `.codex-plugin/mcp.json`
 
 For local development after changing this plugin, refresh the Codex plugin cache:
 
@@ -76,9 +76,23 @@ Then restart Cursor or run **Developer: Reload Window**. The Cursor plugin metad
 
 ## MCP
 
-The Logfire MCP server is configured automatically when you install the plugin (US region).
+The Logfire MCP server is configured automatically when you install the plugin. By default it
+targets the US region endpoint (`https://logfire-us.pydantic.dev/mcp`). The plugin's skills and
+commands are region-independent; only the MCP server entry differs per region.
 
-Codex users can switch to the EU endpoint without editing plugin files by replacing the MCP entry and re-authenticating:
+### EU region and self-hosted instances
+
+**Claude Code** reads the endpoint from the `LOGFIRE_MCP_URL` environment variable, so set it in
+the shell where you launch Claude Code:
+
+```bash
+export LOGFIRE_MCP_URL=https://logfire-eu.pydantic.dev/mcp
+```
+
+(On plugin versions before 0.1.4, the URL is hardcoded; add the endpoint manually instead with
+`claude mcp add --transport http logfire https://logfire-eu.pydantic.dev/mcp`.)
+
+**Codex** users can switch by replacing the MCP entry and re-authenticating:
 
 ```bash
 codex mcp remove logfire
@@ -89,12 +103,10 @@ codex mcp get logfire
 
 Start a new Codex conversation after switching so the MCP tools reload.
 
-Claude Code users can switch by running:
+**Cursor** installs are a local copy, so edit the `url` in
+`~/.cursor/plugins/local/logfire/mcp.json` and reload the window.
 
-```
-claude mcp add logfire --transport http https://logfire-eu.pydantic.dev/mcp
-```
-
-In Codex, `.mcp.json` configures the `logfire` MCP server. In Cursor, `mcp.json` configures the same hosted server.
+In Claude Code, `.mcp.json` configures the `logfire` MCP server. In Codex, `.codex-plugin/mcp.json`
+configures it. In Cursor, `mcp.json` configures the same hosted server.
 
 The Logfire MCP server requires normal Logfire authentication, such as `logfire auth` or a suitable `LOGFIRE_TOKEN`.
