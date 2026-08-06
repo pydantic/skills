@@ -46,6 +46,18 @@ class HooksConfigTests(unittest.TestCase):
         self.assertIn("CODEX_LOGFIRE_PYTHON", launcher)
         self.assertIn("exit /b 0", launcher.lower())
 
+    def test_windows_launcher_falls_back_after_failed_candidates(self) -> None:
+        launcher = WINDOWS_LAUNCHER_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'python3 "%~dp0codex_logfire_hook.py"\n    if not errorlevel 1 exit /b 0',
+            launcher,
+        )
+        self.assertIn(
+            'py -3 "%~dp0codex_logfire_hook.py"\n    if not errorlevel 1 exit /b 0',
+            launcher,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,13 +11,13 @@ if defined CODEX_LOGFIRE_PYTHON (
 where python3.exe >nul 2>nul
 if not errorlevel 1 (
     python3 "%~dp0codex_logfire_hook.py"
-    exit /b 0
+    if not errorlevel 1 exit /b 0
 )
 
 where py.exe >nul 2>nul
 if not errorlevel 1 (
     py -3 "%~dp0codex_logfire_hook.py"
-    exit /b 0
+    if not errorlevel 1 exit /b 0
 )
 
 where python.exe >nul 2>nul
