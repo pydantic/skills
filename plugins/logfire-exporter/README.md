@@ -129,22 +129,32 @@ The two plugins can be enabled together.
 
 ## Python Interpreter Selection
 
-The hooks run `scripts/run_codex_logfire_hook.sh`, which picks a working Python 3 interpreter rather
-than trusting a bare `python3`: version-manager shims (notably pyenv's) can hang instead of failing
-when their backing installation is broken, which previously made every hook run to its timeout and
-stalled the conversation. The wrapper probes candidates (`python3` on `PATH`, then common system
-locations) with a 2-second watchdog, caches the first one that answers under
-`${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/python_interpreter`, and skips exporting
-entirely when none works.
+On macOS and Linux, the hooks run `scripts/run_codex_logfire_hook.sh`. Before looking up Python, the
+wrapper changes to the exporter's accessible, absolute script directory. This avoids
+[pyenv #3513](https://github.com/pyenv/pyenv/issues/3513), in which pyenv's version-file search can
+loop forever when a launcher supplies a relative `PWD` such as `.`. The original project cwd still
+reaches the Python hook in the hook's stdin JSON.
 
-To pin a specific interpreter, set `CODEX_LOGFIRE_PYTHON` (in the hook environment or in the
-`config.env` file):
+The POSIX wrapper then probes candidates (`python3` on `PATH`, followed by common system locations)
+with a 2-second watchdog. It snapshots and terminates the entire probe process tree on timeout,
+caches the first interpreter that answers under
+`${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/python_interpreter`, and skips exporting
+entirely when none works. These checks also contain unrelated broken or hanging interpreter shims.
+
+To pin a specific interpreter on POSIX, set `CODEX_LOGFIRE_PYTHON` in the hook environment or in the
+`config.env` file:
 
 ```dotenv
 CODEX_LOGFIRE_PYTHON=/opt/homebrew/bin/python3.13
 ```
 
 A pinned interpreter is used as-is, with no probe.
+
+On Windows, the hooks use `scripts/run_codex_logfire_hook.cmd` and retain direct interpreter
+launching. The launcher uses `CODEX_LOGFIRE_PYTHON` when it is present in the hook environment, then
+tries `python3`, `py -3`, and `python`, and always fails open. It does not read the interpreter choice
+from `config.env`, probe candidates, or cache a selection; the configured Codex hook timeout remains
+the timeout protection on Windows.
 
 ## Troubleshooting
 
@@ -160,12 +170,21 @@ If no spans or plugin logs appear after a completed Codex turn, check the Codex 
 rg -n "logfire-exporter|failed to load plugin" ~/.codex/log/codex-tui.log
 ```
 
-If hooks report timeouts (a "Hooks summary" with `hook timed out` errors) or chats feel slow after
-enabling the plugin, your `python3` is probably a broken version-manager shim. Fix the shim (for
-pyenv: `pyenv rehash`, or reinstall the selected version) or pin a known-good interpreter with
-`CODEX_LOGFIRE_PYTHON` as described above. Set `CODEX_LOGFIRE_DEBUG=1` in the hook environment to
-see the interpreter selection on stderr, and delete the cached choice at
-`${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/python_interpreter` to force a rescan.
+If POSIX hooks report timeouts (a "Hooks summary" with `hook timed out` errors) or chats feel slow
+after enabling the plugin, distinguish these cases:
+
+- A relative `PWD` such as `.` can trigger the infinite loop in
+  [pyenv #3513](https://github.com/pyenv/pyenv/issues/3513). The wrapper's absolute working-directory
+  normalization contains this case. `pyenv rehash` or reinstalling the selected Python does not fix
+  that relative-directory bug; pyenv and the launcher's `PWD` handling remain the upstream fixes.
+- A shim can be broken for an unrelated reason, such as pointing to a missing interpreter. Repair
+  the version-manager installation in that case, or pin a known-good absolute interpreter with
+  `CODEX_LOGFIRE_PYTHON` as described above.
+
+Set `CODEX_LOGFIRE_DEBUG=1` in the POSIX hook environment to see interpreter selection on stderr.
+Delete `${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/python_interpreter` to force the POSIX
+wrapper to rescan. Windows does not create or use that cache; set `CODEX_LOGFIRE_PYTHON` in the
+Windows hook environment if its default interpreter command is unusable.
 
 ## Test
 

@@ -1,13 +1,14 @@
 #!/bin/sh
 # Runs codex_logfire_hook.py with a Python interpreter that is known to work.
 #
-# Invoking a bare `python3` is not reliable: version-manager shims (notably
-# pyenv's) can hang instead of failing when their backing installation is
-# broken, and Codex then blocks on every hook until its timeout, grinding the
-# chat to a crawl. This wrapper probes interpreter candidates with a short
-# watchdog, caches the first one that answers, and fails open (exit 0) when
-# none does, so a broken Python setup degrades to "no telemetry" rather than
-# "stalled chats".
+# Invoking a bare `python3` is not reliable: version-manager shims can hang
+# because their backing installation is broken, while pyenv can also loop
+# forever when PWD is relative (https://github.com/pyenv/pyenv/issues/3513).
+# Codex then blocks on every hook until its timeout, grinding the chat to a
+# crawl. This wrapper normalizes the working directory, probes interpreter
+# candidates with a short watchdog, caches the first one that answers, and
+# fails open (exit 0) when none does. A broken Python setup therefore degrades
+# to "no telemetry" rather than "stalled chats".
 #
 # Configuration:
 #   CODEX_LOGFIRE_PYTHON     absolute path to the interpreter to use; trusted
@@ -23,9 +24,10 @@ set -u
 SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
 HOOK_SCRIPT="$SCRIPT_DIR/codex_logfire_hook.py"
 
-# Codex can launch hooks with a relative PWD (for example, PWD=.). Move to a
-# known absolute, accessible directory before invoking any interpreter shim.
-# The project cwd is carried in the hook's stdin payload, not process state.
+# Codex can launch hooks with a relative PWD (for example, PWD=.), triggering
+# pyenv #3513. Move to a known absolute, accessible directory before invoking
+# any interpreter shim. The project cwd is carried in the hook's stdin payload,
+# not process state.
 CDPATH='' cd -- "$SCRIPT_DIR" || exit 0
 
 STATE_DIR="${CODEX_LOGFIRE_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/logfire-exporter}"
