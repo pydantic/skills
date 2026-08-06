@@ -89,13 +89,18 @@ the shell where you launch Claude Code:
 export LOGFIRE_MCP_URL=https://logfire-eu.pydantic.dev/mcp
 ```
 
-This needs plugin version 0.1.4 or later (`claude plugin list` shows the installed version); on
-earlier versions the URL is hardcoded. Update an older install and restart Claude Code:
+This needs plugin version 0.1.4 or later; on earlier versions the URL is hardcoded. Run
+`claude plugin list` to see the installed version and the marketplace it came from, then update
+and restart Claude Code:
 
 ```bash
-claude plugin marketplace update claude-plugins-official
-claude plugin update logfire@claude-plugins-official
+claude plugin marketplace update pydantic-skills
+claude plugin update logfire@pydantic-skills
 ```
+
+If you installed from Anthropic's `claude-plugins-official` marketplace instead, substitute that
+name. That marketplace pins a specific commit of this repository, so a release can take longer to
+appear there than on `pydantic-skills`, which tracks `main`.
 
 **Codex** users can switch by replacing the MCP entry and re-authenticating:
 
