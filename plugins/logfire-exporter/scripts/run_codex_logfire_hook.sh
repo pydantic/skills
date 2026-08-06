@@ -55,7 +55,13 @@ load_python_from_config() {
     if [ -n "${CODEX_LOGFIRE_CONFIG_FILE:-}" ]; then
         config_file=$CODEX_LOGFIRE_CONFIG_FILE
     else
-        config_home=${XDG_CONFIG_HOME:-$HOME/.config}
+        if [ -n "${XDG_CONFIG_HOME:-}" ]; then
+            config_home=$XDG_CONFIG_HOME
+        elif [ -n "${HOME:-}" ]; then
+            config_home="$HOME/.config"
+        else
+            return 1
+        fi
         config_file="$config_home/logfire-exporter/config.env"
         if [ ! -f "$config_file" ]; then
             for legacy_dir in codex-logfire-exporter codex-logfire-plugin; do

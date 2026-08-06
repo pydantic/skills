@@ -130,6 +130,18 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse(marker.exists())
 
+    def test_missing_home_with_state_override_still_probes_python(self) -> None:
+        marker = self.tmp_path / "ran"
+        self.write_fake_interpreter("python3", marker)
+        env = self.base_env()
+        env.pop("HOME")
+        env.pop("CODEX_LOGFIRE_CONFIG_FILE")
+
+        result = self.run_wrapper(env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
+
     def test_normalizes_working_directory_before_running_python(self) -> None:
         marker = self.tmp_path / "working-directories"
         self.write_executable(
