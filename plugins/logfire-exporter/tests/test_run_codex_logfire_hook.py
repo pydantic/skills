@@ -55,13 +55,16 @@ class WrapperTests(unittest.TestCase):
     def write_hanging_shim(self, name: str) -> Path:
         return self.write_executable(self.bin_dir / name, "#!/bin/sh\nsleep 60\nexit 0\n")
 
-    def run_wrapper(self, env: dict[str, str], stdin: str = "") -> subprocess.CompletedProcess[str]:
+    def run_wrapper(
+        self, env: dict[str, str], stdin: str = "", cwd: Path | None = None
+    ) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
             ["sh", str(WRAPPER_PATH)],
             input=stdin,
             capture_output=True,
             text=True,
             env=env,
+            cwd=cwd,
             timeout=30.0,
         )
 
@@ -104,6 +107,36 @@ class WrapperTests(unittest.TestCase):
         cached = self.cached_interpreter()
         if cached is not None:
             self.assertNotEqual(cached, str(shim))
+
+    def test_normalizes_working_directory_before_running_python(self) -> None:
+        marker = self.tmp_path / "working-directories"
+        self.write_executable(
+            self.bin_dir / "python3",
+            f'''#!/bin/sh
+printf '%s\t%s\t%s\n' "$1" "$PWD" "$(pwd -P)" >> "{marker}"
+exit 0
+''',
+        )
+        invocation_dir = self.tmp_path / "invocation"
+        invocation_dir.mkdir()
+        env = self.base_env()
+        env["PWD"] = "."
+
+        result = self.run_wrapper(
+            env,
+            stdin='{"hook_event_name": "Stop"}',
+            cwd=invocation_dir,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        records = [line.split("\t") for line in marker.read_text().splitlines()]
+        self.assertEqual(len(records), 2)
+        self.assertEqual(records[0][0], "-c")
+        self.assertIn("codex_logfire_hook.py", records[1][0])
+        expected_cwd = str(WRAPPER_PATH.parent.resolve())
+        for _, logical_cwd, physical_cwd in records:
+            self.assertEqual(logical_cwd, expected_cwd)
+            self.assertEqual(physical_cwd, expected_cwd)
 
     def test_watchdog_kills_probe_children(self) -> None:
         # A hanging shim usually blocks on a child it spawned; the watchdog

@@ -20,8 +20,13 @@
 
 set -u
 
-SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
 HOOK_SCRIPT="$SCRIPT_DIR/codex_logfire_hook.py"
+
+# Codex can launch hooks with a relative PWD (for example, PWD=.). Move to a
+# known absolute, accessible directory before invoking any interpreter shim.
+# The project cwd is carried in the hook's stdin payload, not process state.
+CDPATH='' cd -- "$SCRIPT_DIR" || exit 0
 
 STATE_DIR="${CODEX_LOGFIRE_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/logfire-exporter}"
 CACHE_FILE="$STATE_DIR/python_interpreter"
