@@ -39,6 +39,9 @@ fi
 STATE_DIR="${CODEX_LOGFIRE_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/logfire-exporter}"
 CACHE_FILE="$STATE_DIR/python_interpreter"
 PROBE_TIMEOUT_TICKS=20 # x 0.1s = 2 seconds
+MAX_PROBES=3           # keep total automatic selection below 10s hook timeouts
+probe_count=0
+seen_candidates=''
 
 debug() {
     if [ -n "${CODEX_LOGFIRE_DEBUG:-}" ]; then
@@ -126,6 +129,26 @@ probe() {
     [ "$probe_status" -eq 0 ]
 }
 
+probe_within_budget() {
+    [ "$probe_count" -lt "$MAX_PROBES" ] || return 1
+    probe_count=$((probe_count + 1))
+    probe "$1"
+}
+
+candidate_seen() {
+    [ -n "$seen_candidates" ] &&
+        printf '%s\n' "$seen_candidates" | grep -F -x -- "$1" >/dev/null 2>&1
+}
+
+remember_candidate() {
+    if [ -n "$seen_candidates" ]; then
+        seen_candidates="$seen_candidates
+$1"
+    else
+        seen_candidates=$1
+    fi
+}
+
 run_with() {
     exec "$1" "$HOOK_SCRIPT"
 }
@@ -144,16 +167,28 @@ fi
 # of hanging.
 if [ -f "$CACHE_FILE" ]; then
     cached=$(cat "$CACHE_FILE" 2>/dev/null || printf '')
-    if [ -n "$cached" ] && [ -x "$cached" ] && probe "$cached"; then
-        debug "using cached interpreter $cached"
-        run_with "$cached"
+    if [ -n "$cached" ] && [ -x "$cached" ]; then
+        remember_candidate "$cached"
+        if probe_within_budget "$cached"; then
+            debug "using cached interpreter $cached"
+            run_with "$cached"
+        fi
     fi
     debug "cached interpreter unusable, rescanning"
 fi
 
 for candidate in python3 /usr/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3 python; do
     resolved=$(command -v "$candidate" 2>/dev/null) || continue
-    if probe "$resolved"; then
+    if candidate_seen "$resolved"; then
+        debug "skipping duplicate candidate $resolved"
+        continue
+    fi
+    if [ "$probe_count" -ge "$MAX_PROBES" ]; then
+        debug "probe budget exhausted; skipping remaining candidates"
+        break
+    fi
+    remember_candidate "$resolved"
+    if probe_within_budget "$resolved"; then
         debug "selected $resolved"
         mkdir -p "$STATE_DIR" 2>/dev/null || true
         printf '%s\n' "$resolved" > "$CACHE_FILE" 2>/dev/null || true

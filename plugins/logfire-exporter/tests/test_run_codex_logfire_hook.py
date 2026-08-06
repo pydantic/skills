@@ -246,6 +246,22 @@ wait
         self.assertLess(elapsed, 8.0)
         self.assertEqual(self.cached_interpreter(), str(self.bin_dir / "python3"))
 
+    def test_failed_cached_path_candidate_is_only_probed_once(self) -> None:
+        marker = self.tmp_path / "probe-count"
+        hanging = self.write_executable(
+            self.bin_dir / "python3",
+            f'#!/bin/sh\nprintf "probe\\n" >> "{marker}"\nsleep 60\n',
+        )
+        self.state_dir.mkdir(parents=True)
+        (self.state_dir / "python_interpreter").write_text(
+            f"{hanging}\n", encoding="utf-8"
+        )
+
+        result = self.run_wrapper(self.base_env())
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(marker.read_text(encoding="utf-8").splitlines(), ["probe"])
+
     def test_stdin_reaches_the_hook(self) -> None:
         # The probes must not consume the hook payload: the fake interpreter
         # answers probes (-c) directly and otherwise records stdin.
