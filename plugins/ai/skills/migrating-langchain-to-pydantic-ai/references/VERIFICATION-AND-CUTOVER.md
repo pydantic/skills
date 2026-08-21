@@ -5,6 +5,7 @@ Use this reference before editing a production agent or declaring a migration co
 ## Contents
 
 - [Characterize the old system](#characterize-the-old-system)
+- [Classify every claim](#classify-every-claim)
 - [Build the test pyramid](#build-the-test-pyramid)
 - [Verify operational semantics](#verify-operational-semantics)
 - [Cut over safely](#cut-over-safely)
@@ -28,6 +29,22 @@ Capture the applicable behavior at stable boundaries; do not invent requirements
 - deployment, queue, scheduler, and webhook contracts.
 
 Record at least one success trace and representative failure traces for the risks the selected path actually has.
+
+## Classify every claim
+
+Apply a status to each observed contract, not to the migration as a whole:
+
+| Status | Required evidence |
+|---|---|
+| `verified-equivalent` | Source and target preserve the same externally observable contract in executable checks against the target project's versions and boundaries. |
+| `verified-adapter` | Internal semantics differ, but an adapter preserves the public contract in executable checks. |
+| `intentional-change` | The difference and impact were explained and explicitly accepted by the user or owner. |
+| `external-owner` | A named application or infrastructure component preserves the contract, with evidence at that boundary. |
+| `not-applicable` | The observed source path does not provide or consume this behavior. |
+| `unverified` | The behavior was not exercised, the evidence is incomplete, or only a candidate design exists. Do not call it equivalent. |
+| `blocked` | A required contract has no acceptable proved construction. Do not cut over that slice. |
+
+Trace similarity, successful imports, matching class names, a happy-path demo, and an author-side spike are not sufficient for `verified-equivalent`. Link each verified status to its test or boundary assertion and report every `unverified`, `intentional-change`, and `blocked` item to the user.
 
 ## Build the test pyramid
 
@@ -88,7 +105,11 @@ Test the security boundaries the slice exposes. Examples include cross-tenant ac
 
 ### Streaming
 
-Check the event behavior promised by the public stream: event order, relevant correlation IDs, partial text, final-result emission, and any documented reconnect, backpressure, or cancellation behavior. `run_stream` may treat the first valid final output as terminal; use `run_stream_events` or `iter` when all tool events must complete.
+Check the event behavior promised by the public stream: event order, relevant correlation IDs, partial text, final-result emission, and any documented reconnect, backpressure, or cancellation behavior. Prove incremental delivery with a real client; model-level time to first chunk does not detect application buffering. `run_stream` may treat the first valid final output as terminal; use `run(event_stream_handler=...)`, `run_stream_events`, or `iter` when all tool events must complete. Test early consumer exit, cleanup, and late producer errors.
+
+### Observability
+
+When the user opts in or the project already uses Logfire, configure it at application startup and make content capture an explicit privacy decision. Otherwise preserve the existing tracing infrastructure and use its OpenTelemetry backend where practical. Correlate the request, agent run, model calls, tools, retries, usage, and application-owned boundaries. Compare normalized source and target facts rather than raw telemetry schemas. Sampling, missing instrumentation, and disabled content limit what a trace can substantiate. Follow [Logfire-Assisted Migration Verification](LOGFIRE-VERIFICATION.md); traces complement rather than replace contract tests.
 
 ## Cut over safely
 
@@ -105,13 +126,13 @@ Avoid dual-running side-effectful agents unless tools are in dry-run mode or eve
 
 ## Completion checklist
 
-- [ ] Every applicable migration-ledger row is native, intentionally external, or documented as remaining work; a low-risk slice may use a concise residual-risk note instead.
+- [ ] Every observed contract has an evidence-backed status; a low-risk slice may use a concise residual-risk note instead of a ledger.
 - [ ] Public request, response, error, and event contracts pass.
 - [ ] Tool schemas, authorization, side effects, retries, and approval pass.
 - [ ] State, history, persistence, resume, and recovery promises pass.
 - [ ] Streaming and cancellation pass with real clients.
 - [ ] Unit, integration, and eval thresholds pass.
-- [ ] Logfire traces correlate app request, agent run, model calls, tools, and subagents.
+- [ ] When Logfire is enabled, its privacy settings are deliberate and traces correlate the applicable app, agent, model, tool, and subagent boundaries without being treated as sole parity proof.
 - [ ] No hidden LangChain callbacks, globals, messages, or `RunnableConfig` assumptions remain.
 - [ ] Transitional bridges have been removed or have owners and removal dates.
 - [ ] Dependency files and operational documentation match the new runtime.

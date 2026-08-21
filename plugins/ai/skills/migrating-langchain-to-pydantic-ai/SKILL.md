@@ -18,9 +18,9 @@ Preserve behavior, not framework shape. Migrate the smallest behaviorally comple
    - **Direct LangGraph workflow:** use plain async Python for simple fixed control flow, or `pydantic_graph` when explicit typed nodes and branching remain useful. Treat persistence as a separate design decision.
    - **Product runtime:** retain queues, configured database backends, sandboxes, auth, schedulers, webhooks, tracing, and transport adapters unless the user placed them in scope. Extend an existing application seam before creating a parallel persistence or provider subsystem.
 5. Add or preserve deterministic characterization tests, then migrate one vertical slice behind the existing public boundary.
-6. Run the original tests and focused parity tests. Report intentional changes and residual differences rather than claiming equivalence from matching class names.
+6. Run the original tests and focused parity tests. Classify each observed contract by its evidence; never describe the migration as one-to-one merely because the happy path or trace shape looks similar.
 
-Read [Concept Mapping](references/CONCEPT-MAPPING.md) for the detected source features. Read [Semantic Gaps](references/SEMANTIC-GAPS.md) only for state, middleware, retries, approval, concurrency, streaming, or other behavior where similar-looking APIs may differ. Use [Workaround Recipes](references/WORKAROUND-RECIPES.md) after a concrete gap is identified, not as a mandatory checklist. Read [Verification and Cutover](references/VERIFICATION-AND-CUTOVER.md) before a production cutover.
+Read [Concept Mapping](references/CONCEPT-MAPPING.md) for the detected source features. Read [Semantic Gaps](references/SEMANTIC-GAPS.md) only for state, middleware, retries, approval, concurrency, streaming, or other behavior where similar-looking APIs may differ. Use [Workaround Recipes](references/WORKAROUND-RECIPES.md) after a concrete gap is identified, not as a mandatory checklist. Read [Logfire Verification](references/LOGFIRE-VERIFICATION.md) when adding observability, comparing source and target runs, or debugging a semantic difference. Read [Verification and Cutover](references/VERIFICATION-AND-CUTOVER.md) before a production cutover.
 
 ## Explain semantic differences
 
@@ -42,7 +42,8 @@ When an observed source contract has no direct equivalent, explain it to the use
 - Do not force an `Agent` onto deterministic LCEL or `pydantic_graph` onto every `StateGraph`.
 - Inspect the installed Pydantic AI API before choosing model classes, provider transports, hooks, streaming methods, or durable integrations.
 - When adding Pydantic AI, choose the newest stable release compatible with the project's declared constraints. Prove dependency resolution; do not pin an older release merely to match a remembered example.
+- Offer Logfire instrumentation at application startup for development and migration verification. Make content capture an explicit privacy decision. Use traces to find differences in model calls, tools, retries, errors, usage, and timing, but keep executable contract tests as the authority for parity.
 
 ## Completion
 
-The slice is complete when every observed contract is either preserved by an executable check or intentionally changed by an accepted decision. An unresolved requested contract is unfinished work, not completion evidence; constrain the slice or ask the user to accept the deferral. Remove LangChain or LangGraph dependencies only after no retained path needs them.
+The slice is complete when every observed contract is either preserved by an executable check, intentionally changed by an accepted decision, or explicitly not applicable. An untested contract is `unverified`, not equivalent; an unresolved requested contract is unfinished work, not completion evidence. Constrain the slice or ask the user to accept the deferral. Remove LangChain or LangGraph dependencies only after no retained path needs them.

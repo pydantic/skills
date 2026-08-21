@@ -175,10 +175,12 @@ Translate `Command(goto=..., update=...)` into an explicit next-node value plus 
 | `stream` / `astream` values, updates, messages | `run_stream`, `run_stream_events`, `event_stream_handler`, or `iter` |
 | fake chat models | `TestModel` or `FunctionModel` under `agent.override(...)` |
 | trajectory/eval datasets | `pydantic_evals` cases, datasets, and evaluators |
-| LangSmith traces | Logfire instrumentation and OpenTelemetry |
+| LangSmith traces | Pydantic AI Logfire instrumentation and application-owned OpenTelemetry spans; LangSmith can export source traces to the same backend for comparison |
 | graph state inspection | typed state plus application persistence/graph inspection |
 
 Define an application-owned event schema at the UI/API boundary. Adapt both implementations to it during migration; do not make clients depend directly on either framework's event classes.
+
+Use Logfire to inspect model calls, tools, retries, errors, usage, and timing, then prove public contracts with executable tests. In particular, model time to first chunk is not client time to first event. See [Logfire-Assisted Migration Verification](LOGFIRE-VERIFICATION.md).
 
 Do not substitute `run_stream()` for `run()` without a separate trajectory test. `run_stream()` commits the first matching output as it streams; co-emitted tools and retries can therefore produce a different terminal result from a complete `run()`.
 

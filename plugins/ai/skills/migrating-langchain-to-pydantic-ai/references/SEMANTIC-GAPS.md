@@ -21,19 +21,11 @@ For a checkpointed, side-effectful, approval-gated, or otherwise high-risk slice
 
 | Source guarantee | Observed target behavior | Pydantic workaround | Outcome | Required probe | Residual / owner |
 |---|---|---|---|---|---|
-| checkpoint resumes after approval | deferred results start another agent run | deferred requests plus an authenticated durable pending-action record | `integration-required` | crash before/after result persistence | selected workflow store / application workflow |
+| checkpoint resumes after approval | deferred results start another agent run | deferred requests plus an authenticated durable pending-action record | `unverified` | crash before/after result persistence | selected workflow store / application workflow |
 
-Record two separate classifications. First, the behavior decision:
+Classify each observed contract with the evidence statuses in [Verification and Cutover](VERIFICATION-AND-CUTOVER.md): `verified-equivalent`, `verified-adapter`, `intentional-change`, `external-owner`, `not-applicable`, `unverified`, or `blocked`. A promising native API remains `unverified` until its parity probe passes. A source behavior may be non-equivalent internally while a tested adapter earns `verified-adapter` at the public boundary.
 
-- `equivalent`: the tested versions preserve the same contract.
-- `adapted`: an application adapter preserves the contract.
-- `intentional-change`: product owners accept a documented change.
-- `external-owner`: infrastructure outside the agent preserves it.
-- `unproved`: block cutover or constrain the migrated slice.
-
-Second, the workaround outcome: `validated-native`, `validated-adapter`, `integration-required`, or `blocker`. A source behavior can be non-equivalent while its workaround is validated; conversely, a promising native API remains unproved until its parity probe passes.
-
-Never use `native` to mean “the names look similar.” Do not leave `redesign` as the proposed solution: follow the affected row into [Validated Workaround Recipes](WORKAROUND-RECIPES.md), implement the smallest viable construction, and classify it as `validated-native`, `validated-adapter`, `integration-required`, or `blocker`. Record installed versions and link each claim to a test, trace, source line, or official documentation.
+Never use “native” to mean “the names look similar.” Do not leave `redesign` as the proposed solution: follow the affected row into [Validated Workaround Recipes](WORKAROUND-RECIPES.md), implement the smallest viable construction, and classify the resulting contract. Record installed versions and link each verified claim to an executable test; use traces, source lines, and official documentation as supporting evidence.
 
 ## Prompts and message history
 

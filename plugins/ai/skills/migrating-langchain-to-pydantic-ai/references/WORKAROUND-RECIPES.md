@@ -21,10 +21,13 @@ Assign every semantic-gap row one outcome:
 
 | Outcome | Meaning |
 |---|---|
-| `validated-native` | A Pydantic AI primitive preserves the required behavior in a deterministic parity spike. |
-| `validated-adapter` | Small application or capability code closes the gap, and the spike proves the public contract. |
-| `integration-required` | A concrete construction exists, but the target project/version, backend, provider, or operational boundary has not passed its own parity test. |
-| `blocker` | No acceptable construction has passed. Do not migrate that slice. |
+| `verified-equivalent` | A Pydantic AI primitive preserves the required public behavior in executable source/target checks. |
+| `verified-adapter` | Small application or capability code closes the gap, and executable checks prove the public contract. |
+| `intentional-change` | The semantic difference and impact were explained and explicitly accepted. |
+| `external-owner` | A named application or infrastructure component preserves the contract, with evidence at that boundary. |
+| `not-applicable` | The observed source path does not provide or consume this behavior. |
+| `unverified` | A candidate construction exists, but the target project/version or operational boundary has not passed its own parity test. |
+| `blocked` | No acceptable construction has passed. Do not migrate that slice. |
 
 Do not leave a row at “redesign” or “not 1:1.” Select the most native mechanism that can preserve the behavior, write the smallest source/target reproduction, and measure both. Keep spike code outside the product and skill; promote only stable contract tests.
 
@@ -135,7 +138,7 @@ agent = Agent(
 )
 ```
 
-A disposable skill-development spike on Pydantic AI `2.10.1.dev24` observed one output-function execution and one model call. Treat that as a candidate construction, not validation for the target project: rerun the source/target probe before assigning `validated-native`. It changes the model contract from “optional ordinary tool” to “terminal output choice,” so use a union/list of output choices when other terminal outcomes exist. Output functions can run on partial values under `run_stream()`; guard side effects with `ctx.partial_output` or use a complete-execution API.
+A disposable skill-development spike on Pydantic AI `2.10.1.dev24` observed one output-function execution and one model call. Treat that as a candidate construction, not validation for the target project: rerun the source/target probe before assigning `verified-equivalent`. It changes the model contract from “optional ordinary tool” to “terminal output choice,” so use a union/list of output choices when other terminal outcomes exist. Output functions can run on partial values under `run_stream()`; guard side effects with `ctx.partial_output` or use a complete-execution API.
 
 ## Conversational interrupts, approval, and durable resume
 
@@ -158,9 +161,9 @@ For protected-tool approval, use `requires_approval=True` or raise `ApprovalRequ
 
 On resume, authenticate first, claim the pending row atomically, reconstruct the original history/dependencies, and pass server-created `DeferredToolResults`. Cache the completed result. Unknown, foreign, modified, or already-consumed approvals must fail before the agent or tool executes.
 
-A disposable SQLite development spike exercised this adapter across a fresh service instance, including foreign-principal rejection and a simulated crash after the tool. The tool was attempted twice after recovery but its unique business idempotency key produced one durable effect. This is design evidence, not target-project validation or a claim that arbitrary external APIs are exactly once; keep the outcome `integration-required` until the selected store passes the same probe.
+A disposable SQLite development spike exercised this adapter across a fresh service instance, including foreign-principal rejection and a simulated crash after the tool. The tool was attempted twice after recovery but its unique business idempotency key produced one durable effect. This is design evidence, not target-project validation or a claim that arbitrary external APIs are exactly once; keep the outcome `unverified` until the selected store passes the same probe.
 
-For long waits and process recovery, put the loop in a durable runtime. Pydantic AI supplies wrappers such as `DBOSAgent`, `TemporalAgent`, and `PrefectAgent`; Restate and Kitaru also provide integrations. A disposable two-process DBOS development spike with a stable agent name and workflow ID returned the persisted first result without repeating the model call. This narrows the candidate design but does not change the target outcome from `integration-required`. For DBOS, decorate non-deterministic or I/O tool functions with `@DBOS.step`; they are not automatically durable merely because the agent is wrapped.
+For long waits and process recovery, put the loop in a durable runtime. Pydantic AI supplies wrappers such as `DBOSAgent`, `TemporalAgent`, and `PrefectAgent`; Restate and Kitaru also provide integrations. A disposable two-process DBOS development spike with a stable agent name and workflow ID returned the persisted first result without repeating the model call. This narrows the candidate design but does not change the target outcome from `unverified`. For DBOS, decorate non-deterministic or I/O tool functions with `@DBOS.step`; they are not automatically durable merely because the agent is wrapped.
 
 Run a real process-kill/restart test against the selected production backend. Keep stable agent/toolset IDs, serializable dependencies, and explicit workflow signals/events for approval. Do not generalize DBOS evidence to Temporal, Prefect, Restate, Kitaru, or a different database.
 
