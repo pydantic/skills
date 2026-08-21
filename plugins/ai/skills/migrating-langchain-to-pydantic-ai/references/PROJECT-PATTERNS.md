@@ -44,9 +44,9 @@ Start with clarification or research-brief generation rather than the supervisor
 
 ## Route Deep Agents separately
 
-If inventory finds `create_deep_agent`, `HarnessProfile`, Deep Agents backends, repository skills, virtual files, planning, compaction, subagent registries, or sandbox/deployment orchestration, use the dedicated `migrate-deep-agents-to-pydantic-ai` skill. It owns Deep Agents defaults, Pydantic AI Harness capability selection, Open SWE, remote sandboxes, background work, and Deep Agents project playbooks.
+If the active path calls `create_deep_agent` or relies on Deep Agents planning, skills, filesystems, subagents, compaction, sandbox, memory, or deployment behavior, treat it as a harness migration. Inventory those product contracts and ask whether they are in scope before changing code. Do not translate only the underlying LangChain/LangGraph primitives and silently discard the harness behavior, and do not assume a dedicated migration skill is installed.
 
-Do not run both migration skills over the same project. This skill may still inventory shared LangGraph or LangChain primitives inside a mixed repository, but the Deep Agents skill owns the final migration ledger and plan.
+A dependency or unused helper is only a finding. Continue with an ordinary LangChain/LangGraph slice when its runtime path does not use the Deep Agents harness.
 
 ## Choose a migration boundary
 
@@ -59,6 +59,8 @@ Choose the smallest boundary that produces user-visible value:
 
 Prefer a reversible boundary. Avoid a flag deep inside tool execution that can mix frameworks within one side-effectful run; route the entire run or subgraph to one implementation.
 
+Before adding application-owned workflow state, inspect the repository's existing checkpointer/store factory, backend selection, thread listing/history APIs, registry, lifespan, tracing, and configuration forwarding. Extend those seams or explicitly narrow the public slice. A new SQLite adapter that bypasses configured Postgres or Mongo backends is not a preserved application boundary even if its local resume test passes.
+
 For a production product boundary, make these surfaces explicit:
 
 | Surface | Minimum contract |
@@ -68,4 +70,4 @@ For a production product boundary, make these surfaces explicit:
 | deferred action | typed approval/cancel/resume request and durable correlation, or explicit `none` with the retained owner |
 | final result | typed success/error outcome, usage, remaining side effects, and trace correlation |
 
-List retained webhook, queue, scheduler, thread, sandbox, credential, CI, and deployment owners individually. Put middleware order, tool visibility, streaming compatibility, mid-run steering, usage limits, retries, and cancellation in the parity ledger even when the first slice does not exercise them; mark each `preserved`, `not applicable`, or `deferred with owner`.
+List the infrastructure owners crossed by the selected slice. Put middleware order, tool visibility, streaming compatibility, mid-run steering, usage limits, retries, and cancellation in the parity ledger only when the traced source path or public contract uses them.

@@ -9,7 +9,7 @@ Use this reference after finding a non-1:1 mapping. The job is not complete unti
 - [Prompt replacement and history](#prompt-replacement-and-history)
 - [Middleware and local tool retry](#middleware-and-local-tool-retry)
 - [Structured output and return-direct tools](#structured-output-and-return-direct-tools)
-- [Approval and durable resume](#approval-and-durable-resume)
+- [Conversational interrupts, approval, and durable resume](#conversational-interrupts-approval-and-durable-resume)
 - [Workflow state, fan-out, and reducers](#workflow-state-fan-out-and-reducers)
 - [Streaming and event contracts](#streaming-and-event-contracts)
 - [Limits and persisted budgets](#limits-and-persisted-budgets)
@@ -137,9 +137,16 @@ agent = Agent(
 
 A disposable skill-development spike on Pydantic AI `2.10.1.dev24` observed one output-function execution and one model call. Treat that as a candidate construction, not validation for the target project: rerun the source/target probe before assigning `validated-native`. It changes the model contract from “optional ordinary tool” to “terminal output choice,” so use a union/list of output choices when other terminal outcomes exist. Output functions can run on partial values under `run_stream()`; guard side effects with `ctx.partial_output` or use a complete-execution API.
 
-## Approval and durable resume
+## Conversational interrupts, approval, and durable resume
 
-Use `requires_approval=True` or raise `ApprovalRequired`, then persist the returned `DeferredToolRequests`. The application record should include:
+First distinguish two different source contracts:
+
+- A **conversational interrupt** pauses a workflow to ask the user for missing information, then resumes from that answer. It is not authorization for a protected effect.
+- A **tool approval** binds an authenticated decision to a particular tool call and arguments before a protected effect runs.
+
+For a conversational interrupt, keep the pending question, workflow phase, authenticated owner, thread ID, and any completed pre-interrupt work in application state. Resume by loading that state and adding the answer as user protocol content, unless the source deliberately treats it as a control signal; putting the answer only in transient instructions can make it disappear from later conversation history. Do not re-run pre-interrupt model calls merely to reconstruct context. Reuse or extend the repository's configured persistence interface instead of silently introducing a local-only store. Preserve existing anonymous/optional identity behavior unless the application owner accepts a stronger identity contract. Test a fresh process/agent instance against the same store, same-thread correlation, cross-user rejection when identity exists, and whether the source repeats the interrupted node. If the source promises checkpoint forks, pending writes, or replay, a linear application record is only a bounded adapter and must say so.
+
+For protected-tool approval, use `requires_approval=True` or raise `ApprovalRequired`, then persist the returned `DeferredToolRequests`. The application record should include:
 
 - application approval ID and Pydantic tool-call ID;
 - authenticated tenant, initiator, and permitted approver;
@@ -172,6 +179,8 @@ For model-emitted function tools, Pydantic AI runs tools concurrently by default
 Do not expose framework events as the public API. Normalize source and target into an application envelope with version, run ID, sequence, correlation/tool-call ID, event kind, payload, and terminal/error semantics.
 
 Use `run_stream()` only when committing the first matching output is the intended contract. When all function tools, retries, and side effects must complete, use `run(event_stream_handler=...)`, `run_stream_events()`, or `iter()`, then emit the application terminal event from the completed `AgentRunResult`.
+
+When adapting `run_stream_events()` or `iter()` to an existing token stream, handle both the initial text carried by `PartStartEvent` and later text in `PartDeltaEvent`. A consumer that forwards only deltas silently drops the first chunk. Forward events as they arrive rather than collecting them until the run finishes when the source promises live streaming; event order with buffered delivery does not preserve time to first event, backpressure, or cancellation. Keep live event forwarding separate from final-result collection so the application can emit its terminal message from the completed run.
 
 Probe token/tool/final ordering, co-emitted output and tools, consumer cancellation, cleanup, backpressure, reconnect cursor, and duplicate delivery. Durable runtimes have different streaming constraints: validate the selected wrapper rather than assuming core-agent streaming behavior survives unchanged.
 

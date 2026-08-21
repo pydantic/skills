@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 import sys
 import tokenize
 from collections import Counter, defaultdict
@@ -14,6 +15,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 FRAMEWORK_PREFIXES = ('langchain', 'langgraph', 'langsmith', 'deepagents')
+FRAMEWORK_TEXT_PATTERN = re.compile(
+    r'(?<![A-Za-z0-9])(?:langchain|langgraph|langsmith|deepagents)(?=$|[^A-Za-z0-9]|[_-])',
+    re.IGNORECASE,
+)
 
 IGNORED_PARTS = {
     '.git',
@@ -121,9 +126,23 @@ class Finding:
 def import_category(module: str) -> str:
     """Classify a framework module by migration concern."""
     for prefix, category in IMPORT_CATEGORIES:
-        if module == prefix or module.startswith(f'{prefix}.') or module.startswith(prefix):
+        if prefix.endswith('_'):
+            matches = module.startswith(prefix)
+        else:
+            matches = module == prefix or module.startswith(f'{prefix}.')
+        if matches:
             return category
     return 'other'
+
+
+def is_framework_module(module: str) -> bool:
+    """Return whether a module belongs to the supported framework namespaces."""
+    return any(
+        module == prefix
+        or module.startswith(f'{prefix}.')
+        or (prefix == 'langchain' and module.startswith('langchain_'))
+        for prefix in FRAMEWORK_PREFIXES
+    )
 
 
 def dotted_name(node: ast.AST) -> str:
@@ -164,13 +183,13 @@ class InventoryVisitor(ast.NodeVisitor):
 
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
-            if alias.name.startswith(('langchain', 'langgraph', 'langsmith', 'deepagents')):
+            if is_framework_module(alias.name):
                 self.add(node, import_category(alias.name), 'import', alias.name)
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         module = node.module or ''
-        if module.startswith(('langchain', 'langgraph', 'langsmith', 'deepagents')):
+        if is_framework_module(module):
             names = ', '.join(alias.name for alias in node.names)
             self.add(node, import_category(module), 'import', f'{module}: {names}')
         self.generic_visit(node)
@@ -182,9 +201,12 @@ class InventoryVisitor(ast.NodeVisitor):
         category = CALL_CATEGORIES.get(canonical_leaf)
         if canonical_leaf in {'__import__', 'import_module'} and node.args:
             first_arg = node.args[0]
-            if isinstance(first_arg, ast.Constant) and isinstance(first_arg.value, str):
-                if first_arg.value.startswith(FRAMEWORK_PREFIXES):
-                    self.add(node, 'dynamic-import', 'call', f'{name}({first_arg.value!r})')
+            if (
+                isinstance(first_arg, ast.Constant)
+                and isinstance(first_arg.value, str)
+                and is_framework_module(first_arg.value)
+            ):
+                self.add(node, 'dynamic-import', 'call', f'{name}({first_arg.value!r})')
         if leaf in GENERIC_METHOD_CALLS and leaf != 'compile':
             receiver = name.rsplit('.', 1)[0].lower() if '.' in name else ''
             receiver_leaf = receiver.rsplit('.', 1)[-1]
@@ -269,7 +291,7 @@ def call_aliases(tree: ast.AST) -> dict[str, str]:
         if not isinstance(node, ast.ImportFrom):
             continue
         module = node.module or ''
-        if not module.startswith(FRAMEWORK_PREFIXES):
+        if not is_framework_module(module):
             continue
         for alias in node.names:
             aliases[alias.asname or alias.name] = alias.name
@@ -282,7 +304,11 @@ def scan_config_file(path: Path, relative_path: str) -> list[Finding]:
     lines = path.read_text(encoding='utf-8').splitlines()
     if path.suffix == '.lock' or path.name in {'uv.lock', 'Pipfile.lock'}:
         for prefix in FRAMEWORK_PREFIXES:
-            matching_lines = [line_number for line_number, line in enumerate(lines, start=1) if prefix in line.lower()]
+            matching_lines = [
+                line_number
+                for line_number, line in enumerate(lines, start=1)
+                if any(match.group(0).lower() == prefix for match in FRAMEWORK_TEXT_PATTERN.finditer(line))
+            ]
             if matching_lines:
                 findings.append(
                     Finding(
@@ -296,7 +322,8 @@ def scan_config_file(path: Path, relative_path: str) -> list[Finding]:
         return findings
     for line_number, line in enumerate(lines, start=1):
         lowered = line.lower()
-        matched = next((prefix for prefix in FRAMEWORK_PREFIXES if prefix in lowered), None)
+        match = FRAMEWORK_TEXT_PATTERN.search(lowered)
+        matched = match.group(0).lower() if match else None
         if matched is None:
             continue
         category = 'notebook' if path.suffix == '.ipynb' else 'dependency-config'
@@ -334,8 +361,8 @@ def scan(root: Path) -> tuple[list[Finding], list[dict[str, object]], int, int]:
             errors.append(error)
             continue
         has_framework_import = any(
-            (isinstance(node, ast.Import) and any(alias.name.startswith(FRAMEWORK_PREFIXES) for alias in node.names))
-            or (isinstance(node, ast.ImportFrom) and (node.module or '').startswith(FRAMEWORK_PREFIXES))
+            (isinstance(node, ast.Import) and any(is_framework_module(alias.name) for alias in node.names))
+            or (isinstance(node, ast.ImportFrom) and is_framework_module(node.module or ''))
             for node in ast.walk(tree)
         )
         visitor = InventoryVisitor(
@@ -383,14 +410,15 @@ def build_report(
         for path, counts in sorted(file_counts.items(), key=lambda item: (-sum(item[1].values()), item[0]))
     ]
     routing = []
-    if category_counts['harness'] or any(
-        finding.category == 'dependency-config' and 'deepagents' in finding.symbol.lower() for finding in findings
-    ):
+    if category_counts['harness']:
         routing.append(
             {
-                'condition': 'Deep Agents usage detected',
-                'skill': 'migrate-deep-agents-to-pydantic-ai',
-                'reason': 'Use the dedicated skill for create_deep_agent, Harness, sandbox, and deployment semantics.',
+                'condition': 'Active Deep Agents usage detected',
+                'action': 'assess-harness-scope',
+                'reason': (
+                    'Inventory planning, skills, filesystem, subagent, sandbox, memory, and deployment contracts; '
+                    'do not assume a separate migration skill is installed.'
+                ),
             }
         )
     return {
@@ -455,10 +483,10 @@ def markdown_report(report: dict[str, object], *, details: bool, max_hotspots: i
     routing = report['routing']
     assert isinstance(routing, list)
     if routing:
-        lines.extend(['', '## Route to another skill', ''])
+        lines.extend(['', '## Special routing', ''])
         for route in routing:
             assert isinstance(route, dict)
-            lines.append(f'- `{route["condition"]}` → `{route["skill"]}`: {route["reason"]}')
+            lines.append(f'- `{route["condition"]}` → `{route["action"]}`: {route["reason"]}')
 
     if details:
         lines.extend(['', '## Findings', '', '| File | Line | Category | Kind | Symbol |', '|---|---:|---|---|---|'])

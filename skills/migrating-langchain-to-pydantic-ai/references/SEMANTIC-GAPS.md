@@ -1,6 +1,6 @@
 # Semantic Gaps and Parity Spikes
 
-Use this reference before choosing target primitives. A migration is safe only when each source guarantee is preserved, intentionally changed, or assigned to an explicit external owner.
+Use this reference when the source path has stateful, operational, or version-sensitive behavior whose target semantics are uncertain. A migration is safe only when each observed source guarantee is preserved, intentionally changed, or assigned to an explicit external owner.
 
 ## Contents
 
@@ -17,7 +17,7 @@ Use this reference before choosing target primitives. A migration is safe only w
 
 ## Build a semantic-gap register
 
-Write this before target code:
+For a checkpointed, side-effectful, approval-gated, or otherwise high-risk slice, write this before target code. A simple stateless port can record the few applicable residuals alongside its tests instead:
 
 | Source guarantee | Observed target behavior | Pydantic workaround | Outcome | Required probe | Residual / owner |
 |---|---|---|---|---|---|
@@ -131,7 +131,9 @@ A LangGraph checkpointer stores graph state at super-step boundaries and may ret
 
 LangGraph resume restarts the interrupted node from its beginning. Code before `interrupt()` runs again; multiple interrupts are matched by position. Keep pre-interrupt effects idempotent or move them after the interrupt/separate node.
 
-Pydantic AI deferred approval ends or pauses at a tool-call boundary. An external resume supplies `DeferredToolResults` keyed by tool-call ID together with the original history. Pydantic AI does not automatically persist the history, dependencies, authenticated principal, or application resume token. Approval is not an authorization boundary: never trust a browser/client-provided `DeferredToolResults` merely because its ID is well formed. Authenticate the reviewer and correlate the result server-side to an issued pending call, authorized principal/tenant, tool name, and approved original arguments or an explicitly authorized override.
+When an interrupt merely asks for missing user input, preserve it as conversational workflow state: persist the pending question and phase, then append the answer as user protocol content on resume. Do not introduce an approval protocol unless a protected effect actually needs authorization.
+
+For a protected-tool decision, Pydantic AI deferred approval ends or pauses at a tool-call boundary. An external resume supplies `DeferredToolResults` keyed by tool-call ID together with the original history. Pydantic AI does not automatically persist the history, dependencies, authenticated principal, or application resume token. Approval is not an authorization boundary: never trust a browser/client-provided `DeferredToolResults` merely because its ID is well formed. Authenticate the reviewer and correlate the result server-side to an issued pending call, authorized principal/tenant, tool name, and approved original arguments or an explicitly authorized override.
 
 Map these details explicitly:
 

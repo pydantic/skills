@@ -18,6 +18,7 @@ Use this reference to select Pydantic AI primitives. Preserve behavior rather th
 
 | LangChain / LangGraph | Pydantic AI default | Migration note |
 |---|---|---|
+| LCEL prompt/retriever/parser pipeline | plain Python around a model call or `Agent` | Keep deterministic retrieval, formatting, and routing explicit. Do not introduce an agent loop when the source performs one model call. |
 | `create_agent(model, tools, system_prompt=...)` | `Agent(model, tools=..., instructions=...)` | Keep one reusable agent unless construction genuinely varies per request. |
 | `agent.invoke({"messages": ...})` | `await agent.run(prompt, deps=..., message_history=...)` | Consume `result.output`; do not expose Pydantic AI message objects at the public boundary. |
 | `ainvoke` | `await agent.run(...)` | Pydantic AI is async-first; use `run_sync` only at synchronous edges. |
@@ -25,6 +26,8 @@ Use this reference to select Pydantic AI primitives. Preserve behavior rather th
 | `context_schema` / `ToolRuntime.context` | `deps_type` / `RunContext.deps` | Put DB clients, authenticated identity, config, and service gateways in dependencies. |
 | prompt templates | `instructions` or `system_prompt` | Use `instructions` for current-agent policy and `system_prompt` only when prior prompts must survive history; multiple LangChain dynamic prompts may replace rather than compose. |
 | `init_chat_model` | provider-prefixed model string or model instance | Preserve provider settings explicitly; verify the installed provider API. |
+
+Preserve model transport as well as the model name. LangChain's `ChatOpenAI`, an OpenAI Responses model, an Azure deployment, and an OpenAI-compatible local endpoint can share a model label while using different request protocols and settings. Inspect the installed Pydantic AI provider constructors and test every configured branch without making a live request; leave unknown custom endpoints as an explicit integration gap.
 
 Minimal translation:
 
@@ -143,7 +146,8 @@ Separate four concepts that LangGraph often stores together:
 | checkpointer/thread | application persistence or a durable execution integration |
 | store | explicit storage service in typed dependencies |
 | time travel/fork | durable workflow-specific implementation; do not infer this from message history |
-| `interrupt()` | deferred tool request plus durable application correlation and resume |
+| `interrupt()` for missing user input | application-owned pending conversational state and resume |
+| `interrupt()` or HITL around a protected tool | deferred tool request plus authenticated, durable application correlation and resume |
 | replay after failure | Temporal, DBOS, Prefect, Restate, or another explicit durable boundary |
 
 Never label a migration complete because chat messages survive if the old system also promised checkpoint replay, pending writes, thread forks, or exactly-once side-effect protection.

@@ -69,9 +69,9 @@ agent.invoke({'messages': []})
                 report['scanner_python'],
                 f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}',
             )
-            self.assertEqual(report['routing'][0]['skill'], 'migrate-deep-agents-to-pydantic-ai')
+            self.assertEqual(report['routing'], [])
 
-    def test_deep_agent_usage_routes_to_the_dedicated_skill(self) -> None:
+    def test_active_deep_agent_usage_routes_to_scope_assessment(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             (root / 'deep_agent.py').write_text(
@@ -87,10 +87,11 @@ agent.invoke({'messages': []})
                 report['routing'],
                 [
                     {
-                        'condition': 'Deep Agents usage detected',
-                        'skill': 'migrate-deep-agents-to-pydantic-ai',
+                        'condition': 'Active Deep Agents usage detected',
+                        'action': 'assess-harness-scope',
                         'reason': (
-                            'Use the dedicated skill for create_deep_agent, Harness, sandbox, and deployment semantics.'
+                            'Inventory planning, skills, filesystem, subagent, sandbox, memory, and deployment '
+                            'contracts; do not assume a separate migration skill is installed.'
                         ),
                     }
                 ],
@@ -149,6 +150,36 @@ agent.invoke({'messages': []})
             report = json.loads(completed.stdout)
             self.assertEqual(report['parse_errors'], [])
             self.assertEqual(report['findings'][0]['symbol'], 'langchain: agents')
+
+    def test_lookalike_modules_and_dependency_text_are_ignored(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            source = root / 'lookalikes.py'
+            source.write_text(
+                'import langchainx\n'
+                'from langgraphical import workflow\n'
+                'value = "langsmithery"\n'
+            )
+            (root / 'requirements.txt').write_text('langchainx\ndeepagentsx\n')
+
+            completed = self.run_inventory(root)
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            report = json.loads(completed.stdout)
+            self.assertEqual(report['findings'], [])
+            self.assertEqual(report['routing'], [])
+
+    def test_single_python_file_is_scanned_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            source = Path(temporary_directory) / 'agent.py'
+            source.write_text('from langchain.agents import create_agent\n')
+
+            completed = self.run_inventory(source)
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            report = json.loads(completed.stdout)
+            self.assertEqual(report['python_files_scanned'], 1)
+            self.assertEqual(report['finding_count'], 1)
 
     def test_parse_errors_fail_by_default_and_can_be_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

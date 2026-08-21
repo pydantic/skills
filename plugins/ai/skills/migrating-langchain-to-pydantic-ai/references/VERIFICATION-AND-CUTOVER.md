@@ -12,7 +12,7 @@ Use this reference before editing a production agent or declaring a migration co
 
 ## Characterize the old system
 
-Capture behavior at stable boundaries:
+Capture the applicable behavior at stable boundaries; do not invent requirements for features the source path does not use:
 
 - accepted request and context schema;
 - final output and error schema;
@@ -27,7 +27,7 @@ Capture behavior at stable boundaries:
 - traces, metrics, and eval dimensions;
 - deployment, queue, scheduler, and webhook contracts.
 
-Record at least one success trace and representative traces for invalid tool arguments, tool failure, provider failure, approval, resume, cancellation, and context pressure.
+Record at least one success trace and representative failure traces for the risks the selected path actually has.
 
 ## Build the test pyramid
 
@@ -67,7 +67,7 @@ Do not require identical prose unless wording is a public contract. Require iden
 
 ### Persistence and recovery
 
-Prove separately:
+When the source promises them, prove separately:
 
 - conversation continuation;
 - workflow-state restoration;
@@ -80,15 +80,15 @@ Pydantic AI message history proves only conversation continuity. Use a durable e
 
 ### Concurrency and limits
 
-Test fan-out caps, shared usage limits, cancellation, timeout, rate-limit backoff, partial child failure, and deterministic result aggregation. Verify that parent and child agents do not silently receive separate unlimited budgets.
+When the slice fans out or shares limits, test caps, cancellation, timeout, rate-limit backoff, partial child failure, and deterministic result aggregation. Verify that parent and child agents do not silently receive separate unlimited budgets.
 
 ### Security
 
-Attempt cross-tenant access, path traversal, symlink escape, command bypass, SSRF, prompt injection into tool arguments, secret exposure, and approval bypass. Forge a deferred approval with a foreign, unknown, or already-consumed tool-call ID and reject it at an authenticated server-side correlation boundary. Enforce failures below the model layer.
+Test the security boundaries the slice exposes. Examples include cross-tenant access, path traversal for filesystem tools, SSRF for URL-fetching tools, secret exposure, and approval bypass. For deferred approval, forge a foreign, unknown, or already-consumed tool-call ID and reject it at an authenticated server-side correlation boundary. Enforce failures below the model layer.
 
 ### Streaming
 
-Check event order, tool-call/result correlation IDs, partial text semantics, final-result emission, reconnect behavior, backpressure, and client cancellation. `run_stream` may treat the first valid final output as terminal; use `run_stream_events` or `iter` when all tool events must complete.
+Check the event behavior promised by the public stream: event order, relevant correlation IDs, partial text, final-result emission, and any documented reconnect, backpressure, or cancellation behavior. `run_stream` may treat the first valid final output as terminal; use `run_stream_events` or `iter` when all tool events must complete.
 
 ## Cut over safely
 
@@ -105,7 +105,7 @@ Avoid dual-running side-effectful agents unless tools are in dry-run mode or eve
 
 ## Completion checklist
 
-- [ ] Every migration-ledger row is native, intentionally external, or documented as remaining work.
+- [ ] Every applicable migration-ledger row is native, intentionally external, or documented as remaining work; a low-risk slice may use a concise residual-risk note instead.
 - [ ] Public request, response, error, and event contracts pass.
 - [ ] Tool schemas, authorization, side effects, retries, and approval pass.
 - [ ] State, history, persistence, resume, and recovery promises pass.

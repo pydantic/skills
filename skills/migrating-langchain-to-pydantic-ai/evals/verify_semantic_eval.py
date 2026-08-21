@@ -165,10 +165,15 @@ def _checkout_sha(repository: Path) -> str:
 
 
 def _measure_provenance(repository: Path, oracle_provenance: dict[str, Any]) -> dict[str, Any]:
+    source_root = (repository / 'pydantic_ai_slim').resolve()
+    pydantic_origin = Path(oracle_provenance['import_origins']['pydantic_ai']).resolve()
+    if not pydantic_origin.is_relative_to(source_root):
+        raise SystemExit(f'Pydantic AI was not imported from the requested checkout: {pydantic_origin}')
     return {
-        'versions': oracle_provenance['versions'],
+        'environment_distribution_versions': oracle_provenance['versions'],
         'import_origins': oracle_provenance['import_origins'],
         'pydantic_checkout_sha': _checkout_sha(repository),
+        'pydantic_checkout_version': _git(repository, 'describe', '--tags', '--always', '--dirty').decode().strip(),
     }
 
 
