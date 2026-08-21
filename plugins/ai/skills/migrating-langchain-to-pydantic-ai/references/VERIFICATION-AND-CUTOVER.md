@@ -54,6 +54,8 @@ Trace similarity, successful imports, matching class names, a happy-path demo, a
 - Use `TestModel` for schema/tool registration checks.
 - Use `FunctionModel` when exact requests, tool calls, retry, or failure behavior matters.
 - Assert `ModelRequestParameters` or captured run messages when tool schema and instructions are part of the contract.
+- Run the repository's static checker across the migrated slice. When output inference loses a real union, parameterize `Agent[DepsT, OutputT]` explicitly rather than weakening the owned boundary to `Any`.
+- Round-trip persisted model messages and typed workflow records through their production serializer, and prove malformed records fail validation.
 - For dynamic instructions, test at least two dependency values and prove the emitted instructions change while secrets and authenticated identity remain absent from model-visible content.
 - Test both approval decisions: denial must not execute the protected tool; an approved resume must execute it exactly once with the original authenticated dependencies and correlation ID.
 - Test graph/application transitions without a live model.

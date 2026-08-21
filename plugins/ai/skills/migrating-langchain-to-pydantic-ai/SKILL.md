@@ -36,6 +36,7 @@ When an observed source contract has no direct equivalent, explain it to the use
 ## Pydantic AI defaults
 
 - Put authenticated identity, service clients, and configuration in typed dependencies, never model-chosen tool arguments.
+- Strengthen observed unstable seams, not the whole application: parameterize the agent's dependency and output types, and validate terminal choices, persisted workflow records, and framework adapters. Preserve stable public wire shapes and do not invent types for paths outside the migrated slice.
 - Preserve public request, response, error, and event shapes with a small adapter while callers migrate.
 - Keep retrieval, storage, provider, and transport integrations in place when they are outside the requested slice. Transitional LangChain integrations are acceptable when named and bounded.
 - Use Pydantic models for terminal structured output when that preserves the contract; retain an existing parser when changing the wire contract would expand the migration.

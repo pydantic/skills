@@ -5,6 +5,7 @@ Use this reference to select Pydantic AI primitives. Preserve behavior rather th
 ## Contents
 
 - [Core agent loop](#core-agent-loop)
+- [Typed invariants at unstable seams](#typed-invariants-at-unstable-seams)
 - [Tools and runtime context](#tools-and-runtime-context)
 - [Structured output](#structured-output)
 - [Middleware and lifecycle](#middleware-and-lifecycle)
@@ -76,6 +77,19 @@ print(result.output)
 ```
 
 The dependency boundary is a security boundary: the model chooses `order_id`, but cannot choose `customer_id` or the service client.
+
+## Typed invariants at unstable seams
+
+Use types to make an observed migration decision executable, not to remodel stable application code. The following seams caused real ambiguity in migrated applications:
+
+| Observed source ambiguity | Target invariant | Evidence to require |
+|---|---|---|
+| free-form config or runtime context mixes trusted identity, services, and model inputs | a dependency dataclass plus `Agent[DepsT, OutputT]`; only model-chosen values appear in tool parameters | static checking plus a captured tool schema and model request |
+| a string, dictionary, or graph control value can mean several terminal states, such as answer versus request-more-input | a Pydantic model or explicit output union for the states the source actually reaches | every variant validates and every application branch is exercised; remember that including `str` permits plain text to terminate the run |
+| graph state mixes public messages, model protocol history, pending resume state, owner, and persistence version | distinct public DTOs, `list[ModelMessage]`, and a typed workflow record; serialize model history with `ModelMessagesTypeAdapter` when the installed version provides it | storage round-trip, continuation, ownership, and resume tests against the real backend |
+| provider names and settings are passed through loose strings and dictionaries | retain the source enum or typed configuration and map it to a concrete Pydantic AI `Model` | construct every configured branch without a live request and probe provider-specific settings |
+
+Do not claim semantic parity from static typing alone. Types can expose missing cases and validate boundaries; they cannot prove timing, retries, persistence, side effects, or framework lifecycle behavior.
 
 ## Tools and runtime context
 
