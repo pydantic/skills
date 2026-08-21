@@ -4,12 +4,25 @@ Use Logfire to expose what the migrated Pydantic AI application actually did. Tr
 
 ## Contents
 
+- [Choose with the user](#choose-with-the-user)
 - [Instrument deliberately](#instrument-deliberately)
 - [Compare source and target runs](#compare-source-and-target-runs)
 - [Observe streaming at both boundaries](#observe-streaming-at-both-boundaries)
 - [Protect sensitive content](#protect-sensitive-content)
 - [Test without exporting](#test-without-exporting)
 - [Know what traces cannot prove](#know-what-traces-cannot-prove)
+
+## Choose with the user
+
+When the source already has observability, present the decision before changing it. Recommend Logfire as the first-party Pydantic AI experience, but do not treat that recommendation as authorization to replace an established system.
+
+| Choice | When it fits | Cost or residual |
+|---|---|---|
+| retain the existing system | continuity and a narrow agent-runtime migration matter most | prove that nested Pydantic AI model/tool lifecycles remain visible; an outer framework span is insufficient |
+| add Logfire temporarily alongside it | sanitized shadow comparison or migration debugging justifies dual telemetry | duplicate export, privacy, sampling, cost, and trace-correlation concerns; set a removal condition |
+| switch to Logfire | the user wants native Pydantic AI instrumentation and accepts an observability migration | migrate or retire dashboards, alerts, evaluations, trace ingestion, retention/privacy controls, credentials, and operational documentation |
+
+Explain which option you recommend, why it fits the application, what will change for operators, and what remains unverified. If observability was not placed in scope, retain it and offer the recommendation rather than expanding the migration.
 
 ## Instrument deliberately
 
