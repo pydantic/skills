@@ -6,7 +6,7 @@ Build production-grade AI agents with [Pydantic AI](https://ai.pydantic.dev/) an
 
 - SKILL.md with core Pydantic AI patterns (agents, tools, capabilities, structured output, testing, multi-agent systems)
 - Reference docs for common tasks (hooks, specs, streaming, fallback models, delegation)
-- Migration workflow, concept mappings, project-scale studies, verification guidance, and a LangChain inventory script
+- Migration workflow, concept mappings, semantic-gap guidance, and verification/cutover guidance
 
 ## Install
 

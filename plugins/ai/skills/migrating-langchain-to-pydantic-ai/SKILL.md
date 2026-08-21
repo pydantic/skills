@@ -11,7 +11,7 @@ Preserve behavior, not framework shape. Migrate the smallest behaviorally comple
 
 1. Read repository instructions, dependency files, tests, and the actual runtime entrypoints. Identify the installed LangChain, LangGraph, and Pydantic AI versions.
 2. Trace one representative request through prompts, retrieval, model and tool calls, state, persistence, interrupts, emitted events, and the public result. Inspect every caller and sibling endpoint that consumes the migrated component; a narrow implementation slice can still have several public contracts. Include keyword parameter names and the sync, async, callback, and streaming forms callers actually use. Record only contracts those paths actually use.
-3. Run the cheapest useful baseline. When the migration surface is broad or unclear, run `scripts/inventory_langchain.py`, then confirm its heuristic findings against imports, factories, and call sites.
+3. Run the cheapest useful baseline. When the migration surface is broad or unclear, search dependency files and source for `langchain`, `langgraph`, `langsmith`, and `deepagents`, then confirm findings against imports, factories, and call sites.
 4. Classify the slice before choosing a target:
    - **Chain or LCEL pipeline:** keep deterministic retrieval and transformation in plain Python; use a Pydantic AI agent only where a model/tool loop adds value.
    - **LangChain agent:** normally use one reusable `pydantic_ai.Agent` with typed dependencies, tools, and outputs.
@@ -20,7 +20,11 @@ Preserve behavior, not framework shape. Migrate the smallest behaviorally comple
 5. Add or preserve deterministic characterization tests, then migrate one vertical slice behind the existing public boundary.
 6. Run the original tests and focused parity tests. Report intentional changes and residual differences rather than claiming equivalence from matching class names.
 
-Read [Concept Mapping](references/CONCEPT-MAPPING.md) for the detected source features. Read [Semantic Gaps](references/SEMANTIC-GAPS.md) only for state, middleware, retries, approval, concurrency, streaming, or other behavior where similar-looking APIs may differ. Use [Workaround Recipes](references/WORKAROUND-RECIPES.md) after a concrete gap is identified, not as a mandatory checklist. For a large service, use [Project Patterns](references/PROJECT-PATTERNS.md) to choose a reversible boundary. Read [Verification and Cutover](references/VERIFICATION-AND-CUTOVER.md) before a production cutover.
+Read [Concept Mapping](references/CONCEPT-MAPPING.md) for the detected source features. Read [Semantic Gaps](references/SEMANTIC-GAPS.md) only for state, middleware, retries, approval, concurrency, streaming, or other behavior where similar-looking APIs may differ. Use [Workaround Recipes](references/WORKAROUND-RECIPES.md) after a concrete gap is identified, not as a mandatory checklist. Read [Verification and Cutover](references/VERIFICATION-AND-CUTOVER.md) before a production cutover.
+
+## Explain semantic differences
+
+When an observed source contract has no direct equivalent, explain it to the user before making a consequential design choice. State the source behavior, how the proposed Pydantic AI design differs, the user-visible or operational impact, and the available choices. Recommend one option and name its residual risk. Keep this proportional: do not turn ordinary import or naming changes into semantic warnings.
 
 ## Match rigor to risk
 

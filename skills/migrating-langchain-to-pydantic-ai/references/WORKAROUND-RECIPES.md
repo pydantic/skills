@@ -211,4 +211,4 @@ Keep workaround spikes disposable and deterministic:
 5. State the narrow guarantee proved and what remains unproved.
 6. Delete the spike after extracting the recipe; add a stable product test for the public contract.
 
-Re-run the relevant recipe against the target project's installed versions. These constructions were exercised during skill development, but framework and integration behavior can change.
+Treat each construction as a candidate pattern, not proof for the target project. Re-run the relevant behavioral check against its installed versions.
