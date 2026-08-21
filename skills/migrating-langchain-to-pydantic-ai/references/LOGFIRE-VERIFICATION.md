@@ -37,7 +37,7 @@ During a shadow or replay comparison:
 
 1. Run the same sanitized input, dependencies, model settings, and deterministic fixtures through the source and target behind the same application boundary.
 2. Send both traces to the same OpenTelemetry backend when practical. LangChain and LangGraph can export LangSmith OpenTelemetry traces to Logfire; set `LANGSMITH_OTEL_ENABLED=true` and `LANGSMITH_TRACING=true` before importing those frameworks. Set `LANGSMITH_OTEL_ONLY=true` only when intentionally sending exclusively through OpenTelemetry rather than also retaining LangSmith export. Keep source and target trace namespaces distinct.
-3. Normalize comparable facts instead of diffing raw spans. Compare model-request count, tool name/order, safe arguments and results, retries, errors, usage, latency, model-visible messages when allowed, and application boundary events.
+3. Normalize comparable facts instead of diffing raw spans. Compare model-request count, tool calls and their causal relationships, safe arguments and results, retries, errors, usage, latency, model-visible messages when allowed, and application boundary events. Use application sequence IDs or executable assertions—not raw span arrival order—when tool order is a contract.
 4. Investigate every unexplained difference. A trace that merely looks similar is not equivalence evidence.
 5. Link a validated claim to the executable test that establishes it and use the trace to explain the trajectory.
 
@@ -47,7 +47,7 @@ Do not dual-run side-effectful agents unless tools are dry-run, sandboxed, or pr
 
 Keep these measurements separate:
 
-- **Model boundary:** Pydantic AI instrumentation can record provider/model stream timing, including time to first model chunk.
+- **Instrumented model-call boundary:** Pydantic AI can record the time from issuing the streaming request until the wrapped response surfaces its first chunk. This includes transport and client-SDK behavior; it is not provider-internal timing.
 - **Application boundary:** measure when the API, SSE, or WebSocket consumer receives its first public event and its terminal event.
 
 Model time to first chunk does not prove client time to first event. A service can buffer an entire agent run after the model begins streaming. Test the public client contract for:
@@ -84,7 +84,7 @@ Instrument every service participating in the tested path and verify trace-conte
 
 ## Know what traces cannot prove
 
-Logfire can help demonstrate that an exercised run used the expected model, tools, retry path, token budget, and timing. It cannot by itself prove:
+Logfire can help demonstrate that an exercised run used the expected model, tools, retry path, observed token usage, and timing. It cannot by itself prove:
 
 - deterministic output equivalence from a nondeterministic model;
 - public streaming delivery, backpressure, reconnect, or cancellation;

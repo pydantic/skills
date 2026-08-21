@@ -109,7 +109,7 @@ Check the event behavior promised by the public stream: event order, relevant co
 
 ### Observability
 
-Add Logfire at application startup when compatible and make content capture an explicit privacy decision. Use it to correlate the request, agent run, model calls, tools, retries, usage, and application-owned boundaries. Compare normalized source and target facts rather than raw telemetry schemas. Sampling, missing instrumentation, and disabled content limit what a trace can substantiate. Follow [Logfire-Assisted Migration Verification](LOGFIRE-VERIFICATION.md); traces complement rather than replace contract tests.
+When the user opts in or the project already uses Logfire, configure it at application startup and make content capture an explicit privacy decision. Otherwise preserve the existing tracing infrastructure and use its OpenTelemetry backend where practical. Correlate the request, agent run, model calls, tools, retries, usage, and application-owned boundaries. Compare normalized source and target facts rather than raw telemetry schemas. Sampling, missing instrumentation, and disabled content limit what a trace can substantiate. Follow [Logfire-Assisted Migration Verification](LOGFIRE-VERIFICATION.md); traces complement rather than replace contract tests.
 
 ## Cut over safely
 
