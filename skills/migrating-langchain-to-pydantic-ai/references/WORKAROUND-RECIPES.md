@@ -156,16 +156,16 @@ For protected-tool approval, use `requires_approval=True` or raise `ApprovalRequ
 - tool name and original validated arguments;
 - serializable dependencies or stable references to reconstruct them;
 - complete server-owned message history;
-- pending/consuming/completed status, result, and one-time consumption version;
-- business idempotency key for the protected effect.
+- pending/consuming/completed/manual-reconciliation status, result, claim owner, lease expiry, attempt count, and fencing/consumption version;
+- business idempotency key plus an authoritative effect receipt or reconciliation reference when the external system provides one.
 
-On resume, authenticate first, claim the pending row atomically, reconstruct the original history/dependencies, and pass server-created `DeferredToolResults`. Cache the completed result. Unknown, foreign, modified, or already-consumed approvals must fail before the agent or tool executes.
+On resume, authenticate first and atomically claim a pending or safely expired `consuming` row with a bounded lease and new fencing version. Return the cached result for `completed`; report an unexpired claim as in progress. Before reclaiming an expired lease, reconcile the protected effect by idempotency key or authoritative receipt: finalize a known result, retry only when the effect is known not to have happened or the external API guarantees safe replay, and move an unknowable outcome to manual reconciliation instead of blindly rerunning it. Reconstruct the original history/dependencies and pass server-created `DeferredToolResults`; only the current fenced claimant may persist completion. Unknown, foreign, modified, or stale claims must fail before the agent or tool executes.
 
 A disposable SQLite development spike exercised this adapter across a fresh service instance, including foreign-principal rejection and a simulated crash after the tool. The tool was attempted twice after recovery but its unique business idempotency key produced one durable effect. This is design evidence, not target-project validation or a claim that arbitrary external APIs are exactly once; keep the outcome `unverified` until the selected store passes the same probe.
 
 For long waits and process recovery, put the loop in a durable runtime. Pydantic AI supplies wrappers such as `DBOSAgent`, `TemporalAgent`, and `PrefectAgent`; Restate and Kitaru also provide integrations. A disposable two-process DBOS development spike with a stable agent name and workflow ID returned the persisted first result without repeating the model call. This narrows the candidate design but does not change the target outcome from `unverified`. For DBOS, decorate non-deterministic or I/O tool functions with `@DBOS.step`; they are not automatically durable merely because the agent is wrapped.
 
-Run a real process-kill/restart test against the selected production backend. Keep stable agent/toolset IDs, serializable dependencies, and explicit workflow signals/events for approval. Do not generalize DBOS evidence to Temporal, Prefect, Restate, Kitaru, or a different database.
+Run real process-kill/restart tests against the selected production backend after claim, before the effect, after an unknown effect outcome, and before completion persistence. Prove expired-lease recovery, stale-worker fencing, cached-result replay, and the manual-reconciliation path. Keep stable agent/toolset IDs, serializable dependencies, and explicit workflow signals/events for approval. Do not generalize DBOS evidence to Temporal, Prefect, Restate, Kitaru, or a different database.
 
 ## Workflow state, fan-out, and reducers
 
