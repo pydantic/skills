@@ -174,6 +174,7 @@ Probe:
 - cancellation and cleanup when the consumer disconnects;
 - reconnect/resume cursor behavior and duplicate delivery;
 - bounded buffering/backpressure for slow consumers;
+- event-loop responsiveness before the first model chunk: use a native async retrieval/tool path or offload blocking synchronous work, and probe that unrelated async work can still advance;
 - durable execution limitations, since some workflow integrations cannot stream in real time.
 
 ## Concurrency and cancellation
@@ -181,6 +182,8 @@ Probe:
 LangGraph parallel nodes execute within super-steps and merge through channel reducers. `Send` creates dynamic branches. Pydantic AI function tools are concurrent by default when the model emits multiple calls; `sequential=True` makes a tool a barrier, and a run-level execution mode can serialize tools.
 
 LangGraph rejects conflicting same-step writes when a channel has no suitable reducer; annotated reducers define combination. Pydantic Graph parallel tasks can share mutable state, so a mechanical state-port can turn a deterministic reducer or conflict into a race and lost update. Prefer branch-local results and an explicit typed join/reducer; do not use shared dependencies as a mutable state channel. Carry a source index when visible order matters, sort at the join, and use `ReducerContext.cancel_sibling_tasks()` when the reducer's contract ends remaining branch work.
+
+Also test concurrent requests for the same persisted thread. An optimistic version check at final save can prevent a lost-state overwrite while both requests have already paid for model calls or executed tools. Preserve source serialization where promised, or claim/reserve the thread before dispatch and make effects idempotent. Report a final-save conflict as duplicate-work protection only when an executable probe proves that earlier work did not repeat.
 
 Do not replace graph fan-out with default tool concurrency. Preserve:
 

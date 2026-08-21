@@ -10,7 +10,7 @@ Preserve behavior, not framework shape. Migrate the smallest behaviorally comple
 ## Work from the running application
 
 1. Read repository instructions, dependency files, tests, and the actual runtime entrypoints. Identify the installed LangChain, LangGraph, and Pydantic AI versions.
-2. Trace one representative request through prompts, retrieval, model and tool calls, state, persistence, interrupts, emitted events, and the public result. Inspect every caller and sibling endpoint that consumes the migrated component; a narrow implementation slice can still have several public contracts. Include keyword parameter names and the sync, async, callback, and streaming forms callers actually use. Record only contracts those paths actually use.
+2. Trace one representative request through prompts, retrieval, model and tool calls, state, persistence, interrupts, emitted events, tracing/metrics callbacks, and the public result. Inspect every caller and sibling endpoint that consumes the migrated component; a narrow implementation slice can still have several public contracts. Include keyword parameter names and the sync, async, callback, and streaming forms callers actually use. Record only contracts those paths actually use.
 3. Run the cheapest useful baseline. When the migration surface is broad or unclear, search dependency files and source for `langchain`, `langgraph`, `langsmith`, and `deepagents`, then confirm findings against imports, factories, and call sites.
 4. Classify the slice before choosing a target:
    - **Chain or LCEL pipeline:** keep deterministic retrieval and transformation in plain Python; use a Pydantic AI agent only where a model/tool loop adds value.
@@ -41,7 +41,7 @@ When an observed source contract has no direct equivalent, explain it to the use
 - Use Pydantic models for terminal structured output when that preserves the contract; retain an existing parser when changing the wire contract would expand the migration.
 - Do not force an `Agent` onto deterministic LCEL or `pydantic_graph` onto every `StateGraph`.
 - Inspect the installed Pydantic AI API before choosing model classes, provider transports, hooks, streaming methods, or durable integrations.
-- When adding Pydantic AI, choose the newest stable release compatible with the project's declared constraints. Prove dependency resolution; do not pin an older release merely to match a remembered example.
+- When adding Pydantic AI, prefer a currently supported stable release. Use the newest compatible release unless that would expand the migration through an unrelated major/runtime upgrade; explain and pin any exception. Resolve the whole project from a clean environment and run an import probe because an existing environment can hide incompatible transitive versions. Prefer `pydantic-ai-slim` with only the required provider and integration extras when the dependency surface is bounded, and use the full distribution when its broader integrations are actually needed. Do not pin an older release merely to match a remembered example.
 - Offer Logfire instrumentation at application startup for development and migration verification. Make content capture an explicit privacy decision. Use traces to find differences in model calls, tools, retries, errors, usage, and timing, but keep executable contract tests as the authority for parity.
 
 ## Completion

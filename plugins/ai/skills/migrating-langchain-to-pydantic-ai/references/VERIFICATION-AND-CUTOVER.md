@@ -97,7 +97,7 @@ Pydantic AI message history proves only conversation continuity. Use a durable e
 
 ### Concurrency and limits
 
-When the slice fans out or shares limits, test caps, cancellation, timeout, rate-limit backoff, partial child failure, and deterministic result aggregation. Verify that parent and child agents do not silently receive separate unlimited budgets.
+When the slice fans out, accepts concurrent requests for one thread, or shares limits, test caps, cancellation, timeout, rate-limit backoff, partial child failure, deterministic result aggregation, and duplicate work before persistence conflicts. Verify that parent and child agents do not silently receive separate unlimited budgets.
 
 ### Security
 
@@ -105,11 +105,11 @@ Test the security boundaries the slice exposes. Examples include cross-tenant ac
 
 ### Streaming
 
-Check the event behavior promised by the public stream: event order, relevant correlation IDs, partial text, final-result emission, and any documented reconnect, backpressure, or cancellation behavior. Prove incremental delivery with a real client; model-level time to first chunk does not detect application buffering. `run_stream` may treat the first valid final output as terminal; use `run(event_stream_handler=...)`, `run_stream_events`, or `iter` when all tool events must complete. Test early consumer exit, cleanup, and late producer errors.
+Check the event behavior promised by the public stream: event order, relevant correlation IDs, partial text, final-result emission, and any documented reconnect, backpressure, or cancellation behavior. Prove incremental delivery with a real client; model-level time to first chunk does not detect application buffering. If synchronous request construction, retrieval, or tools can block the event loop, preserve any source worker/thread boundary or use a native async path. When responsiveness before the first chunk is an observed contract, test that unrelated event-loop work still advances; do not move thread-affine clients across threads blindly. `run_stream` may treat the first valid final output as terminal; use `run(event_stream_handler=...)`, `run_stream_events`, or `iter` when all tool events must complete. Test early consumer exit, cleanup, and late producer errors.
 
 ### Observability
 
-When the user opts in or the project already uses Logfire, configure it at application startup and make content capture an explicit privacy decision. Otherwise preserve the existing tracing infrastructure and use its OpenTelemetry backend where practical. Correlate the request, agent run, model calls, tools, retries, usage, and application-owned boundaries. Compare normalized source and target facts rather than raw telemetry schemas. Sampling, missing instrumentation, and disabled content limit what a trace can substantiate. Follow [Logfire-Assisted Migration Verification](LOGFIRE-VERIFICATION.md); traces complement rather than replace contract tests.
+When the user opts in or the project already uses Logfire, configure it at application startup and make content capture an explicit privacy decision. Otherwise preserve the existing tracing infrastructure and use its OpenTelemetry backend where practical. An installed SDK or outer request/graph span does not prove that a nested Pydantic AI model call, tokens, errors, usage, or tool calls remain observable. Probe the active success and failure lifecycle at the model boundary, including parent correlation and existing application metrics. Compare normalized source and target facts rather than raw telemetry schemas. Sampling, missing instrumentation, and disabled content limit what a trace can substantiate. Follow [Logfire-Assisted Migration Verification](LOGFIRE-VERIFICATION.md); traces complement rather than replace contract tests.
 
 ## Cut over safely
 

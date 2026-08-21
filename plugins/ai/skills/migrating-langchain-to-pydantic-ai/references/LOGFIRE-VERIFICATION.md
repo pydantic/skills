@@ -29,6 +29,8 @@ Name reusable agents so their runs are distinguishable. Instrument a specific ag
 
 The default instrumentation can expose agent runs, model requests, tool calls, retries, errors, token usage, and timing. Add small application spans around boundaries that Pydantic AI does not own, such as retrieval, persistence, queues, approval records, public streaming, and external writes. Reuse the application's request, thread, tenant, and idempotency correlation identifiers as safe attributes; do not put secrets in them.
 
+Inventory the source model/tool callback lifecycle and application metrics before replacing it. Keeping a LangSmith, Langfuse, or other callback on an outer LangGraph node does not automatically instrument a nested Pydantic AI call. Preserve the existing model/tool observations through a tested adapter or make an explicit observability change; verify success, token, completion, and error paths plus parent correlation.
+
 Do not add one span per token. Prefer a bounded set of spans and metrics: first event, terminal event, event counts, queue delay, cancellation, and failure.
 
 ## Compare source and target runs
