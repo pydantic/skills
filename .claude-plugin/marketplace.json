@@ -9,7 +9,6 @@
     {
       "name": "logfire",
       "description": "Add Logfire observability to Python applications with auto-instrumentation for FastAPI, httpx, asyncpg, SQLAlchemy, and more",
-      "version": "0.1.4",
       "author": {
         "name": "Pydantic",
         "email": "support@pydantic.dev"
@@ -21,7 +20,6 @@
     {
       "name": "ai",
       "description": "Build production-grade AI agents with Pydantic AI — tools, capabilities, structured output, streaming, and testing patterns",
-      "version": "0.1.0",
       "author": {
         "name": "Pydantic",
         "email": "support@pydantic.dev"
@@ -33,7 +31,6 @@
     {
       "name": "pydantic-ai-harness",
       "description": "Extend Pydantic AI agents with batteries-included capabilities from pydantic-ai-harness, currently Code Mode for collapsing many tool calls into one sandboxed Python execution",
-      "version": "0.1.0",
       "author": {
         "name": "Pydantic",
         "email": "support@pydantic.dev"
@@ -45,7 +42,6 @@
     {
       "name": "pydantic",
       "description": "Validate and serialize data with Pydantic — modeling patterns, constraints, custom validators, coercion, and discriminated unions",
-      "version": "0.1.0",
       "author": {
         "name": "Pydantic",
         "email": "support@pydantic.dev"

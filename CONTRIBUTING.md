@@ -16,12 +16,14 @@ Synced skills are owned by the library they document. Libraries host those skill
 
 A daily workflow (`.github/workflows/sync-from-upstream.yml`) clones each upstream listed above, runs `rsync -a --delete` into both destinations, and opens a PR. CI (`scripts/check-skill-sync.sh`) enforces that plugin and standalone skill copies stay byte-identical.
 
+Claude Code plugins intentionally omit explicit versions. Because they are distributed from relative paths in this Git-hosted marketplace, Claude Code uses the resolved commit SHA as their version, so merged skill syncs are available to existing installations without separate version bumps. Codex and Cursor plugin manifests follow their own versioning rules.
+
 **Anything you add directly inside a synced skill directory will be wiped on the next sync.** To change synced skill content, send a PR upstream. Everything else in this repo (plugin metadata, repo-root files, `.github/`, `scripts/`) is fine to edit here.
 
 ## Adding a new skill
 
 1. Ensure the skill exists in the library at `<package-dir>/.agents/skills/<skill-name>/`.
-2. Add a `sync_skill` entry to `scripts/sync-from-upstream.sh`.
+2. Add a `sync_skill` entry to `scripts/sync-from-upstream.sh`. The sync check discovers the resulting plugin and standalone mirrors automatically.
 
 ## Manually triggering a sync
 
