@@ -79,6 +79,11 @@ The Logfire MCP server requires normal Logfire authentication, such as `logfire 
 
 The `skills/` directory contains standalone SKILL.md files compatible with 30+ agents via the [agentskills.io](https://agentskills.io) standard - including Codex, Cursor, Gemini CLI, and Claude Code.
 
+Released skills are also published through the [Agent Skills Discovery](https://github.com/cloudflare/agent-skills-discovery-rfc) API at
+[`pydantic.dev/.well-known/agent-skills`](https://pydantic.dev/.well-known/agent-skills). After a change reaches `main` and passes this repository's sync check, CI asks
+`pydantic/unified-docs` to build and verify immutable, content-addressed artifacts from that exact commit. The generated discovery index and archives are deployment
+artifacts; do not maintain copies in this repository.
+
 | Skill                                                              | Description                                                                         |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
 | [logfire-instrumentation](skills/logfire-instrumentation/)         | Add Logfire observability to Python, JS/TS, and Rust apps                           |
