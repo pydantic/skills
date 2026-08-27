@@ -165,6 +165,10 @@ ENV/**
 
 # ---- This repo: byte-identical mirrored files ----
 
-# CI proves that each standalone skill is byte-identical to the corresponding
-# plugin copy. Review plugins/*/skills/** and skip this duplicate tree.
-skills/**
+# CI proves these standalone skills are byte-identical to their corresponding
+# plugin copies. Keep the unchecked logfire-ui pair reviewable.
+skills/logfire-instrumentation/**
+skills/logfire-query/**
+skills/building-pydantic-ai-agents/**
+skills/pydantic-ai-harness/**
+skills/pydantic/**
