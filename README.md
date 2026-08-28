@@ -57,6 +57,19 @@ codex mcp get logfire
 
 Start a new Codex conversation after switching so the MCP tools reload.
 
+### Troubleshooting Codex OAuth
+
+Codex CLI 0.142.0 through at least 0.144.3 has an OAuth regression
+([openai/codex#31573](https://github.com/openai/codex/issues/31573)): it drops the RFC 9207 `iss`
+parameter from the authorization callback, so `codex mcp login` can fail with
+`Authorization server response missing required issuer` even after the browser shows
+"Authentication complete". A server-side workaround is being rolled out to the hosted Logfire MCP
+servers (mid-July 2026). If you still hit this error (for example against a self-hosted Logfire
+instance that hasn't updated yet), either:
+
+- downgrade Codex: `npm install -g @openai/codex@0.141.0`, or
+- wait for a Codex release that fixes the issue, then retry `codex mcp login logfire`.
+
 ## Install In Cursor
 
 Install the Logfire plugin from the published [pydantic/skills](https://github.com/pydantic/skills) repository:
