@@ -70,6 +70,13 @@ sync_skill \
     "building-pydantic-ai-agents"
 
 sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-langchain-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-langchain-to-pydantic-ai" \
+    "skills/migrating-langchain-to-pydantic-ai" \
+    "migrating-langchain-to-pydantic-ai"
+
+sync_skill \
     "pydantic/pydantic-ai-harness" \
     "pydantic_ai_harness/.agents/skills/pydantic-ai-harness" \
     "plugins/pydantic-ai-harness/skills/pydantic-ai-harness" \
