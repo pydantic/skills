@@ -57,10 +57,31 @@ sync_skill() {
 
 sync_skill \
     "pydantic/logfire" \
+    "logfire/.agents/skills/logfire-setup" \
+    "plugins/logfire/skills/logfire-setup" \
+    "skills/logfire-setup" \
+    "logfire-setup"
+
+sync_skill \
+    "pydantic/logfire" \
     "logfire/.agents/skills/logfire-instrumentation" \
     "plugins/logfire/skills/logfire-instrumentation" \
     "skills/logfire-instrumentation" \
     "logfire-instrumentation"
+
+sync_skill \
+    "pydantic/logfire" \
+    "logfire/.agents/skills/logfire-infrastructure" \
+    "plugins/logfire/skills/logfire-infrastructure" \
+    "skills/logfire-infrastructure" \
+    "logfire-infrastructure"
+
+sync_skill \
+    "pydantic/logfire" \
+    "logfire/.agents/skills/logfire-evals" \
+    "plugins/logfire/skills/logfire-evals" \
+    "skills/logfire-evals" \
+    "logfire-evals"
 
 sync_skill \
     "pydantic/pydantic-ai" \
