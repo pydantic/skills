@@ -14,5 +14,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
       - name: Verify plugin and standalone skill copies are in sync
         run: bash scripts/check-skill-sync.sh
+
+  publish-agent-skills:
+    name: Publish Agent Skills
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: check-skill-sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+
+    steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.DOCS_APP_ID }}
+          private-key: ${{ secrets.DOCS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: unified-docs
+          permission-contents: write
+
+      - name: Trigger unified-docs publication
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          gh api repos/pydantic/unified-docs/dispatches \
+            --method POST \
+            -f event_type=docs-update \
+            -f "client_payload[source]=pydantic/skills@${SOURCE_SHA}"
