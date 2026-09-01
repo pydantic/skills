@@ -86,7 +86,10 @@ artifacts; do not maintain copies in this repository.
 
 | Skill                                                              | Description                                                                         |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [logfire-setup](skills/logfire-setup/)                             | Set up Logfire by routing application, infrastructure, and eval projects            |
 | [logfire-instrumentation](skills/logfire-instrumentation/)         | Add Logfire observability to Python, JS/TS, and Rust apps                           |
+| [logfire-infrastructure](skills/logfire-infrastructure/)           | Monitor hosts, containers, Kubernetes, databases, and cloud infrastructure          |
+| [logfire-evals](skills/logfire-evals/)                             | Add dataset-based evaluations for AI and agent behavior                             |
 | [logfire-query](skills/logfire-query/)                             | Query and analyze Logfire traces, logs, spans, metrics, and activity data           |
 | [logfire-ui](skills/logfire-ui/)                                   | Open Logfire project pages, live views, traces, and Explore filters                 |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |

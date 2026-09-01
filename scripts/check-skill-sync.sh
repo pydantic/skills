@@ -33,8 +33,20 @@ check_dir_sync() {
 }
 
 check_dir_sync \
+    plugins/logfire/skills/logfire-setup \
+    skills/logfire-setup
+
+check_dir_sync \
     plugins/logfire/skills/logfire-instrumentation \
     skills/logfire-instrumentation
+
+check_dir_sync \
+    plugins/logfire/skills/logfire-infrastructure \
+    skills/logfire-infrastructure
+
+check_dir_sync \
+    plugins/logfire/skills/logfire-evals \
+    skills/logfire-evals
 
 check_dir_sync \
     plugins/logfire/skills/logfire-query \
