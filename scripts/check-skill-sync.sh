@@ -61,10 +61,6 @@ check_dir_sync \
     skills/instrumenting-pydantic-ai
 
 check_dir_sync \
-    plugins/ai/skills/migrating-langchain-to-pydantic-ai \
-    skills/migrating-langchain-to-pydantic-ai
-
-check_dir_sync \
     plugins/pydantic-ai-harness/skills/pydantic-ai-harness \
     skills/pydantic-ai-harness
 
