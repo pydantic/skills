@@ -57,10 +57,6 @@ check_dir_sync \
     skills/building-pydantic-ai-agents
 
 check_dir_sync \
-    plugins/ai/skills/instrumenting-pydantic-ai \
-    skills/instrumenting-pydantic-ai
-
-check_dir_sync \
     plugins/pydantic-ai-harness/skills/pydantic-ai-harness \
     skills/pydantic-ai-harness
 
