@@ -14,17 +14,28 @@ Synced skills are owned by the library they document. Libraries host those skill
 | `logfire-infrastructure` | [`pydantic/logfire`](https://github.com/pydantic/logfire) — `logfire/.agents/skills/logfire-infrastructure/` |
 | `logfire-evals` | [`pydantic/logfire`](https://github.com/pydantic/logfire) — `logfire/.agents/skills/logfire-evals/` |
 | `building-pydantic-ai-agents` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/building-pydantic-ai-agents/` |
+| `migrating-langchain-to-pydantic-ai` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-langchain-to-pydantic-ai/` |
 | `pydantic-ai-harness` | [`pydantic/pydantic-ai-harness`](https://github.com/pydantic/pydantic-ai-harness) — `pydantic_ai_harness/.agents/skills/pydantic-ai-harness/` |
 | `pydantic` | [`pydantic/pydantic`](https://github.com/pydantic/pydantic) — `.agents/skills/pydantic/` |
 
 A daily workflow (`.github/workflows/sync-from-upstream.yml`) clones each upstream listed above, runs `rsync -a --delete` into both destinations, and opens a PR. CI (`scripts/check-skill-sync.sh`) enforces that plugin and standalone skill copies stay byte-identical.
 
+Claude Code plugins intentionally omit explicit versions. Because they are distributed from relative paths in this Git-hosted marketplace, Claude Code uses the resolved commit SHA as their version, so merged skill syncs are available to existing installations without separate version bumps. Codex and Cursor plugin manifests follow their own versioning rules.
+
 **Anything you add directly inside a synced skill directory will be wiped on the next sync.** To change synced skill content, send a PR upstream. Everything else in this repo (plugin metadata, repo-root files, `.github/`, `scripts/`) is fine to edit here.
 
 ## Adding a new skill
 
+Synced skill:
+
 1. Ensure the skill exists in the library at `<package-dir>/.agents/skills/<skill-name>/`.
 2. Add a `sync_skill` entry to `scripts/sync-from-upstream.sh`.
+3. Land both destination directories in the same change (run the sync script, or a targeted `rsync` of that skill). The check script parses those destinations and fails if either copy is missing. Equality checks still discover every plugin skill on disk.
+
+Repo-local skill (not upstream-synced):
+
+1. Add both `plugins/<plugin>/skills/<skill>/` and `skills/<skill>/`.
+2. Add the skill name to `local_skills` in `scripts/check-skill-sync.sh`. CI fails if a plugin skill is on disk but in neither the sync script nor that list.
 
 ## Manually triggering a sync
 

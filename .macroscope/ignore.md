@@ -170,5 +170,6 @@ ENV/**
 skills/logfire-instrumentation/**
 skills/logfire-query/**
 skills/building-pydantic-ai-agents/**
+skills/migrating-langchain-to-pydantic-ai/**
 skills/pydantic-ai-harness/**
 skills/pydantic/**

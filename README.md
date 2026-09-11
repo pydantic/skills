@@ -93,5 +93,6 @@ artifacts; do not maintain copies in this repository.
 | [logfire-query](skills/logfire-query/)                             | Query and analyze Logfire traces, logs, spans, metrics, and activity data           |
 | [logfire-ui](skills/logfire-ui/)                                   | Open Logfire project pages, live views, traces, and Explore filters                 |
 | [building-pydantic-ai-agents](skills/building-pydantic-ai-agents/) | Build LLM-powered agents with Pydantic AI — tools, capabilities, streaming, testing |
+| [migrating-langchain-to-pydantic-ai](skills/migrating-langchain-to-pydantic-ai/) | Migrate Python LangChain or LangGraph applications to Pydantic AI |
 | [pydantic-ai-harness](skills/pydantic-ai-harness/)                 | Extend Pydantic AI agents with harness capabilities like Code Mode (sandboxed `run_code`) |
 | [pydantic](skills/pydantic/)                                       | Validate and serialize data with Pydantic models, constraints, and custom validators |

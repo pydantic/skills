@@ -5,6 +5,7 @@ Build production-grade AI agents with [Pydantic AI](https://ai.pydantic.dev/).
 ## Features
 
 - SKILL.md with core Pydantic AI patterns (agents, tools, capabilities, structured output, testing, multi-agent systems)
+- SKILL.md for migrating LangChain agents, LCEL chains, and LangGraph workflows to Pydantic AI
 - Reference docs for common tasks (hooks, specs, streaming, fallback models, delegation)
 
 ## Install
