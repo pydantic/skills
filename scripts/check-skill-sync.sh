@@ -32,6 +32,43 @@ check_dir_sync() {
     fi
 }
 
+require_dir() {
+    local dir="$1"
+    local label="$2"
+    if [ ! -d "$dir" ]; then
+        echo "MISSING $label: $dir"
+        exit_code=1
+        return
+    fi
+}
+
+# Print plugin_dest<TAB>standalone_dest for each sync_skill call in the
+# upstream sync script. Those destinations are the authoritative registry
+# for synced skills; filesystem discovery cannot see a skill deleted from
+# both mirrors.
+parse_synced_destinations() {
+    local in_call=0
+    local -a args=()
+    local line
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" =~ ^sync_skill[[:space:]]+\\ ]]; then
+            in_call=1
+            args=()
+            continue
+        fi
+        if (( in_call )); then
+            if [[ "$line" =~ \"([^\"]+)\" ]]; then
+                args+=("${BASH_REMATCH[1]}")
+            fi
+            if (( ${#args[@]} == 5 )); then
+                printf '%s\t%s\n' "${args[2]}" "${args[3]}"
+                in_call=0
+            fi
+        fi
+    done < scripts/sync-from-upstream.sh
+}
+
 shopt -s nullglob
 
 # Claude Code resolves these Git-hosted plugins by commit SHA. An explicit
@@ -43,8 +80,35 @@ for manifest in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.
     fi
 done
 
-# Discover mirrored skills so adding a sync_skill entry does not also require
-# maintaining a second hardcoded registry in this script.
+expected_sync_calls="$(grep -c '^sync_skill \\' scripts/sync-from-upstream.sh || true)"
+parsed_sync_calls=0
+while IFS=$'\t' read -r plugin_dir standalone_dir; do
+    parsed_sync_calls=$((parsed_sync_calls + 1))
+    require_dir "$plugin_dir" "synced plugin skill"
+    require_dir "$standalone_dir" "synced standalone skill"
+done < <(parse_synced_destinations)
+
+if [ "$parsed_sync_calls" -eq 0 ] || [ "$parsed_sync_calls" -ne "$expected_sync_calls" ]; then
+    echo "ERROR: parsed $parsed_sync_calls sync_skill destinations, expected $expected_sync_calls"
+    exit_code=1
+fi
+
+# Repo-local skills are not in the sync script, so deletion cannot be
+# derived from it. Keep this list in sync with skills that live only here.
+local_skills=(logfire-query logfire-ui)
+for skill_name in "${local_skills[@]}"; do
+    plugin_dirs=(plugins/*/skills/"$skill_name")
+    if [ "${#plugin_dirs[@]}" -ne 1 ]; then
+        echo "MISSING local skill plugin dir: $skill_name (expected 1, found ${#plugin_dirs[@]})"
+        exit_code=1
+        continue
+    fi
+    require_dir "${plugin_dirs[0]}" "local plugin skill"
+    require_dir "skills/$skill_name" "local standalone skill"
+done
+
+# Discover mirrored skills so equality checks cover every plugin skill
+# without a second hardcoded path list.
 for plugin_dir in plugins/*/skills/*; do
     [ -d "$plugin_dir" ] || continue
     skill_name="${plugin_dir##*/}"

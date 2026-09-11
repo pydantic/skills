@@ -14,6 +14,7 @@ Synced skills are owned by the library they document. Libraries host those skill
 | `logfire-infrastructure` | [`pydantic/logfire`](https://github.com/pydantic/logfire) — `logfire/.agents/skills/logfire-infrastructure/` |
 | `logfire-evals` | [`pydantic/logfire`](https://github.com/pydantic/logfire) — `logfire/.agents/skills/logfire-evals/` |
 | `building-pydantic-ai-agents` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/building-pydantic-ai-agents/` |
+| `migrating-langchain-to-pydantic-ai` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-langchain-to-pydantic-ai/` |
 | `pydantic-ai-harness` | [`pydantic/pydantic-ai-harness`](https://github.com/pydantic/pydantic-ai-harness) — `pydantic_ai_harness/.agents/skills/pydantic-ai-harness/` |
 | `pydantic` | [`pydantic/pydantic`](https://github.com/pydantic/pydantic) — `.agents/skills/pydantic/` |
 
@@ -25,8 +26,16 @@ Claude Code plugins intentionally omit explicit versions. Because they are distr
 
 ## Adding a new skill
 
+Synced skill:
+
 1. Ensure the skill exists in the library at `<package-dir>/.agents/skills/<skill-name>/`.
-2. Add a `sync_skill` entry to `scripts/sync-from-upstream.sh`. The sync check discovers the resulting plugin and standalone mirrors automatically.
+2. Add a `sync_skill` entry to `scripts/sync-from-upstream.sh`.
+3. Land both destination directories in the same change (run the sync script, or a targeted `rsync` of that skill). The check script parses those destinations and fails if either copy is missing. Equality checks still discover every plugin skill on disk.
+
+Repo-local skill (not upstream-synced):
+
+1. Add both `plugins/<plugin>/skills/<skill>/` and `skills/<skill>/`.
+2. Add the skill name to `local_skills` in `scripts/check-skill-sync.sh`.
 
 ## Manually triggering a sync
 
