@@ -82,8 +82,10 @@ done
 
 expected_sync_calls="$(grep -c '^sync_skill \\' scripts/sync-from-upstream.sh || true)"
 parsed_sync_calls=0
+synced_skill_names="|"
 while IFS=$'\t' read -r plugin_dir standalone_dir; do
     parsed_sync_calls=$((parsed_sync_calls + 1))
+    synced_skill_names+="${plugin_dir##*/}|"
     require_dir "$plugin_dir" "synced plugin skill"
     require_dir "$standalone_dir" "synced standalone skill"
 done < <(parse_synced_destinations)
@@ -96,15 +98,35 @@ fi
 # Repo-local skills are not in the sync script, so deletion cannot be
 # derived from it. Keep this list in sync with skills that live only here.
 local_skills=(logfire-query logfire-ui)
-for skill_name in "${local_skills[@]}"; do
-    plugin_dirs=(plugins/*/skills/"$skill_name")
-    if [ "${#plugin_dirs[@]}" -ne 1 ]; then
-        echo "MISSING local skill plugin dir: $skill_name (expected 1, found ${#plugin_dirs[@]})"
-        exit_code=1
+local_skill_names="|"
+if [ "${#local_skills[@]}" -gt 0 ]; then
+    for skill_name in "${local_skills[@]}"; do
+        local_skill_names+="$skill_name|"
+        if [[ "$synced_skill_names" == *"|$skill_name|"* ]]; then
+            echo "INVALID local skill also synced: $skill_name"
+            exit_code=1
+        fi
+        plugin_dirs=(plugins/*/skills/"$skill_name")
+        if [ "${#plugin_dirs[@]}" -ne 1 ]; then
+            echo "MISSING local skill plugin dir: $skill_name (expected 1, found ${#plugin_dirs[@]})"
+            exit_code=1
+            continue
+        fi
+        require_dir "${plugin_dirs[0]}" "local plugin skill"
+        require_dir "skills/$skill_name" "local standalone skill"
+    done
+fi
+
+# Every plugin skill on disk must be in the sync registry or local_skills.
+# Otherwise a forgotten local skill can be deleted later with no CI failure.
+for plugin_dir in plugins/*/skills/*; do
+    [ -d "$plugin_dir" ] || continue
+    skill_name="${plugin_dir##*/}"
+    if [[ "$synced_skill_names" == *"|$skill_name|"* || "$local_skill_names" == *"|$skill_name|"* ]]; then
         continue
     fi
-    require_dir "${plugin_dirs[0]}" "local plugin skill"
-    require_dir "skills/$skill_name" "local standalone skill"
+    echo "UNREGISTERED skill: $plugin_dir (add a sync_skill entry or local_skills)"
+    exit_code=1
 done
 
 # Discover mirrored skills so equality checks cover every plugin skill

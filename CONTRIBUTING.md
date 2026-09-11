@@ -35,7 +35,7 @@ Synced skill:
 Repo-local skill (not upstream-synced):
 
 1. Add both `plugins/<plugin>/skills/<skill>/` and `skills/<skill>/`.
-2. Add the skill name to `local_skills` in `scripts/check-skill-sync.sh`.
+2. Add the skill name to `local_skills` in `scripts/check-skill-sync.sh`. CI fails if a plugin skill is on disk but in neither the sync script nor that list.
 
 ## Manually triggering a sync
 
