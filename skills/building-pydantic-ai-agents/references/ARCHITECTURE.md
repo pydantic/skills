@@ -174,17 +174,20 @@ Need deterministic, fast tests?
 | Azure | `azure:` | `azure:gpt-5.2` |
 | OpenRouter | `openrouter:` | `openrouter:anthropic/claude-sonnet-4-6` |
 | xAI | `xai:` | `xai:grok-4.3` |
-| DeepSeek | `deepseek:` | `deepseek:deepseek-chat` |
+| DeepSeek | `deepseek:` | `deepseek:deepseek-v4-flash` |
 | Fireworks | `fireworks:` | `fireworks:accounts/fireworks/models/llama-v3p3-70b-instruct` |
 | Together | `together:` | `together:meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` |
 | Ollama (local) | `ollama:` | `ollama:llama3.2` |
-| GitHub Models | `github:` | `github:openai/gpt-5.2` |
+| vLLM (local or remote) | `vllm:` | `vllm:Qwen/Qwen3.8-27B` |
+| GitHub Models (retired) | `github:` | `github:openai/gpt-5.2` |
+| GitHub Copilot | `github-copilot:` | `github-copilot:claude-haiku-4.5` |
 | Hugging Face | `huggingface:` | `huggingface:meta-llama/Llama-3.3-70B-Instruct` |
 | Cerebras | `cerebras:` | `cerebras:llama-4-scout-17b-16e-instruct` |
 | Heroku | `heroku:` | `heroku:claude-sonnet-4-6` |
 | Snowflake Cortex | `snowflake:` | `snowflake:claude-sonnet-4-6` |
+| Crusoe | `crusoe:` | `crusoe:zai/GLM-5.2` |
 
-**Additional prefixes:** `litellm:`, `nebius:`, `ovhcloud:`, `alibaba:`, `sambanova:`, `vercel:`, `moonshotai:`. For truly custom providers, subclass `Model` or use `OpenAIChatModel` with a custom `base_url`.
+**Additional prefixes:** `litellm:`, `nebius:`, `ovhcloud:`, `alibaba:`, `sambanova:`, `vercel:`, `moonshotai:`. For any other OpenAI-compatible endpoint, point `OpenAIChatModel` at it with `provider=OpenAIProvider(base_url=..., api_key=...)`. For anything that isn't OpenAI-compatible, subclass `Model`.
 
 ### Tool Decorator Comparison
 
@@ -203,7 +206,7 @@ Need deterministic, fast tests?
 | `RaiseContentFilterError` | Raises `ContentFilterError` for model responses with `finish_reason='content_filter'` | Yes |
 | `WebSearch` | Web search — native when supported, local fallback | Yes |
 | `WebFetch` | URL fetching — native when supported, custom fallback | Yes |
-| `ImageGeneration` | Image generation — native when supported, custom fallback | Yes |
+| `ImageGeneration` | Image generation — native when supported, direct fallback via an image model name or `ImageGenerator` | Yes |
 | `MCP` | MCP server — native when supported, direct connection | Yes |
 | `PrepareTools` | Filters or modifies tool definitions per step | No |
 | `PrefixTools` | Wraps a capability and prefixes its tool names | Yes |
@@ -220,6 +223,7 @@ Need deterministic, fast tests?
 | Writing a CLI tool, script, or Jupyter notebook (no async) | `agent.run_sync()` |
 | Streaming final text word-by-word to a UI | `agent.run_stream()` |
 | Synchronous streaming for CLI tools or scripts (no async) | `agent.run_stream_sync()` |
+| Delegating to another agent from a tool or output function | `await agent.run()` in an `async def` function; the sync run methods cannot be used inside an agent run |
 | Receiving an async iterable of typed events (tool calls, results, final output) | `agent.run_stream_events()` |
 | Inspecting or modifying state between agent steps, human-in-the-loop approval | `agent.iter()` |
 
