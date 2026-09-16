@@ -363,7 +363,6 @@ def build_turn_span(
         "gen_ai.request.model": turn.get("model"),
         "gen_ai.response.model": turn.get("model"),
         "gen_ai.response.finish_reasons": ["stop"],
-        "gen_ai.tool.call.count": len(turn.get("tools") or []),
         "agent_name": "codex",
         "model_name": turn.get("model"),
     }

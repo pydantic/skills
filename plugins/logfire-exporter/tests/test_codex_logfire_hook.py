@@ -173,6 +173,7 @@ class HookTests(unittest.TestCase):
         self.assertEqual(attrs["gen_ai.response.model"], "gpt-5.5")
         self.assertNotIn("gen_ai.usage.input_tokens", attrs)
         self.assertNotIn("gen_ai.usage.output_tokens", attrs)
+        self.assertNotIn("gen_ai.tool.call.count", attrs)
         self.assertEqual(attrs["final_result"], "done")
         messages = json.loads(str(attrs["pydantic_ai.all_messages"]))
         self.assertEqual(
