@@ -77,12 +77,12 @@ class HookTests(unittest.TestCase):
         os.environ["CODEX_LOGFIRE_AUTH_SCHEME"] = "bearer"
         self.assertEqual(hook.authorization_header("Bearer write-token"), "Bearer write-token")
 
-    def test_content_capture_defaults_to_full(self) -> None:
-        self.assertEqual(hook.content_capture_mode(), "full")
+    def test_content_capture_defaults_to_no_tool_content(self) -> None:
+        self.assertEqual(hook.content_capture_mode(), "no_tool_content")
         os.environ["CODEX_LOGFIRE_CONTENT_CAPTURE_MODE"] = "metadata_only"
         self.assertEqual(hook.content_capture_mode(), "metadata_only")
         os.environ["CODEX_LOGFIRE_CONTENT_CAPTURE_MODE"] = "invalid"
-        self.assertEqual(hook.content_capture_mode(), "full")
+        self.assertEqual(hook.content_capture_mode(), "no_tool_content")
 
     def test_logfire_base_url_is_accepted_for_endpoint(self) -> None:
         os.environ["LOGFIRE_BASE_URL"] = "https://logfire-eu.pydantic.dev/"
@@ -114,7 +114,7 @@ class HookTests(unittest.TestCase):
         new_path.write_text("LOGFIRE_TOKEN=new-token\n", encoding="utf-8")
         self.assertEqual(hook.config_env_path(), new_path)
 
-    def test_stop_exports_turn_and_tool_spans(self) -> None:
+    def test_stop_exports_only_logfire_turn_enrichment(self) -> None:
         server = HTTPServer(("127.0.0.1", 0), CaptureHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -125,70 +125,6 @@ class HookTests(unittest.TestCase):
         os.environ["CODEX_LOGFIRE_PROJECT"] = "acme/codex"
         os.environ["CODEX_LOGFIRE_CONTENT_CAPTURE_MODE"] = "no_tool_content"
 
-        transcript = Path(self.tmp.name) / "rollout.jsonl"
-        transcript.write_text(
-            "\n".join(
-                [
-                    json.dumps(
-                        {
-                            "type": "event_msg",
-                            "payload": {
-                                "type": "token_count",
-                                "info": {
-                                    "total_token_usage": {
-                                        "input_tokens": 10,
-                                        "cached_input_tokens": 2,
-                                        "output_tokens": 3,
-                                        "reasoning_output_tokens": 1,
-                                        "total_tokens": 13,
-                                    }
-                                },
-                            },
-                        }
-                    ),
-                    json.dumps({"type": "turn_context", "payload": {"turn_id": "turn-1"}}),
-                    json.dumps(
-                        {
-                            "type": "event_msg",
-                            "payload": {
-                                "type": "token_count",
-                                "info": {
-                                    "total_token_usage": {
-                                        "input_tokens": 30,
-                                        "cached_input_tokens": 4,
-                                        "output_tokens": 8,
-                                        "reasoning_output_tokens": 2,
-                                        "total_tokens": 38,
-                                    },
-                                    "last_token_usage": {
-                                        "input_tokens": 20,
-                                        "cached_input_tokens": 2,
-                                        "output_tokens": 5,
-                                        "reasoning_output_tokens": 1,
-                                        "total_tokens": 25,
-                                    },
-                                    "model_context_window": 128000,
-                                },
-                            },
-                        }
-                    ),
-                ]
-            )
-            + "\n",
-            encoding="utf-8",
-        )
-
-        hook.dispatch(
-            {
-                "hook_event_name": "SessionStart",
-                "session_id": "sess-1",
-                "cwd": "/tmp/project",
-                "model": "gpt-5.5",
-                "source": "startup",
-                "transcript_path": str(transcript),
-                "timestamp": "2026-05-14T10:00:00Z",
-            }
-        )
         hook.dispatch(
             {
                 "hook_event_name": "UserPromptSubmit",
@@ -200,21 +136,12 @@ class HookTests(unittest.TestCase):
         )
         hook.dispatch(
             {
-                "hook_event_name": "PostToolUse",
-                "session_id": "sess-1",
-                "turn_id": "turn-1",
-                "tool_name": "Bash",
-                "tool_use_id": "tool-1",
-                "tool_response": {"exit_code": 0},
-                "duration_ms": 250.5,
-                "timestamp": "2026-05-14T10:00:03Z",
-            }
-        )
-        hook.dispatch(
-            {
                 "hook_event_name": "Stop",
                 "session_id": "sess-1",
                 "turn_id": "turn-1",
+                "cwd": "/tmp/project",
+                "model": "gpt-5.5",
+                "source": "exec",
                 "last_assistant_message": "done",
                 "timestamp": "2026-05-14T10:00:04Z",
             }
@@ -223,15 +150,11 @@ class HookTests(unittest.TestCase):
         self.assertIsNotNone(CaptureHandler.body)
         request = json.loads(CaptureHandler.body or b"{}")
         spans = request["resourceSpans"][0]["scopeSpans"][0]["spans"]
-        self.assertEqual(len(spans), 2)
+        self.assertEqual(len(spans), 1)
         self.assertEqual(spans[0]["name"], "codex turn")
         self.assertEqual(spans[0]["kind"], hook.SPAN_KIND_INTERNAL)
         self.assertEqual(spans[0]["status"]["code"], hook.STATUS_CODE_OK)
         self.assertNotIn("parentSpanId", spans[0])
-        self.assertEqual(spans[1]["parentSpanId"], spans[0]["spanId"])
-        self.assertEqual(spans[1]["kind"], hook.SPAN_KIND_INTERNAL)
-        self.assertEqual(spans[1]["status"]["code"], hook.STATUS_CODE_OK)
-        self.assertEqual(spans[0]["traceId"], spans[1]["traceId"])
         self.assertEqual(CaptureHandler.headers_seen["Authorization"], "test-token")
 
         attrs = flatten_attrs(spans[0]["attributes"])
@@ -248,8 +171,8 @@ class HookTests(unittest.TestCase):
         # The provider, not "codex", so cost calculators can price the turn.
         self.assertEqual(attrs["gen_ai.system"], "openai")
         self.assertEqual(attrs["gen_ai.response.model"], "gpt-5.5")
-        self.assertEqual(attrs["gen_ai.usage.input_tokens"], "20")
-        self.assertEqual(attrs["gen_ai.usage.output_tokens"], "5")
+        self.assertNotIn("gen_ai.usage.input_tokens", attrs)
+        self.assertNotIn("gen_ai.usage.output_tokens", attrs)
         self.assertEqual(attrs["final_result"], "done")
         messages = json.loads(str(attrs["pydantic_ai.all_messages"]))
         self.assertEqual(
@@ -259,12 +182,6 @@ class HookTests(unittest.TestCase):
                 {"role": "assistant", "parts": [{"type": "text", "content": "done"}]},
             ],
         )
-
-        tool_attrs = flatten_attrs(spans[1]["attributes"])
-        self.assertEqual(tool_attrs["logfire.msg"], "Codex tool Bash completed")
-        self.assertEqual(tool_attrs["logfire.tags"], ["Codex"])
-        self.assertEqual(tool_attrs["codex.tool.success"], True)
-        self.assertEqual(tool_attrs["codex.tool.duration_ms"], 250.5)
 
     def test_thread_id_env_groups_multiple_hook_sessions_in_one_trace(self) -> None:
         server = HTTPServer(("127.0.0.1", 0), CaptureHandler)

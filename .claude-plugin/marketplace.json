@@ -1,6 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pydantic-skills",
+  "description": "Official Pydantic plugins for Logfire, Pydantic AI, and Pydantic.",
   "owner": {
     "name": "Pydantic",
     "email": "support@pydantic.dev"
@@ -8,8 +9,8 @@
   "plugins": [
     {
       "name": "logfire",
-      "description": "Add Logfire observability to Python applications with auto-instrumentation for FastAPI, httpx, asyncpg, SQLAlchemy, and more",
-      "version": "0.1.4",
+      "description": "Instrument applications and infrastructure, investigate telemetry, and manage Logfire workflows across Python, JavaScript, TypeScript, and Rust",
+      "version": "0.1.5",
       "author": {
         "name": "Pydantic",
         "email": "support@pydantic.dev"

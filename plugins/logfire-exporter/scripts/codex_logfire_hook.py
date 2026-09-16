@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Codex hook entrypoint that exports completed turns to Logfire via OTLP JSON.
+"""Codex hook entrypoint that enriches native telemetry with completed turns.
 
 This intentionally avoids the Logfire SDK and the OpenTelemetry SDK so the
 plugin can control trace/span IDs from Codex conversation identities.
@@ -217,8 +217,7 @@ def handle_stop(payload: dict[str, Any]) -> None:
         delete_file(path)
         return
 
-    usage = read_token_usage_for_turn(turn.get("transcript_path"), turn_id)
-    request = build_otlp_request(turn, usage)
+    request = build_otlp_request(turn, None)
     export_otlp(request)
     delete_file(path)
     debug(f"exported session={session_id} turn={turn_id} spans={count_spans(request)}")
@@ -303,8 +302,6 @@ def build_otlp_request(turn: dict[str, Any], usage: dict[str, Any] | None) -> di
         completed_at_ns = started_at_ns
 
     spans = [build_turn_span(turn, usage, trace_id, turn_span_id, started_at_ns, completed_at_ns)]
-    for index, tool in enumerate(turn.get("tools") or []):
-        spans.append(build_tool_span(turn, tool, index, trace_id, turn_span_id, completed_at_ns))
 
     return {
         "resourceSpans": [
@@ -930,10 +927,10 @@ def cleanup_stale(current_session_id: str | None = None, current_turn_id: str | 
 
 
 def content_capture_mode() -> str:
-    raw = os.getenv("CODEX_LOGFIRE_CONTENT_CAPTURE_MODE", "full").strip().lower()
+    raw = os.getenv("CODEX_LOGFIRE_CONTENT_CAPTURE_MODE", "no_tool_content").strip().lower()
     if raw in {"full", "no_tool_content", "metadata_only"}:
         return raw
-    return "full"
+    return "no_tool_content"
 
 
 def redact_json_value(value: Any) -> Any:
