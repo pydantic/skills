@@ -55,6 +55,7 @@ CONTENT_ATTRIBUTE_KEYS = frozenset(
         "codex.last_assistant_message",
         "pydantic_ai.all_messages",
         "logfire.json_schema",
+        "logfire.msg",
         "final_result",
     }
 )

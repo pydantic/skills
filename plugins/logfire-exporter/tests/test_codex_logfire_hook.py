@@ -118,6 +118,7 @@ class HookTests(unittest.TestCase):
         self.assertLessEqual(len(body), hook.MAX_OTLP_REQUEST_BYTES)
         attrs = flatten_attrs(json.loads(body)["resourceSpans"][0]["scopeSpans"][0]["spans"][0]["attributes"])
         self.assertEqual(attrs["codex.session_id"], "sess-1")
+        self.assertNotIn("logfire.msg", attrs)
         self.assertTrue(hook.CONTENT_ATTRIBUTE_KEYS.isdisjoint(attrs))
 
     def test_oversized_metadata_request_is_rejected(self) -> None:
