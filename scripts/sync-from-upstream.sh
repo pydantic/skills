@@ -91,6 +91,62 @@ sync_skill \
     "building-pydantic-ai-agents"
 
 sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-agno-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-agno-to-pydantic-ai" \
+    "skills/migrating-agno-to-pydantic-ai" \
+    "migrating-agno-to-pydantic-ai"
+
+sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-claude-agent-sdk-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-claude-agent-sdk-to-pydantic-ai" \
+    "skills/migrating-claude-agent-sdk-to-pydantic-ai" \
+    "migrating-claude-agent-sdk-to-pydantic-ai"
+
+sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-google-adk-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-google-adk-to-pydantic-ai" \
+    "skills/migrating-google-adk-to-pydantic-ai" \
+    "migrating-google-adk-to-pydantic-ai"
+
+sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-langchain-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-langchain-to-pydantic-ai" \
+    "skills/migrating-langchain-to-pydantic-ai" \
+    "migrating-langchain-to-pydantic-ai"
+
+sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-mastra-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-mastra-to-pydantic-ai" \
+    "skills/migrating-mastra-to-pydantic-ai" \
+    "migrating-mastra-to-pydantic-ai"
+
+sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-openai-agents-sdk-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-openai-agents-sdk-to-pydantic-ai" \
+    "skills/migrating-openai-agents-sdk-to-pydantic-ai" \
+    "migrating-openai-agents-sdk-to-pydantic-ai"
+
+sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-pi-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-pi-to-pydantic-ai" \
+    "skills/migrating-pi-to-pydantic-ai" \
+    "migrating-pi-to-pydantic-ai"
+
+sync_skill \
+    "pydantic/pydantic-ai" \
+    "pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-vercel-ai-sdk-and-eve-to-pydantic-ai" \
+    "plugins/ai/skills/migrating-vercel-ai-sdk-and-eve-to-pydantic-ai" \
+    "skills/migrating-vercel-ai-sdk-and-eve-to-pydantic-ai" \
+    "migrating-vercel-ai-sdk-and-eve-to-pydantic-ai"
+
+sync_skill \
     "pydantic/pydantic-ai-harness" \
     "pydantic_ai_harness/.agents/skills/pydantic-ai-harness" \
     "plugins/pydantic-ai-harness/skills/pydantic-ai-harness" \

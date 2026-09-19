@@ -57,6 +57,38 @@ check_dir_sync \
     skills/building-pydantic-ai-agents
 
 check_dir_sync \
+    plugins/ai/skills/migrating-agno-to-pydantic-ai \
+    skills/migrating-agno-to-pydantic-ai
+
+check_dir_sync \
+    plugins/ai/skills/migrating-claude-agent-sdk-to-pydantic-ai \
+    skills/migrating-claude-agent-sdk-to-pydantic-ai
+
+check_dir_sync \
+    plugins/ai/skills/migrating-google-adk-to-pydantic-ai \
+    skills/migrating-google-adk-to-pydantic-ai
+
+check_dir_sync \
+    plugins/ai/skills/migrating-langchain-to-pydantic-ai \
+    skills/migrating-langchain-to-pydantic-ai
+
+check_dir_sync \
+    plugins/ai/skills/migrating-mastra-to-pydantic-ai \
+    skills/migrating-mastra-to-pydantic-ai
+
+check_dir_sync \
+    plugins/ai/skills/migrating-openai-agents-sdk-to-pydantic-ai \
+    skills/migrating-openai-agents-sdk-to-pydantic-ai
+
+check_dir_sync \
+    plugins/ai/skills/migrating-pi-to-pydantic-ai \
+    skills/migrating-pi-to-pydantic-ai
+
+check_dir_sync \
+    plugins/ai/skills/migrating-vercel-ai-sdk-and-eve-to-pydantic-ai \
+    skills/migrating-vercel-ai-sdk-and-eve-to-pydantic-ai
+
+check_dir_sync \
     plugins/pydantic-ai-harness/skills/pydantic-ai-harness \
     skills/pydantic-ai-harness
 
