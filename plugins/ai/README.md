@@ -6,6 +6,7 @@ Build production-grade AI agents with [Pydantic AI](https://ai.pydantic.dev/).
 
 - SKILL.md with core Pydantic AI patterns (agents, tools, capabilities, structured output, testing, multi-agent systems)
 - Reference docs for common tasks (hooks, specs, streaming, fallback models, delegation)
+- Migration skills for porting an existing application from another framework, one per source framework: LangChain and LangGraph, the OpenAI Agents SDK, Google ADK, Mastra, Agno, Pi, the Claude Agent SDK, and the Vercel AI SDK and Eve
 
 ## Install
 
