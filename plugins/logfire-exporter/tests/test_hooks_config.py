@@ -23,9 +23,7 @@ class HooksConfigTests(unittest.TestCase):
 
     def test_all_commands_have_platform_launchers_and_expected_timeouts(self) -> None:
         expected_timeouts = {
-            "SessionStart": 10,
             "UserPromptSubmit": 10,
-            "PostToolUse": 10,
             "Stop": 30,
         }
         hooks = list(self.command_hooks())

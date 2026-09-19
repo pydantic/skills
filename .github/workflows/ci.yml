@@ -19,10 +19,25 @@ jobs:
       - name: Verify plugin and standalone skill copies are in sync
         run: bash scripts/check-skill-sync.sh
 
+  validate-plugins:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5a  # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
+        with:
+          node-version: 22
+      - name: Validate Claude plugin and marketplace metadata
+        run: npx --yes @anthropic-ai/claude-code@2.1.236 plugin validate .
+      - name: Test Codex Logfire exporter hooks
+        run: python3 -m unittest discover -s plugins/logfire-exporter/tests -v
+
   publish-agent-skills:
     name: Publish Agent Skills
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: check-skill-sync
+    needs: [check-skill-sync, validate-plugins]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}

@@ -1,7 +1,7 @@
 {
   "name": "logfire-exporter",
-  "version": "0.1.0",
-  "description": "Export Codex activity traces to Logfire via direct OTLP spans.",
+  "version": "0.2.0",
+  "description": "Enrich Codex native OpenTelemetry with completed conversation turns in Logfire.",
   "author": {
     "name": "Pydantic",
     "email": "support@pydantic.dev",
@@ -22,8 +22,8 @@
   ],
   "interface": {
     "displayName": "Logfire Exporter",
-    "shortDescription": "Export Codex activity traces to Logfire.",
-    "longDescription": "Captures Codex lifecycle hook events, stores lightweight turn fragments locally, and exports completed turns and tool calls to Logfire as direct OTLP spans.",
+    "shortDescription": "Add completed turns to Codex native telemetry.",
+    "longDescription": "Complements Codex native OpenTelemetry with the user prompt and final assistant response needed to inspect completed conversations in Logfire.",
     "developerName": "Pydantic",
     "category": "Coding",
     "capabilities": [

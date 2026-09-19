@@ -53,6 +53,10 @@ check_dir_sync \
     skills/logfire-query
 
 check_dir_sync \
+    plugins/logfire/skills/logfire-ui \
+    skills/logfire-ui
+
+check_dir_sync \
     plugins/ai/skills/building-pydantic-ai-agents \
     skills/building-pydantic-ai-agents
 

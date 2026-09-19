@@ -1,6 +1,13 @@
 # Logfire Exporter
 
-Codex hook plugin that exports completed Codex turns and tool calls to Logfire using direct OTLP HTTP/JSON.
+Codex hook plugin that enriches native Codex telemetry with completed turns and
+final assistant responses using direct OTLP HTTP/JSON.
+
+> **Migration note:** Current Codex releases provide native OTLP logs, traces,
+> and metrics. This plugin still supplies the existing Logfire agent-run shape,
+> but new development is moving standard lifecycle, token, and tool telemetry to
+> Codex's native exporters. See [PLAN.md](./PLAN.md) for the verified division of
+> responsibility and migration sequence.
 
 This plugin is separate from the main Logfire plugin:
 
@@ -22,14 +29,13 @@ The Codex plugin metadata lives in `.codex-plugin/plugin.json` and configures:
 - default prompts for checking hook installation and explaining the trace design
 - hook configuration from `hooks/hooks.json`
 
-The installed hooks capture Codex lifecycle events:
+The installed hooks add only the conversation content that native Codex
+OpenTelemetry does not provide:
 
 | Hook | Purpose |
 |------|---------|
-| `SessionStart` | Initialize local telemetry state for startup, resume, and clear events |
 | `UserPromptSubmit` | Store the submitted prompt and turn metadata |
-| `PostToolUse` | Store tool-call results so they can be exported as child spans |
-| `Stop` | Export the completed turn and its tool spans to Logfire |
+| `Stop` | Export the completed turn and final assistant response to Logfire |
 
 ## Install In Codex
 
@@ -103,8 +109,8 @@ The selected value is exported as `codex.conversation_id`, while the hook `sessi
 
 ## Content Capture
 
-By default the plugin uses `CODEX_LOGFIRE_CONTENT_CAPTURE_MODE=full`, so it exports redacted prompt text, final
-assistant text, tool inputs, tool outputs, and tool errors.
+By default the plugin uses `CODEX_LOGFIRE_CONTENT_CAPTURE_MODE=no_tool_content`,
+so it exports redacted prompt and final assistant text without tool content.
 
 To suppress captured content, set a narrower mode:
 
@@ -114,12 +120,20 @@ CODEX_LOGFIRE_CONTENT_CAPTURE_MODE=metadata_only
 
 Capture modes:
 
-- `full`: default; includes redacted user prompt, final assistant message, tool input/output, and tool errors.
-- `no_tool_content`: includes redacted user prompt and final assistant message, but not tool input/output.
+- `full`: includes redacted user prompt and final assistant message; native
+  Codex logs own bounded tool arguments and result previews.
+- `no_tool_content`: default; includes redacted user prompt and final assistant
+  message, but not tool input/output.
 - `metadata_only`: no prompt, assistant, tool input, or tool output content.
 
 The current plugin emits standard Logfire/OTel spans plus `pydantic_ai.all_messages` when content capture is enabled,
 which lets Logfire show Codex turns in the generic LLM conversation/details panel.
+
+Captured prompt and response text is redacted first, then limited to 60 KiB per
+field at a valid UTF-8 boundary. The complete OTLP request is limited to 512
+KiB. If compatibility attributes would exceed that limit, the exporter removes
+captured content and still sends the turn metadata; it never sends a larger
+request.
 
 ## Relationship To The Logfire Plugin
 
