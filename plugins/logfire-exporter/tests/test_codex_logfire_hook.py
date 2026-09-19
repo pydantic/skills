@@ -84,6 +84,55 @@ class HookTests(unittest.TestCase):
         os.environ["CODEX_LOGFIRE_CONTENT_CAPTURE_MODE"] = "invalid"
         self.assertEqual(hook.content_capture_mode(), "no_tool_content")
 
+    def test_capture_text_redacts_then_truncates_at_utf8_boundary(self) -> None:
+        value = "token=super-secret-value " + "🔥" * hook.MAX_CAPTURE_TEXT_BYTES
+
+        captured = hook.capture_text(value)
+
+        self.assertNotIn("super-secret-value", captured)
+        self.assertIn("token=[REDACTED]", captured)
+        self.assertTrue(captured.endswith(hook.TRUNCATION_MARKER))
+        self.assertLessEqual(len(captured.encode("utf-8")), hook.MAX_CAPTURE_TEXT_BYTES)
+        self.assertEqual(captured.encode("utf-8").decode("utf-8"), captured)
+
+    def test_oversized_request_degrades_to_metadata_only(self) -> None:
+        request = hook.build_otlp_request(
+            {
+                "session_id": "sess-1",
+                "turn_id": "turn-1",
+                "prompt": "hello",
+                "last_assistant_message": "done",
+            },
+            None,
+        )
+        span = request["resourceSpans"][0]["scopeSpans"][0]["spans"][0]
+        span["attributes"].append(
+            {
+                "key": "codex.prompt",
+                "value": {"stringValue": "x" * hook.MAX_OTLP_REQUEST_BYTES},
+            }
+        )
+
+        body = hook.bounded_otlp_body(request)
+
+        self.assertLessEqual(len(body), hook.MAX_OTLP_REQUEST_BYTES)
+        attrs = flatten_attrs(json.loads(body)["resourceSpans"][0]["scopeSpans"][0]["spans"][0]["attributes"])
+        self.assertEqual(attrs["codex.session_id"], "sess-1")
+        self.assertTrue(hook.CONTENT_ATTRIBUTE_KEYS.isdisjoint(attrs))
+
+    def test_oversized_metadata_request_is_rejected(self) -> None:
+        request = hook.build_otlp_request({"session_id": "s", "turn_id": "t"}, None)
+        span = request["resourceSpans"][0]["scopeSpans"][0]["spans"][0]
+        span["attributes"].append(
+            {
+                "key": "unexpected.large.metadata",
+                "value": {"stringValue": "x" * hook.MAX_OTLP_REQUEST_BYTES},
+            }
+        )
+
+        with self.assertRaisesRegex(ValueError, "after removing captured content"):
+            hook.bounded_otlp_body(request)
+
     def test_logfire_base_url_is_accepted_for_endpoint(self) -> None:
         os.environ["LOGFIRE_BASE_URL"] = "https://logfire-eu.pydantic.dev/"
         self.assertEqual(hook.otlp_traces_endpoint(), "https://logfire-eu.pydantic.dev/v1/traces")

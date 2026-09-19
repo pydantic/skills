@@ -129,6 +129,12 @@ Capture modes:
 The current plugin emits standard Logfire/OTel spans plus `pydantic_ai.all_messages` when content capture is enabled,
 which lets Logfire show Codex turns in the generic LLM conversation/details panel.
 
+Captured prompt and response text is redacted first, then limited to 60 KiB per
+field at a valid UTF-8 boundary. The complete OTLP request is limited to 512
+KiB. If compatibility attributes would exceed that limit, the exporter removes
+captured content and still sends the turn metadata; it never sends a larger
+request.
+
 ## Relationship To The Logfire Plugin
 
 Install `logfire-exporter` when you want telemetry about Codex itself. Install `logfire` when you want Codex to

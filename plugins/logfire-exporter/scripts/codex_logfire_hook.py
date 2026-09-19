@@ -46,6 +46,18 @@ STATE_DIR_NAME = "logfire-exporter"
 LEGACY_STATE_DIR_NAMES = ("codex-logfire-exporter", "codex-logfire-plugin")
 DEFAULT_LOGFIRE_URL = "https://logfire-api.pydantic.dev"
 MAX_TRANSCRIPT_BYTES = 20 * 1024 * 1024
+MAX_CAPTURE_TEXT_BYTES = 60 * 1024
+MAX_OTLP_REQUEST_BYTES = 512 * 1024
+TRUNCATION_MARKER = "\n...[TRUNCATED]"
+CONTENT_ATTRIBUTE_KEYS = frozenset(
+    {
+        "codex.prompt",
+        "codex.last_assistant_message",
+        "pydantic_ai.all_messages",
+        "logfire.json_schema",
+        "final_result",
+    }
+)
 STALE_AFTER_SECONDS = 24 * 60 * 60
 LOCK_TIMEOUT_SECONDS = 2.0
 SPAN_KIND_INTERNAL = 1
@@ -145,7 +157,7 @@ def handle_user_prompt_submit(payload: dict[str, Any]) -> None:
             prompt = str(payload["prompt"])
             turn["prompt_length"] = len(prompt)
             if mode != "metadata_only":
-                turn["prompt"] = redact_text(prompt)
+                turn["prompt"] = capture_text(prompt)
 
     update_json(turn_path(payload["session_id"], payload["turn_id"]), mutate)
 
@@ -203,7 +215,7 @@ def handle_stop(payload: dict[str, Any]) -> None:
             last_assistant_message = str(payload["last_assistant_message"])
             turn["last_assistant_message_length"] = len(last_assistant_message)
             if mode != "metadata_only":
-                turn["last_assistant_message"] = redact_text(last_assistant_message)
+                turn["last_assistant_message"] = capture_text(last_assistant_message)
 
     path = turn_path(session_id, turn_id)
     update_json(path, mutate)
@@ -553,7 +565,7 @@ def usage_attributes(usage: dict[str, Any]) -> dict[str, Any]:
 
 
 def export_otlp(request: dict[str, Any]) -> None:
-    body = json.dumps(request, separators=(",", ":")).encode()
+    body = bounded_otlp_body(request)
     headers = {
         "Content-Type": "application/json",
         "User-Agent": f"{SERVICE_NAME}/{PLUGIN_VERSION}",
@@ -572,6 +584,27 @@ def export_otlp(request: dict[str, Any]) -> None:
     except urllib.error.HTTPError as exc:
         detail = exc.read(512).decode(errors="replace")
         raise RuntimeError(f"OTLP export returned HTTP {exc.code}: {detail}") from exc
+
+
+def bounded_otlp_body(request: dict[str, Any]) -> bytes:
+    body = json.dumps(request, separators=(",", ":")).encode()
+    if len(body) <= MAX_OTLP_REQUEST_BYTES:
+        return body
+
+    removed = 0
+    for resource_span in request.get("resourceSpans") or []:
+        for scope_span in resource_span.get("scopeSpans") or []:
+            for span in scope_span.get("spans") or []:
+                attributes = span.get("attributes") or []
+                kept = [attribute for attribute in attributes if attribute.get("key") not in CONTENT_ATTRIBUTE_KEYS]
+                removed += len(attributes) - len(kept)
+                span["attributes"] = kept
+
+    body = json.dumps(request, separators=(",", ":")).encode()
+    if len(body) > MAX_OTLP_REQUEST_BYTES:
+        raise ValueError(f"OTLP request exceeds {MAX_OTLP_REQUEST_BYTES} bytes after removing captured content")
+    debug(f"OTLP request exceeded {MAX_OTLP_REQUEST_BYTES} bytes; removed {removed} captured-content attributes")
+    return body
 
 
 def otlp_traces_endpoint() -> str:
@@ -953,6 +986,21 @@ def redact_text(value: str) -> str:
     for pattern in SECRET_PATTERNS:
         redacted = pattern.sub(lambda m: f"{m.group(1)}{m.group(2)}[REDACTED]" if len(m.groups()) >= 3 else "[REDACTED]", redacted)
     return redacted
+
+
+def capture_text(value: str) -> str:
+    return truncate_utf8(redact_text(value), MAX_CAPTURE_TEXT_BYTES)
+
+
+def truncate_utf8(value: str, max_bytes: int) -> str:
+    encoded = value.encode("utf-8")
+    if len(encoded) <= max_bytes:
+        return value
+    marker = TRUNCATION_MARKER.encode()
+    if len(marker) >= max_bytes:
+        return marker[:max_bytes].decode("utf-8", errors="ignore")
+    prefix = encoded[: max_bytes - len(marker)].decode("utf-8", errors="ignore")
+    return prefix + TRUNCATION_MARKER
 
 
 def json_dumps_or_none(value: Any) -> str | None:

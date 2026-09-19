@@ -67,6 +67,8 @@ content while retaining timing, usage, and operational structure.
 - use `UserPromptSubmit` and `Stop` only for bounded prompt/final-response
   enrichment
 - never capture tool input or output
+- redact before applying a 60 KiB UTF-8 limit to each captured prompt or
+  response, and enforce a 512 KiB request ceiling with metadata-only fallback
 
 ### Full debugging
 
