@@ -169,6 +169,7 @@ ENV/**
 # plugin copies. Keep the unchecked logfire-ui pair reviewable.
 skills/logfire-instrumentation/**
 skills/logfire-query/**
+skills/logfire-datasets/**
 skills/building-pydantic-ai-agents/**
 skills/pydantic-ai-harness/**
 skills/pydantic/**

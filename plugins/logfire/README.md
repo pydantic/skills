@@ -14,6 +14,7 @@ Add [Logfire](https://logfire.pydantic.dev/) observability to Python application
 - `logfire-setup` skill - authenticate, inspect the repository, and route to the right setup workflow
 - `logfire-infrastructure` skill - monitor hosts, containers, Kubernetes, databases, and cloud infrastructure
 - `logfire-evals` skill - add dataset-based evaluations for AI and agent behavior
+- `logfire-datasets` skill - create hosted datasets from traces, query results, or case files via the datasets API
 - `/debug` - investigate errors using Logfire traces via MCP
 - `/query` - query traces, logs, and metrics interactively or add query capabilities to code
 - `logfire-ui` skill - open Logfire project pages, live views, traces, and Explore filters directly in Codex

@@ -18,6 +18,7 @@ Synced skills are owned by the library they document. Libraries host those skill
 | `logfire-gateway` | [`pydantic/logfire`](https://github.com/pydantic/logfire) — `logfire-sdk/logfire/.agents/skills/logfire-gateway/` |
 | `logfire-query` | This repository — `plugins/logfire/skills/logfire-query/` (native MCP workflow) |
 | `logfire-ui` | This repository — `plugins/logfire/skills/logfire-ui/` (native MCP/browser workflow) |
+| `logfire-datasets` | This repository — `plugins/logfire/skills/logfire-datasets/` (datasets API workflow; the MCP server has no dataset tools) |
 | `building-pydantic-ai-agents` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/building-pydantic-ai-agents/` |
 | `migrating-agno-to-pydantic-ai` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-agno-to-pydantic-ai/` |
 | `migrating-claude-agent-sdk-to-pydantic-ai` | [`pydantic/pydantic-ai`](https://github.com/pydantic/pydantic-ai) — `pydantic_ai_slim/pydantic_ai/.agents/skills/migrating-claude-agent-sdk-to-pydantic-ai/` |
@@ -40,9 +41,12 @@ references resolve inside the assembled catalog.
 
 **Anything you add directly inside a synced skill directory will be wiped on the next sync.** To change synced skill content, send a PR upstream. Everything else in this repo (plugin metadata, repo-root files, `.github/`, `scripts/`) is fine to edit here.
 
-The two locally owned Logfire skills are not upstream sync targets. Edit their
-plugin sources here, then mirror them to `skills/`. Do not replace their native
-MCP authentication with the CLI's independently authenticated MCP client.
+The three locally owned Logfire skills are not upstream sync targets. Edit their
+plugin sources here, then mirror them to `skills/`. `logfire-query` and
+`logfire-ui` use native MCP authentication; do not replace it with the CLI's
+independently authenticated MCP client. `logfire-datasets` uses a Logfire API
+key for the datasets API and a read token for script-side queries, because the
+MCP server has no dataset tools.
 
 The CLI also ships release-bound SDK/query/UI adaptations. Those are not public
 sync sources: do not import them over the SDK owner's files or the native MCP

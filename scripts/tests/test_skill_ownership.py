@@ -48,7 +48,7 @@ class SkillOwnershipTests(unittest.TestCase):
         published = {path.parent.name for path in CATALOG.glob("*/SKILL.md")}
         self.assertTrue(PLUGIN_ONLY_SKILLS <= published)
         self.assertEqual(set(sources), published - PLUGIN_ONLY_SKILLS)
-        self.assertEqual(len(sources), 9)
+        self.assertEqual(len(sources), 10)
         for name in PLUGIN_ONLY_SKILLS:
             self.assertFalse((ROOT / "skills" / name).exists())
         destinations = set()

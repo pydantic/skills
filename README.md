@@ -97,6 +97,7 @@ artifacts; do not maintain copies in this repository.
 | [logfire-evals](skills/logfire-evals/)                             | Add dataset-based evaluations for AI and agent behavior                             |
 | [logfire-query](skills/logfire-query/)                             | Query and analyze Logfire traces, logs, spans, metrics, and activity data           |
 | [logfire-ui](skills/logfire-ui/)                                   | Open Logfire project pages, live views, traces, and Explore filters                 |
+| [logfire-datasets](skills/logfire-datasets/)                       | Create hosted Logfire datasets from traces, query results, or case files            |
 | [logfire-coding-agents](skills/logfire-coding-agents/)               | Record Claude/Codex sessions or configure coding-agent Gateway routing             |
 | [logfire-frontend](skills/logfire-frontend/)                         | Browser errors, Web Vitals, and session replays                                    |
 | [logfire-gateway](skills/logfire-gateway/)                           | Route application model calls through Pydantic AI Gateway                          |
