@@ -49,6 +49,23 @@ debug() {
     fi
 }
 
+# unquote_config_value <value> <quote>: print the text between the opening
+# quote and the next matching quote when only an optional comment follows it.
+# Otherwise print the value unchanged.
+unquote_config_value() {
+    unquote_rest=${1#"$2"}
+    case $unquote_rest in
+        *"$2"*) ;;
+        *) printf '%s' "$1"; return ;;
+    esac
+    unquote_inner=${unquote_rest%%"$2"*}
+    unquote_after=$(printf '%s' "${unquote_rest#*"$2"}" | sed 's/^[[:space:]]*//')
+    case $unquote_after in
+        '' | \#*) printf '%s' "$unquote_inner" ;;
+        *) printf '%s' "$1" ;;
+    esac
+}
+
 # The hook script itself loads config.env, but the interpreter choice is
 # needed before any Python runs, so read this one key here too.
 load_python_from_config() {
@@ -79,10 +96,12 @@ load_python_from_config() {
     line=$(grep -E '^[[:space:]]*CODEX_LOGFIRE_PYTHON[[:space:]]*=' "$config_file" 2>/dev/null | tail -n 1) || return 1
     [ -n "$line" ] || return 1
     value=$(printf '%s' "${line#*=}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-    # Strip one layer of surrounding quotes, matching the hook's env parsing.
+    # Match the hook's env parsing: a quoted value is literal, and an unquoted
+    # value ends at a ` #` inline comment.
     case $value in
-        \"*\") value=${value#\"}; value=${value%\"} ;;
-        \'*\') value=${value#\'}; value=${value%\'} ;;
+        \"*) value=$(unquote_config_value "$value" '"') ;;
+        \'*) value=$(unquote_config_value "$value" "'") ;;
+        *) value=$(printf '%s' "$value" | sed 's/[[:space:]]#.*$//; s/[[:space:]]*$//') ;;
     esac
     [ -n "$value" ] || return 1
     CODEX_LOGFIRE_PYTHON=$value

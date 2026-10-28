@@ -289,6 +289,24 @@ class HookTests(unittest.TestCase):
         os.environ["LOGFIRE_URL"] = "https://logfire-us.pydantic.dev/"
         self.assertEqual(hook.otlp_traces_endpoint(), "https://logfire-eu.pydantic.dev/v1/traces")
 
+    def test_config_env_strips_inline_comments_from_unquoted_values(self) -> None:
+        config = Path(self.tmp.name) / "config.env"
+        config.write_text(
+            "LOGFIRE_BASE_URL=https://logfire-us.pydantic.dev  # or https://logfire-eu.pydantic.dev for the EU region\n"
+            "LOGFIRE_TOKEN=write-token\t# project write token\n"
+            "CODEX_LOGFIRE_AUTH_SCHEME=\"Bearer # literal\"  # comment after quotes\n"
+            "CODEX_LOGFIRE_DEBUG='true'\n"
+            "CODEX_LOGFIRE_OTLP_HEADERS=x-id=a#b\n",
+            encoding="utf-8",
+        )
+        os.environ["CODEX_LOGFIRE_CONFIG_FILE"] = str(config)
+        hook.load_config_env()
+        self.assertEqual(hook.otlp_traces_endpoint(), "https://logfire-us.pydantic.dev/v1/traces")
+        self.assertEqual(os.environ["LOGFIRE_TOKEN"], "write-token")
+        self.assertEqual(os.environ["CODEX_LOGFIRE_AUTH_SCHEME"], "Bearer # literal")
+        self.assertEqual(os.environ["CODEX_LOGFIRE_DEBUG"], "true")
+        self.assertEqual(os.environ["CODEX_LOGFIRE_OTLP_HEADERS"], "x-id=a#b")
+
     def test_config_env_path_falls_back_to_legacy_paths(self) -> None:
         os.environ.pop("CODEX_LOGFIRE_CONFIG_FILE", None)
         config_home = Path(self.tmp.name) / "config"

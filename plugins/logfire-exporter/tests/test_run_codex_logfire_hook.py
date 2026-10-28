@@ -221,6 +221,30 @@ wait
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
 
+    def test_config_file_override_strips_inline_comment(self) -> None:
+        marker = self.tmp_path / "ran"
+        pinned = self.write_fake_interpreter("pinned-python", marker)
+        (self.tmp_path / "config.env").write_text(
+            f"CODEX_LOGFIRE_PYTHON={pinned}  # pinned interpreter\n", encoding="utf-8"
+        )
+        result = self.run_wrapper(self.base_env())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
+
+    def test_config_file_override_keeps_hash_inside_quotes(self) -> None:
+        marker = self.tmp_path / "ran"
+        pinned_dir = self.tmp_path / "py #3"
+        pinned_dir.mkdir()
+        pinned = self.write_executable(
+            pinned_dir / "python", f'#!/bin/sh\nprintf \'%s\\n\' "$@" > "{marker}"\nexit 0\n'
+        )
+        (self.tmp_path / "config.env").write_text(
+            f'CODEX_LOGFIRE_PYTHON="{pinned}" # pinned interpreter\n', encoding="utf-8"
+        )
+        result = self.run_wrapper(self.base_env())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("codex_logfire_hook.py", marker.read_text(encoding="utf-8"))
+
     def test_config_file_falls_back_to_legacy_paths(self) -> None:
         legacy_directories = ("codex-logfire-exporter", "codex-logfire-plugin")
         for index, legacy_directory in enumerate(legacy_directories):
