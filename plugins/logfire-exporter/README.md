@@ -51,7 +51,8 @@ After enabling the plugin:
 
 1. Configure `LOGFIRE_TOKEN` in your shell environment or in `${XDG_CONFIG_HOME:-~/.config}/logfire-exporter/config.env`.
 2. Restart Codex so hook configuration is loaded.
-3. Run `/hooks` if Codex asks you to review or trust the plugin hooks.
+3. Trust the plugin hooks: select **Trust all and continue** when Codex shows **Hooks need review**, or run `/hooks`.
+   Codex does not run untrusted hooks.
 4. Complete a new Codex turn; the exporter sends telemetry on the `Stop` hook.
 
 For local development after changing the plugin:
@@ -68,6 +69,12 @@ Configure credentials in:
 
 ```text
 ${XDG_CONFIG_HOME:-~/.config}/logfire-exporter/config.env
+```
+
+Create the directory first. This path is the same on macOS and Linux:
+
+```bash
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/logfire-exporter"
 ```
 
 The minimal config is:
@@ -190,7 +197,14 @@ Debug logs are written under:
 ${XDG_STATE_HOME:-~/.local/state}/logfire-exporter/logs/
 ```
 
-If no spans or plugin logs appear after a completed Codex turn, check the Codex TUI log:
+If no spans or plugin logs appear after a completed Codex turn, first check that the hooks are trusted:
+
+- Codex does not run a hook until you trust it. When Codex shows **Hooks need review**, select **Trust all and
+  continue**, or run `/hooks` and trust the Logfire Exporter hooks.
+- `codex exec` skips untrusted hooks without a warning. Trust the hooks once in an interactive session. For vetted
+  automation only, `codex exec --dangerously-bypass-hook-trust` runs hooks without that review.
+
+Then check the Codex TUI log:
 
 ```bash
 rg -n "logfire-exporter|failed to load plugin" ~/.codex/log/codex-tui.log

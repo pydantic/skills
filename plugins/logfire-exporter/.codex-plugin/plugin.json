@@ -1,6 +1,6 @@
 {
   "name": "logfire-exporter",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Enrich Codex native OpenTelemetry with completed conversation turns in Logfire.",
   "author": {
     "name": "Pydantic",

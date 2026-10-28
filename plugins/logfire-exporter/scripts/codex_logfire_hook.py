@@ -22,6 +22,7 @@ from typing import Any
 
 
 FALLBACK_PLUGIN_VERSION = "unknown"
+INLINE_COMMENT_PATTERN = re.compile(r"\s#")
 
 
 def plugin_version() -> str:
@@ -1050,7 +1051,7 @@ def load_config_env() -> None:
             continue
         if key in configured_values:
             raise ValueError(f"duplicate exporter config field: {key}")
-        configured_values[key] = unquote_env_value(value.strip())
+        configured_values[key] = parse_env_value(value)
     if configured_values.get("CODEX_LOGFIRE_MANAGED") == "1":
         validate_managed_config(configured_values)
     for key, configured in configured_values.items():
@@ -1097,10 +1098,17 @@ def config_env_path() -> Path:
     return path
 
 
-def unquote_env_value(value: str) -> str:
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
-        return value[1:-1]
-    return value
+def parse_env_value(raw: str) -> str:
+    """Parse a dotenv value. A quoted value is literal. An unquoted value ends at a ` #` comment."""
+    value = raw.strip()
+    quote = value[:1]
+    if quote in {"'", '"'}:
+        end = value.find(quote, 1)
+        rest = value[end + 1 :].strip() if end > 0 else None
+        if rest is not None and (not rest or rest.startswith("#")):
+            return value[1:end]
+        return value
+    return INLINE_COMMENT_PATTERN.split(value, maxsplit=1)[0].rstrip()
 
 
 def debug_enabled() -> bool:
