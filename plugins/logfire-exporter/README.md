@@ -85,9 +85,6 @@ LOGFIRE_TOKEN=<your Logfire write token>
 `LOGFIRE_BASE_URL` defaults to `https://logfire-api.pydantic.dev`. Set it only for another Logfire region or a local
 Logfire instance. `LOGFIRE_URL` is still accepted as a compatibility alias, but `LOGFIRE_BASE_URL` takes precedence.
 
-An unquoted value ends at a `#` that follows whitespace, so a trailing comment is safe. Quote a value that must
-contain ` #`.
-
 For a local Logfire instance:
 
 ```dotenv
