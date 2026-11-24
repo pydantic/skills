@@ -12,37 +12,52 @@ Detailed examples for querying Logfire data programmatically.
 4. Click "Create read token"
 5. Copy the token immediately — it won't be shown again
 
-### Via the CLI
+### Via the Rust CLI
 
-```bash
-logfire read-tokens --project <organization>/<project> create
-```
-
-Store the token in an environment variable:
-
-```bash
-export LOGFIRE_READ_TOKEN=<your-read-token>
-```
+Follow the [shared identity and credential flow](https://pydantic.dev/.well-known/agent-skills/logfire-instrumentation/references/auth.md).
+For an already configured local project, `logfire token read` creates a read token.
+If a consumer specifically requires a project API key, use
+`logfire api-key query --name query-client` instead; do not grant unrelated
+permissions.
+Capture its stdout programmatically, check exit status zero, and deliver it to the
+application's secret mechanism without logging or displaying it. Do not put a token
+literal in source or command arguments. Use `LOGFIRE_READ_TOKEN` in the application's
+private environment. Interactive analysis through `logfire mcp query run` uses
+OAuth and does not need a separately created read token.
 
 ---
 
 ## Python `LogfireQueryClient` (Sync)
 
+Install `logfire` and `httpx` with the project's existing package manager.
+Install `pyarrow` only when using the Arrow examples. Keep the read token in a
+private `LOGFIRE_READ_TOKEN` environment variable, never in source.
+
 ```python
+import os
+from datetime import datetime, timedelta, timezone
+
 from logfire.query_client import LogfireQueryClient
 
-with LogfireQueryClient(read_token='<token>') as client:
-    # Column-oriented JSON (default)
-    result = client.query_json(sql='SELECT start_timestamp, message FROM records LIMIT 10')
+min_timestamp = datetime.now(timezone.utc) - timedelta(hours=2)
 
-    # Row-oriented JSON
-    rows = client.query_json_rows(sql='SELECT start_timestamp, message FROM records LIMIT 10')
+with LogfireQueryClient(read_token=os.environ['LOGFIRE_READ_TOKEN']) as client:
+    rows = client.query_json_rows(
+        sql='SELECT start_timestamp, message FROM records LIMIT 10',
+        min_timestamp=min_timestamp,
+    )
 
     # CSV
-    csv_data = client.query_csv(sql='SELECT start_timestamp, message FROM records LIMIT 10')
+    csv_data = client.query_csv(
+        sql='SELECT start_timestamp, message FROM records LIMIT 10',
+        min_timestamp=min_timestamp,
+    )
 
     # Apache Arrow (requires pyarrow)
-    arrow_table = client.query_arrow(sql='SELECT start_timestamp, message FROM records LIMIT 10')
+    arrow_table = client.query_arrow(
+        sql='SELECT start_timestamp, message FROM records LIMIT 10',
+        min_timestamp=min_timestamp,
+    )
 
     # Token info
     info = client.info()
@@ -51,23 +66,20 @@ with LogfireQueryClient(read_token='<token>') as client:
 With time filtering:
 
 ```python
-with LogfireQueryClient(read_token='<token>') as client:
-    result = client.query_json(
-        sql='SELECT message, exception_type FROM records WHERE is_exception LIMIT 20',
-        min_timestamp='2025-01-01T00:00:00Z',
-        max_timestamp='2025-01-02T00:00:00Z',
-    )
-```
-
-### Using environment variables
-
-```python
 import os
+from datetime import datetime, timedelta, timezone
+
 from logfire.query_client import LogfireQueryClient
 
-# Reads from LOGFIRE_READ_TOKEN env var
+max_timestamp = datetime.now(timezone.utc)
+min_timestamp = max_timestamp - timedelta(days=1)
+
 with LogfireQueryClient(read_token=os.environ['LOGFIRE_READ_TOKEN']) as client:
-    result = client.query_json(sql='SELECT message FROM records LIMIT 5')
+    rows = client.query_json_rows(
+        sql='SELECT message, exception_type FROM records WHERE is_exception LIMIT 20',
+        min_timestamp=min_timestamp,
+        max_timestamp=max_timestamp,
+    )
 ```
 
 ---
@@ -75,20 +87,25 @@ with LogfireQueryClient(read_token=os.environ['LOGFIRE_READ_TOKEN']) as client:
 ## Python `AsyncLogfireQueryClient` (Async)
 
 ```python
+import os
+from datetime import datetime, timedelta, timezone
+
 from logfire.query_client import AsyncLogfireQueryClient
 
-async with AsyncLogfireQueryClient(read_token='<token>') as client:
-    result = await client.query_json(
-        sql='SELECT start_timestamp, message FROM records LIMIT 10'
-    )
+min_timestamp = datetime.now(timezone.utc) - timedelta(hours=2)
+
+async with AsyncLogfireQueryClient(read_token=os.environ['LOGFIRE_READ_TOKEN']) as client:
     rows = await client.query_json_rows(
-        sql='SELECT start_timestamp, message FROM records LIMIT 10'
+        sql='SELECT start_timestamp, message FROM records LIMIT 10',
+        min_timestamp=min_timestamp,
     )
     csv_data = await client.query_csv(
-        sql='SELECT start_timestamp, message FROM records LIMIT 10'
+        sql='SELECT start_timestamp, message FROM records LIMIT 10',
+        min_timestamp=min_timestamp,
     )
     arrow_table = await client.query_arrow(
-        sql='SELECT start_timestamp, message FROM records LIMIT 10'
+        sql='SELECT start_timestamp, message FROM records LIMIT 10',
+        min_timestamp=min_timestamp,
     )
 ```
 
@@ -101,9 +118,11 @@ PEP 249 compliant interface. Works with pandas, Jupyter, and marimo.
 ### Basic usage
 
 ```python
+import os
+
 import logfire.db_api
 
-with logfire.db_api.connect(read_token='<token>') as conn:
+with logfire.db_api.connect(read_token=os.environ['LOGFIRE_READ_TOKEN']) as conn:
     cursor = conn.cursor()
     cursor.execute('SELECT start_timestamp, message FROM records LIMIT 10')
     rows = cursor.fetchall()
@@ -125,10 +144,12 @@ cursor.execute(
 ### Pandas integration
 
 ```python
+import os
+
 import pandas as pd
 import logfire.db_api
 
-with logfire.db_api.connect(read_token='<token>') as conn:
+with logfire.db_api.connect(read_token=os.environ['LOGFIRE_READ_TOKEN']) as conn:
     df = pd.read_sql('SELECT start_timestamp, message, duration FROM records LIMIT 100', conn)
     print(df.describe())
 ```
@@ -136,17 +157,18 @@ with logfire.db_api.connect(read_token='<token>') as conn:
 ### Configuration options
 
 ```python
+import os
 import logfire.db_api
 from datetime import timedelta, datetime, timezone
 
 # Custom row limit
-conn = logfire.db_api.connect(read_token='<token>', limit=1000)
+conn = logfire.db_api.connect(read_token=os.environ['LOGFIRE_READ_TOKEN'], limit=1000)
 
 # Query last 7 days (default is 24 hours)
-conn = logfire.db_api.connect(read_token='<token>', min_timestamp=timedelta(days=7))
+conn = logfire.db_api.connect(read_token=os.environ['LOGFIRE_READ_TOKEN'], min_timestamp=timedelta(days=7))
 
 # Disable default timestamp filter
-conn = logfire.db_api.connect(read_token='<token>', min_timestamp=None)
+conn = logfire.db_api.connect(read_token=os.environ['LOGFIRE_READ_TOKEN'], min_timestamp=None)
 
 # Per-cursor overrides
 cursor = conn.cursor()
@@ -162,88 +184,111 @@ For any language or tool. Works with `curl`, `httpx`, `requests`, `fetch`, etc.
 
 ### Endpoint
 
-```
-GET https://logfire-api.pydantic.dev/v1/query
-```
+Send a `POST` request with a JSON body to the endpoint for the project's region:
 
-Region variants:
-- US: `https://logfire-us.pydantic.dev/v1/query`
-- EU: `https://logfire-eu.pydantic.dev/v1/query`
+- US: `https://logfire-us.pydantic.dev/v2/query`
+- EU: `https://logfire-eu.pydantic.dev/v2/query`
 
 ### Authentication
 
-```
+```http
 Authorization: Bearer <read_token>
 ```
 
-### Query parameters
+### JSON body
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `sql` | Yes | SQL query string |
-| `min_timestamp` | No | ISO timestamp lower bound |
+| `min_timestamp` | Yes | Timezone-aware ISO timestamp lower bound |
 | `max_timestamp` | No | ISO timestamp upper bound |
-| `limit` | No | Row limit (default 500, max 10,000) |
-| `row_oriented` | No | Set `true` for row-oriented JSON |
+| `limit` | No | Row limit (default 100, max 10,000) |
+| `timezone` | No | Query execution timezone, such as `Europe/Paris` |
+| `deployment_environment` | No | One or more deployment-environment names |
+| `explain` | No | Include query-plan messages when true |
 
 ### Response formats
 
 Set the `Accept` header:
-- `application/json` — column-oriented JSON (default)
+
+- `application/json` — schema plus data rows (default)
+- `application/x-ndjson` — streaming schema, data, and completion messages
 - `text/csv` — CSV
 - `application/vnd.apache.arrow.stream` — Apache Arrow
 
 ### curl examples
 
 ```bash
-# Basic query (column-oriented JSON)
-curl -G 'https://logfire-api.pydantic.dev/v1/query' \
-  -H "Authorization: Bearer $LOGFIRE_READ_TOKEN" \
-  --data-urlencode "sql=SELECT start_timestamp, message FROM records LIMIT 5"
+# Set this to a recent, timezone-aware lower bound before running the examples.
+MIN_TIMESTAMP='<ISO-8601 lower bound>'
+MAX_TIMESTAMP='<ISO-8601 upper bound>'
 
-# Row-oriented JSON
-curl -G 'https://logfire-api.pydantic.dev/v1/query' \
-  -H "Authorization: Bearer $LOGFIRE_READ_TOKEN" \
-  --data-urlencode "sql=SELECT start_timestamp, message FROM records LIMIT 5" \
-  --data-urlencode "row_oriented=true"
+# Basic query (JSON). Pass the secret header over stdin, not argv.
+printf 'Authorization: Bearer %s\n' "$LOGFIRE_READ_TOKEN" | curl 'https://logfire-us.pydantic.dev/v2/query' \
+  -H @- \
+  --json "{\"sql\":\"SELECT start_timestamp, message FROM records LIMIT 5\",\"min_timestamp\":\"$MIN_TIMESTAMP\"}"
+
+# Streaming NDJSON
+printf 'Authorization: Bearer %s\n' "$LOGFIRE_READ_TOKEN" | curl 'https://logfire-us.pydantic.dev/v2/query' \
+  -H @- \
+  -H 'Accept: application/x-ndjson' \
+  --json "{\"sql\":\"SELECT start_timestamp, message FROM records LIMIT 5\",\"min_timestamp\":\"$MIN_TIMESTAMP\"}"
 
 # CSV format
-curl -G 'https://logfire-api.pydantic.dev/v1/query' \
-  -H "Authorization: Bearer $LOGFIRE_READ_TOKEN" \
+printf 'Authorization: Bearer %s\n' "$LOGFIRE_READ_TOKEN" | curl 'https://logfire-us.pydantic.dev/v2/query' \
+  -H @- \
   -H "Accept: text/csv" \
-  --data-urlencode "sql=SELECT start_timestamp, message FROM records LIMIT 5"
+  --json "{\"sql\":\"SELECT start_timestamp, message FROM records LIMIT 5\",\"min_timestamp\":\"$MIN_TIMESTAMP\"}"
 
 # With time range
-curl -G 'https://logfire-api.pydantic.dev/v1/query' \
-  -H "Authorization: Bearer $LOGFIRE_READ_TOKEN" \
-  --data-urlencode "sql=SELECT message FROM records WHERE is_exception LIMIT 20" \
-  --data-urlencode "min_timestamp=2025-01-01T00:00:00Z" \
-  --data-urlencode "max_timestamp=2025-01-02T00:00:00Z"
+printf 'Authorization: Bearer %s\n' "$LOGFIRE_READ_TOKEN" | curl 'https://logfire-us.pydantic.dev/v2/query' \
+  -H @- \
+  --json "{\"sql\":\"SELECT message FROM records WHERE is_exception LIMIT 20\",\"min_timestamp\":\"$MIN_TIMESTAMP\",\"max_timestamp\":\"$MAX_TIMESTAMP\"}"
 ```
 
 ### Python (httpx)
 
 ```python
+import os
+from datetime import UTC, datetime, timedelta
+
 import httpx
 
-response = httpx.get(
-    'https://logfire-api.pydantic.dev/v1/query',
-    params={'sql': 'SELECT start_timestamp, message FROM records LIMIT 5'},
-    headers={'Authorization': f'Bearer {read_token}'},
+response = httpx.post(
+    'https://logfire-us.pydantic.dev/v2/query',
+    json={
+        'sql': 'SELECT start_timestamp, message FROM records LIMIT 5',
+        'min_timestamp': (datetime.now(UTC) - timedelta(hours=2)).isoformat(),
+    },
+    headers={'Authorization': f"Bearer {os.environ['LOGFIRE_READ_TOKEN']}"},
 )
+response.raise_for_status()
 data = response.json()
 ```
 
 ### JavaScript (fetch)
 
+Run this only in a trusted server process; never expose a read token to browser code.
+
 ```javascript
-const params = new URLSearchParams({
-  sql: 'SELECT start_timestamp, message FROM records LIMIT 5',
-});
+const readToken = process.env.LOGFIRE_READ_TOKEN;
+if (!readToken) throw new Error('LOGFIRE_READ_TOKEN is required');
+const minTimestamp = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
 const response = await fetch(
-  `https://logfire-api.pydantic.dev/v1/query?${params}`,
-  { headers: { Authorization: `Bearer ${readToken}` } }
+  'https://logfire-us.pydantic.dev/v2/query',
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${readToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sql: 'SELECT start_timestamp, message FROM records LIMIT 5',
+      min_timestamp: minTimestamp,
+    }),
+  },
 );
+if (!response.ok) throw new Error(`Logfire query failed: ${response.status}`);
 const data = await response.json();
 ```

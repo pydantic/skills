@@ -48,7 +48,7 @@ headless credentials. Quote all substituted paths/names as arguments.
 2. Inspect `--no-input --output json project --data-dir <data_dir> current`.
    Reuse credentials matching the confirmed origin/org/project. Only when absent
    (not on network/auth errors), or after explicit retargeting approval, run
-   `--no-input --output json init use --name <project> --permission send --data-dir <data_dir>`.
+   `--no-input --output json init use --name <project> --data-dir <data_dir>`.
    This creates a write token; do not repeat initialization on reconnect or pick
    another project on failure.
 3. Run `--beta --no-input --output json agent codex --data-dir <data_dir> configure --capture <mode>`
