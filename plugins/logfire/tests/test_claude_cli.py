@@ -13,6 +13,7 @@ CLI = os.environ.get("LOGFIRE_CONNECTION_TEST_CLI") or os.environ.get(
     "LOGFIRE_CLAUDE_TEST_CLI"
 )
 PROJECT_ID = "11111111-1111-1111-1111-111111111111"
+MANAGEMENT_KEY = "synthetic-management-api-key"
 
 
 class LocalApiFixture(unittest.TestCase):
@@ -21,6 +22,7 @@ class LocalApiFixture(unittest.TestCase):
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name).resolve()
         self.calls = []
+        self.identity_tools = []
         calls = self.calls
         fixture = self
 
@@ -81,7 +83,10 @@ class LocalApiFixture(unittest.TestCase):
 
             def do_POST(self):
                 calls.append(("POST", self.path))
-                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                body = self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                if self.path == "/mcp":
+                    self.identity(json.loads(body))
+                    return
                 if (
                     self.path == f"/api/v1/projects/{PROJECT_ID}/write-tokens/"
                     and getattr(fixture, "allow_write_tokens", False)
@@ -99,6 +104,42 @@ class LocalApiFixture(unittest.TestCase):
                     )
                 else:
                     self.reply(500, {"detail": "Unexpected mutation"})
+
+            def identity(self, request):
+                if self.headers.get("Authorization") != f"Bearer {MANAGEMENT_KEY}":
+                    self.reply(401, {})
+                    return
+                method = request["method"]
+                if method == "initialize":
+                    result = {
+                        "protocolVersion": request["params"]["protocolVersion"],
+                        "serverInfo": {"name": "fixture", "version": "1"},
+                        "capabilities": {"tools": {}},
+                    }
+                elif method == "notifications/initialized":
+                    self.send_response(202)
+                    self.end_headers()
+                    return
+                elif method == "tools/list":
+                    result = {"tools": [{
+                        "name": "token_info",
+                        "inputSchema": {"type": "object", "properties": {}},
+                        "annotations": {"readOnlyHint": True},
+                    }]}
+                elif method == "tools/call":
+                    name = request["params"]["name"]
+                    fixture.identity_tools.append(name)
+                    if name != "token_info":
+                        self.reply(400, {})
+                        return
+                    result = {
+                        "content": [{"type": "text", "text": "fixture identity"}],
+                        "structuredContent": {"organization_name": "smoke-org"},
+                    }
+                else:
+                    self.reply(400, {})
+                    return
+                self.reply(200, {"jsonrpc": "2.0", "id": request["id"], "result": result})
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -126,7 +167,7 @@ class LocalApiFixture(unittest.TestCase):
             "HOME": str(self.root),
             "USERPROFILE": str(self.root),
             "CLAUDE_CONFIG_DIR": str(self.config),
-            "LOGFIRE_TOKEN": "synthetic-account-token",
+            "LOGFIRE_API_KEY": MANAGEMENT_KEY,
         }
 
     def run_cli(self, *arguments, base=None):
@@ -207,15 +248,19 @@ class PublishedCliTests(LocalApiFixture):
             "use",
             "--name",
             "not-a-project",
-            "--permission",
-            "send",
             "--data-dir",
             str(missing),
         )
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn(("GET", "/api/v1/projects/"), self.calls)
+        error = json.loads(result.stderr)["error"]
+        self.assertEqual(error["code"], "initialization_failed")
+        self.assertIn('no project named "not-a-project"', error["message"])
+        self.assertEqual(self.identity_tools, ["token_info"])
+        self.assertEqual(
+            [call for call in self.calls if call[1] != "/mcp"],
+            [("GET", "/api/v1/projects/")],
+        )
         self.assertFalse((missing / "logfire_credentials.json").exists())
-        self.assertFalse(any(method == "POST" for method, _ in self.calls))
 
 
 if __name__ == "__main__":

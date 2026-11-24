@@ -92,7 +92,7 @@ separate SDK write credential; it is not an OAuth login directory, and the
    Reuse a verified existing binding to the chosen instance, organization, and
    project. Only initialize when local credentials are missing or the user
    explicitly confirms a different destination:
-   `--org <organization> --no-input --output json init use --name <project> --permission send --data-dir <data_dir>`.
+   `--org <organization> --no-input --output json init use --name <project> --data-dir <data_dir>`.
    This creates a write token. Do not mint another token on every reconnect,
    treat network/authentication failure as missing credentials, or pick another
    project on failure.
