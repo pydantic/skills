@@ -179,7 +179,8 @@ FROM records WHERE trace_id = '<trace_id>'
 ORDER BY start_timestamp
 
 -- Tag filtering
-SELECT * FROM records WHERE array_has(tags, 'critical') LIMIT 20
+SELECT start_timestamp, service_name, message
+FROM records WHERE array_has(tags, 'critical') LIMIT 20
 
 -- Time-bucketed error rate
 SELECT time_bucket(interval '5 minutes', start_timestamp) as bucket,

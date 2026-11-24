@@ -13,6 +13,10 @@ Keep progress updates quiet. Do not narrate why this skill was selected, restate
 
 After opening Logfire, do not run or narrate an extra page-state check unless the browser appears stuck, asks for login, or the user explicitly asked you to verify the page.
 
+If the wizard supplied an executable and target, use the [CLI workflow](#get-a-durable-link)
+below. The following browser and MCP workflow is for plugins with an existing
+connection. Neither route needs a new SDK write token.
+
 ## Browser Targeting
 
 In Codex Desktop, use the Browser plugin's Codex in-app browser (`iab`) and the currently selected tab whenever possible.
@@ -44,6 +48,10 @@ If the MCP can resolve exactly one current project, use that project URL. If it 
 Do not infer the project URL from `LOGFIRE_BASE_URL`, `LOGFIRE_URL`, exporter config, repository names, or localhost reachability. Env/config values can identify the Logfire platform/API base, but they do not by themselves identify the target organization/project.
 
 ## URL Workflow
+
+Use a clean link unless the native integration can pass a one-time browser
+handoff directly to the browser without putting the ticket in the conversation
+or logs. Where it cannot, keep `handoff` off even when opening immediately.
 
 1. If the full project URL is already known, use it directly.
 2. If the user omits the project, resolve the current project through MCP as described above.
@@ -122,3 +130,52 @@ For "change the open live view to the last hour of errors", submit `{"q":"level=
 Do not try to pass MCP auth tokens into the browser or Logfire UI. Never put bearer, API, read, or write tokens in URL query parameters, fragments, pasted browser instructions, logs, or notes. MCP/tool authentication and browser web sessions are separate security contexts.
 
 For immediately opened UI links, prefer the platform handoff described above. If handoff is unavailable, fall back to the clean URL and explain the specific fallback reason when useful. A missing browser cookie may require normal browser login; a stale MCP OAuth connection requires MCP re-authentication instead.
+
+## Get a durable link
+
+Use the trusted CLI (the exact executable for a wizard handoff) and the user's confirmed target,
+real organization, and project. The examples use synthetic names:
+
+```bash
+logfire --region us --org acme --no-input --output json mcp projects
+logfire --region us --org acme --no-input --output json mcp link project --project my-app --query "level='error'"
+logfire --region us --org acme --no-input --output json mcp link trace 019c337145729a1f848bfb66cb1c5ad3 --project my-app
+```
+
+These guided commands use hosted public MCP and return clean, shareable links.
+Parse the JSON result; never infer an organization/project from a repository name,
+an exporter endpoint, or `LOGFIRE_BASE_URL`. If discovery leaves several plausible
+projects, ask for the intended one. An existing `project current` report can supply
+a verified local project's identity and URL without telemetry queries.
+
+Pass supported filters and time bounds through `mcp link project`; consult its
+`--help`. For a more specific public tool capability, inspect `mcp tools info`
+and `mcp tools schema` first. Do not invent a private link/session endpoint.
+
+## Open only when asked
+
+For an in-app browser, open the clean link using the browser workflow above.
+
+Only if the user explicitly requests the system browser, add `--open` to the guided
+link command. The CLI requests a short-lived handoff, opens it itself, and returns
+a receipt without exposing its ticket. Do not invoke generic MCP handoff tools to
+print a ticket into agent logs; do not persist or modify handoff URLs.
+
+## Save images returned by a public tool
+
+When the user requests a screenshot or another image supported by a discovered
+tool, inspect its public schema and use `mcp call --save-images DIR` with a new
+directory under an existing parent. This flag saves actual MCP image blocks;
+it does not capture the browser or add tools absent from the server. Inspect the
+returned local paths with the agent's image-reading tool instead of printing
+base64. Without the flag, JSON retains the original image data.
+
+Use the same explicit target and machine flags as above. Do not combine saving
+with `--raw` or `--dry-run`. A filesystem failure can happen after the tool
+completed; never repeat a mutating call just to retry saving its images.
+
+## Authentication boundary
+
+OAuth, API, read and write tokens never belong in URLs, browser instructions, or
+logs. CLI OAuth and browser cookies are separate sessions: a clean link can still
+require browser login. Do not inject CLI credentials into the browser.
