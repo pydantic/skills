@@ -44,10 +44,10 @@ The two locally owned Logfire skills are not upstream sync targets. Edit their
 plugin sources here, then mirror them to `skills/`. Do not replace their native
 MCP authentication with the CLI's independently authenticated MCP client.
 
-The CLI also ships release-bound SDK/query/UI adaptations. Those are not public
-sync sources: do not import them over the SDK owner's files or the native MCP
-entrypoints. Migrate shared improvements upstream deliberately; the CLI's
-prepared-project and embedded-reference behavior must survive that migration.
+The CLI consumes release-pinned skills; its embedded copies are not upstream
+sources. Edit shared guidance in the owning repository. Keep both entrypoints
+working: plugins can use their existing MCP session, and a CLI wizard handoff
+uses its prepared project and release-matched references.
 
 For this ownership migration, merge the frontend owner in logfire-js and the
 CLI connection references and the SDK's separate Gateway owner first. Publish
